@@ -1,4 +1,4 @@
-```python
+
 import streamlit as st
 from groq import Groq
 from pypdf import PdfReader
@@ -1061,4 +1061,4 @@ if prompt:
             "retrieved_chunks": retrieved_chunks
         }
     )
-```
+
