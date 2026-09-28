@@ -1,0 +1,21 @@
+Course Plan: Predictive Analytics (DATA204)
+Program: Minor programme (Data Science minor)
+Semester: V
+Credits: 4 (L-T-P structure 2:0:4)
+Duration: 15 weeks
+Prerequisite: Exploring Data Science
+Good to know (recommended, not mandatory): Essentials of Data Science, Probability and
+Statistics, Linear Algebra
+Assessment: Continuous assessment 70 percent (assignments/labs 50 percent, quiz 20 percent),
+End-Term Final Project 30 percent.
+
+---
+
+Course Plan: Internship Project (MGMT801)
+Program: BMS (Hons)
+Semester: V
+Credits: 2 (credit structure 0-0-0, non-taught course)
+Duration: 2 months
+Prerequisite: Nil
+Notes: Must be completed 6-8 weeks after Semester IV final exams and before Semester V begins.
+Assessment: Report 60 percent, Presentation/Demo 40 percent.
