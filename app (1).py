@@ -19,32 +19,40 @@ if not api_key:
 
 groq_client = Groq(api_key=api_key)
 
-# 1. Load Knowledge Base & Build TF-IDF (Direct from Draft 4 Notebook)
+# 1. Load Knowledge Base & Build TF-IDF (Supports both root folder and DOCS subfolder)
 @st.cache_resource
 def load_knowledge_base():
-    DOCS_DIR = "DOCS"
+    # Use 'DOCS' directory if it exists, otherwise scan the current folder '.'
+    docs_dir = "DOCS" if os.path.exists("DOCS") else "."
+    
     EXCLUDE_KEYWORDS = ["Evaluation_Dataset", "Held_Out", "results_", "before_after", 
-                        "generalization_gap", "phase4", "advisor_scoring"]
+                        "generalization_gap", "phase4", "advisor_scoring", "requirements"]
     
     kb = []
-    if os.path.exists(DOCS_DIR):
-        for fname in os.listdir(DOCS_DIR):
-            if fname.startswith(".") or any(k.lower() in fname.lower() for k in EXCLUDE_KEYWORDS):
-                continue
-            path = os.path.join(DOCS_DIR, fname)
-            text = ""
-            try:
-                if fname.lower().endswith(".pdf"):
-                    text = "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
-                elif fname.lower().endswith((".txt", ".csv")):
-                    text = open(path, encoding="utf-8").read()
-            except Exception:
-                continue
+    for fname in os.listdir(docs_dir):
+        # Skip hidden files, python scripts, requirements, and evaluation datasets
+        if fname.startswith(".") or fname.endswith(".py") or fname.endswith(".md"):
+            continue
+        if any(k.lower() in fname.lower() for k in EXCLUDE_KEYWORDS):
+            continue
             
-            words = text.split()
-            chunks = [" ".join(words[i:i+120]) for i in range(0, len(words), 120) if words[i:i+120]]
-            for i, c in enumerate(chunks):
-                kb.append({"id": f"{fname}#{i}", "source": fname, "text": c})
+        path = os.path.join(docs_dir, fname)
+        text = ""
+        try:
+            if fname.lower().endswith(".pdf"):
+                text = "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
+            elif fname.lower().endswith((".txt", ".csv")):
+                text = open(path, encoding="utf-8").read()
+            else:
+                continue
+        except Exception:
+            continue
+        
+        words = text.split()
+        chunks = [" ".join(words[i:i+120]) for i in range(0, len(words), 120) if words[i:i+120]]
+        for i, c in enumerate(chunks):
+            kb.append({"id": f"{fname}#{i}", "source": fname, "text": c})
+            
     return kb
 
 KB = load_knowledge_base()
