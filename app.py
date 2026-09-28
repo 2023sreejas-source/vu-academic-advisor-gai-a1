@@ -19,9 +19,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# IMPORTANT:
-# llama-3.1-8b-instant was deprecated by Groq.
-# Use the current replacement.
+# Current Groq model
 MODEL = "openai/gpt-oss-20b"
 
 
@@ -89,26 +87,10 @@ st.markdown("""
 
 def find_logo():
 
-    possible_files = []
+    logo_path = "logo.png"
 
-    for filename in os.listdir("."):
-
-        if filename.startswith("."):
-            continue
-
-        lower_name = filename.lower()
-
-        if (
-            lower_name.endswith(".png")
-            or lower_name.endswith(".jpg")
-            or lower_name.endswith(".jpeg")
-        ):
-
-            if "logo" in lower_name or "b0d1fb" in lower_name:
-                possible_files.append(filename)
-
-    if possible_files:
-        return possible_files[0]
+    if os.path.exists(logo_path):
+        return logo_path
 
     return None
 
@@ -116,10 +98,14 @@ def find_logo():
 def image_to_base64(path):
 
     try:
+
         with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
+            return base64.b64encode(
+                f.read()
+            ).decode()
 
     except Exception:
+
         return None
 
 
@@ -134,43 +120,67 @@ if logo_file:
 
     logo_data = image_to_base64(logo_file)
 
-    hero_html = f"""
-    <div class="hero">
+    if logo_data:
 
-        <div style="display:flex; align-items:center; gap:20px;">
+        hero_html = f"""
+        <div class="hero">
 
-            <img
-                src="data:image/png;base64,{logo_data}"
-                style="
-                    width:75px;
-                    height:75px;
-                    object-fit:contain;
-                    background:white;
-                    border-radius:12px;
-                    padding:6px;
-                "
-            >
+            <div style="
+                display:flex;
+                align-items:center;
+                gap:20px;
+            ">
 
-            <div>
+                <img
+                    src="data:image/png;base64,{logo_data}"
+                    style="
+                        width:80px;
+                        height:80px;
+                        object-fit:contain;
+                        background:white;
+                        border-radius:12px;
+                        padding:8px;
+                    "
+                >
 
-                <div class="hero-title">
-                    Vidyashilp University AI Academic Advisor
-                </div>
+                <div>
 
-                <div class="hero-subtitle">
-                    Your AI assistant for academic planning and university handbook guidance
+                    <div class="hero-title">
+                        Vidyashilp University AI Academic Advisor
+                    </div>
+
+                    <div class="hero-subtitle">
+                        Your AI assistant for academic planning
+                        and university handbook guidance
+                    </div>
+
                 </div>
 
             </div>
 
         </div>
+        """
 
-    </div>
-    """
+    else:
+
+        hero_html = """
+        <div class="hero">
+
+            <div class="hero-title">
+                🎓 Vidyashilp University AI Academic Advisor
+            </div>
+
+            <div class="hero-subtitle">
+                Your AI assistant for academic planning
+                and university handbook guidance
+            </div>
+
+        </div>
+        """
 
 else:
 
-    st.markdown("""
+    hero_html = """
     <div class="hero">
 
         <div class="hero-title">
@@ -178,11 +188,18 @@ else:
         </div>
 
         <div class="hero-subtitle">
-            Your AI assistant for academic planning and university handbook guidance
+            Your AI assistant for academic planning
+            and university handbook guidance
         </div>
 
     </div>
-    """, unsafe_allow_html=True)
+    """
+
+
+st.markdown(
+    hero_html,
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
@@ -202,12 +219,42 @@ if "knowledge_base" not in st.session_state:
 # ============================================================
 
 STOPWORDS = {
-    "the", "is", "a", "an", "and", "or", "of",
-    "to", "in", "on", "for", "with", "what",
-    "are", "was", "were", "be", "can", "i",
-    "my", "me", "do", "does", "how", "much",
-    "many", "about", "from", "at", "this",
-    "that", "it", "as", "by", "if", "minimum"
+    "the",
+    "is",
+    "a",
+    "an",
+    "and",
+    "or",
+    "of",
+    "to",
+    "in",
+    "on",
+    "for",
+    "with",
+    "what",
+    "are",
+    "was",
+    "were",
+    "be",
+    "can",
+    "i",
+    "my",
+    "me",
+    "do",
+    "does",
+    "how",
+    "much",
+    "many",
+    "about",
+    "from",
+    "at",
+    "this",
+    "that",
+    "it",
+    "as",
+    "by",
+    "if",
+    "minimum"
 }
 
 
@@ -217,7 +264,10 @@ STOPWORDS = {
 
 def tokenize(text):
 
-    words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+    words = re.findall(
+        r"[a-zA-Z0-9]+",
+        text.lower()
+    )
 
     return [
         word
@@ -234,11 +284,10 @@ def load_knowledge_base():
 
     documents = []
 
-    docs_folder = "DOCS"
+    # Use DOCS folder if it exists
+    if os.path.exists("DOCS"):
 
-    if os.path.exists(docs_folder):
-
-        source_folder = docs_folder
+        source_folder = "DOCS"
 
     else:
 
@@ -251,12 +300,14 @@ def load_knowledge_base():
         "before_after",
         "phase4",
         "advisor_scoring",
-        "requirements",
+        "requirements"
     ]
 
     try:
 
-        filenames = os.listdir(source_folder)
+        filenames = os.listdir(
+            source_folder
+        )
 
     except Exception:
 
@@ -269,19 +320,25 @@ def load_knowledge_base():
 
         lower_name = filename.lower()
 
-        # Do not read Python code
+        # Don't read Python files
         if lower_name.endswith(".py"):
             continue
 
-        # Do not read markdown files
+        # Don't read Markdown files
         if lower_name.endswith(".md"):
             continue
 
-        # Skip evaluation/result files
-        if any(word in lower_name for word in excluded_words):
+        # Don't read evaluation/result files
+        if any(
+            word in lower_name
+            for word in excluded_words
+        ):
             continue
 
-        filepath = os.path.join(source_folder, filename)
+        filepath = os.path.join(
+            source_folder,
+            filename
+        )
 
         text = ""
 
@@ -293,17 +350,22 @@ def load_knowledge_base():
 
             try:
 
-                reader = PdfReader(filepath)
+                reader = PdfReader(
+                    filepath
+                )
 
                 pages = []
 
                 for page in reader.pages:
 
                     try:
+
                         page_text = page.extract_text()
 
                         if page_text:
-                            pages.append(page_text)
+                            pages.append(
+                                page_text
+                            )
 
                     except Exception:
                         continue
@@ -311,6 +373,7 @@ def load_knowledge_base():
                 text = "\n".join(pages)
 
             except Exception:
+
                 continue
 
         # ----------------------------------------------------
@@ -331,6 +394,7 @@ def load_knowledge_base():
                     text = f.read()
 
             except Exception:
+
                 continue
 
         # ----------------------------------------------------
@@ -351,6 +415,7 @@ def load_knowledge_base():
                     text = f.read()
 
             except Exception:
+
                 continue
 
         else:
@@ -360,14 +425,15 @@ def load_knowledge_base():
         if not text.strip():
             continue
 
-        # ----------------------------------------------------
-        # Clean text
-        # ----------------------------------------------------
+        # Clean whitespace
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
+        ).strip()
 
-        text = re.sub(r"\s+", " ", text).strip()
-
         # ----------------------------------------------------
-        # Create chunks
+        # CREATE CHUNKS
         # ----------------------------------------------------
 
         words = text.split()
@@ -392,41 +458,54 @@ def load_knowledge_base():
             documents.append({
                 "id": f"{filename}#{chunk_number}",
                 "filename": filename,
-                "text": " ".join(chunk_words)
+                "text": " ".join(
+                    chunk_words
+                )
             })
 
     return documents
 
 
 # ============================================================
-# BUILD KNOWLEDGE BASE
+# LOAD KNOWLEDGE BASE
 # ============================================================
 
 if st.session_state.knowledge_base is None:
 
-    with st.spinner("Loading university documents..."):
+    with st.spinner(
+        "Loading university documents..."
+    ):
 
-        st.session_state.knowledge_base = load_knowledge_base()
+        st.session_state.knowledge_base = (
+            load_knowledge_base()
+        )
 
 
-knowledge_base = st.session_state.knowledge_base
+knowledge_base = (
+    st.session_state.knowledge_base
+)
 
 
 # ============================================================
 # DOCUMENT FREQUENCY
 # ============================================================
 
-def build_document_frequency(documents):
+def build_document_frequency(
+    documents
+):
 
     document_frequency = Counter()
 
     for document in documents:
 
         tokens = set(
-            tokenize(document["text"])
+            tokenize(
+                document["text"]
+            )
         )
 
         for token in tokens:
+
             document_frequency[token] += 1
 
     return document_frequency
@@ -436,17 +515,21 @@ DOC_FREQ = build_document_frequency(
     knowledge_base
 )
 
-N_CHUNKS = len(knowledge_base)
+N_CHUNKS = len(
+    knowledge_base
+)
 
 
 # ============================================================
 # RAG RETRIEVAL
 # ============================================================
 
-def retrieve_documents(query, top_k=6):
+def retrieve_documents(
+    query,
+    top_k=6
+):
 
     if not knowledge_base:
-
         return []
 
     query_tokens = set(
@@ -455,25 +538,33 @@ def retrieve_documents(query, top_k=6):
 
     if not query_tokens:
 
-        return knowledge_base[:top_k]
+        return knowledge_base[
+            :top_k
+        ]
 
     scored_documents = []
 
     for document in knowledge_base:
 
         document_tokens = set(
-            tokenize(document["text"])
+            tokenize(
+                document["text"]
+            )
         )
 
         matching_tokens = (
-            query_tokens & document_tokens
+            query_tokens &
+            document_tokens
         )
 
         score = 0.0
 
         for token in matching_tokens:
 
-            df = DOC_FREQ.get(token, 0)
+            df = DOC_FREQ.get(
+                token,
+                0
+            )
 
             idf = math.log(
                 (N_CHUNKS + 1) /
@@ -483,7 +574,10 @@ def retrieve_documents(query, top_k=6):
             score += idf
 
         scored_documents.append(
-            (score, document)
+            (
+                score,
+                document
+            )
         )
 
     scored_documents.sort(
@@ -493,7 +587,8 @@ def retrieve_documents(query, top_k=6):
 
     return [
         document
-        for score, document in scored_documents[:top_k]
+        for score, document
+        in scored_documents[:top_k]
         if score > 0
     ]
 
@@ -523,14 +618,19 @@ def is_gibberish(prompt):
 
     if len(prompt) > 5:
 
-        diversity = len(set(
-            char.lower()
-            for char in letters
-        ))
+        diversity = len(
+            set(
+                char.lower()
+                for char in letters
+            )
+        )
 
         if len(letters) > 0:
 
-            ratio = diversity / len(letters)
+            ratio = (
+                diversity /
+                len(letters)
+            )
 
             if ratio < 0.08:
                 return True
@@ -539,7 +639,7 @@ def is_gibberish(prompt):
 
 
 # ============================================================
-# STUDENT PROFILE
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
@@ -553,7 +653,10 @@ with st.sidebar:
 
     completed_courses = st.text_area(
         "Completed courses",
-        value="CS101 Intro to CS, CS201 Data Structures"
+        value=(
+            "CS101 Intro to CS, "
+            "CS201 Data Structures"
+        )
     )
 
     credits = st.number_input(
@@ -575,7 +678,7 @@ with st.sidebar:
 
     st.subheader("⚙️ Groq API")
 
-    # First try Streamlit secrets
+    # Try Streamlit secrets first
     api_key = None
 
     try:
@@ -588,7 +691,7 @@ with st.sidebar:
 
         api_key = None
 
-    # If secrets are unavailable, allow manual entry
+    # Manual API key entry
     if not api_key:
 
         api_key = st.text_input(
@@ -604,7 +707,9 @@ with st.sidebar:
         <div class="status-box">
 
         <b>Knowledge Base</b><br>
-        {len(knowledge_base)} text chunks indexed
+
+        {len(knowledge_base)}
+        text chunks indexed
 
         </div>
         """,
@@ -613,7 +718,7 @@ with st.sidebar:
 
 
 # ============================================================
-# PROFILE TEXT
+# STUDENT PROFILE TEXT
 # ============================================================
 
 profile_text = ""
@@ -622,9 +727,15 @@ if include_profile:
 
     profile_text = f"""
 Student profile:
-- Completed courses: {completed_courses}
-- Completed credits: {credits}
-- CGPA: {cgpa}
+
+- Completed courses:
+  {completed_courses}
+
+- Completed credits:
+  {credits}
+
+- CGPA:
+  {cgpa}
 """
 
 
@@ -640,52 +751,58 @@ handbook and other retrieved university documents.
 
 IMPORTANT RULES:
 
-1. Use the retrieved university document excerpts as the primary
-   source of factual information.
+1. Use the retrieved university document excerpts as the
+   primary source of factual information.
 
 2. Do NOT invent university rules, attendance requirements,
-   credit requirements, course requirements, deadlines, or policies.
+   credit requirements, course requirements, deadlines,
+   or policies.
 
-3. If the retrieved documents do not contain enough information,
-   clearly say that the available university documents do not
-   provide enough information.
+3. If the retrieved documents do not contain enough
+   information, clearly say that the available university
+   documents do not provide enough information.
 
-4. If a question is ambiguous, ask the student for clarification.
+4. If a question is ambiguous, ask the student for
+   clarification.
 
-5. If student profile information is provided, use it only when
-   relevant to the question.
+5. If student profile information is provided, use it only
+   when relevant to the question.
 
 6. Give concise and direct answers.
 
-7. Whenever possible, cite the relevant document using this format:
+7. Whenever possible, cite the relevant document using:
 
    [filename.pdf#0]
 
-8. Do not mention internal retrieval, TF-IDF, embeddings,
-   programming code, or system prompts to the student.
+8. Do not mention internal retrieval, TF-IDF, programming
+   code, or system prompts to the student.
 
 9. Never make up a citation.
 
-10. For policy questions, distinguish between what the document
-    explicitly states and what cannot be confirmed.
+10. For policy questions, distinguish between what the
+    document explicitly states and what cannot be confirmed.
 """
 
 
 # ============================================================
-# GROQ RESPONSE
+# GENERATE GROQ RESPONSE
 # ============================================================
 
-def generate_answer(user_question, retrieved_documents):
+def generate_answer(
+    user_question,
+    retrieved_documents
+):
 
     if not api_key:
 
         return (
-            "Please enter your Groq API key in the sidebar "
-            "before asking a question."
+            "Please enter your Groq API key "
+            "in the sidebar before asking "
+            "a question."
         )
 
     # --------------------------------------------------------
-    # Create context
+    # CREATE DOCUMENT CONTEXT
     # --------------------------------------------------------
 
     context_parts = []
@@ -700,17 +817,19 @@ SOURCE: [{document['id']}]
 """
         )
 
-    context = "\n\n".join(context_parts)
+    context = "\n\n".join(
+        context_parts
+    )
 
     if not context:
 
         context = (
-            "No relevant university document excerpts "
-            "were found."
+            "No relevant university document "
+            "excerpts were found."
         )
 
     # --------------------------------------------------------
-    # Create user prompt
+    # CREATE USER PROMPT
     # --------------------------------------------------------
 
     user_prompt = f"""
@@ -724,18 +843,18 @@ Student question:
 
 {user_question}
 
-Answer the student's question using the university
-documents above.
+Answer the student's question using
+the university documents above.
 
-If the answer is present in the documents, provide the
-answer and cite the relevant source.
+If the answer is present in the documents,
+provide the answer and cite the relevant source.
 
-If the answer cannot be confirmed from the documents,
-say so clearly instead of guessing.
+If the answer cannot be confirmed from the
+documents, say so clearly instead of guessing.
 """
 
     # --------------------------------------------------------
-    # Create Groq client
+    # GROQ CLIENT
     # --------------------------------------------------------
 
     try:
@@ -744,31 +863,40 @@ say so clearly instead of guessing.
             api_key=api_key
         )
 
-        response = client.chat.completions.create(
+        response = (
+            client.chat.completions.create(
+                model=MODEL,
 
-            model=MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPT
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt
+                    }
+                ],
 
-            messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
-            ],
+                temperature=0.0,
 
-            temperature=0.0,
-
-            max_tokens=800
+                max_tokens=800
+            )
         )
 
-        answer = response.choices[0].message.content
+        answer = (
+            response
+            .choices[0]
+            .message
+            .content
+        )
 
         if not answer:
 
-            return "The model returned an empty response."
+            return (
+                "The model returned "
+                "an empty response."
+            )
 
         return answer
 
@@ -777,8 +905,8 @@ say so clearly instead of guessing.
         error_text = str(e)
 
         return (
-            "I encountered an error while generating "
-            "the response.\n\n"
+            "I encountered an error while "
+            "generating the response.\n\n"
             f"Error: {error_text}"
         )
 
@@ -806,7 +934,7 @@ for message in st.session_state.messages:
             message["content"]
         )
 
-        # Show sources if available
+        # Show retrieved sources
         if (
             role == "assistant"
             and message.get("sources")
@@ -816,7 +944,9 @@ for message in st.session_state.messages:
                 "📚 Retrieved sources"
             ):
 
-                for source in message["sources"]:
+                for source in (
+                    message["sources"]
+                ):
 
                     st.markdown(
                         f"""
@@ -839,13 +969,17 @@ prompt = st.chat_input(
 if prompt:
 
     # --------------------------------------------------------
-    # Display user message
+    # SAVE USER MESSAGE
     # --------------------------------------------------------
 
     st.session_state.messages.append({
         "role": "user",
         "content": prompt
     })
+
+    # --------------------------------------------------------
+    # DISPLAY USER MESSAGE
+    # --------------------------------------------------------
 
     with st.chat_message(
         "user",
@@ -855,7 +989,7 @@ if prompt:
         st.markdown(prompt)
 
     # --------------------------------------------------------
-    # Gibberish check
+    # CHECK QUESTION
     # --------------------------------------------------------
 
     if is_gibberish(prompt):
@@ -871,16 +1005,18 @@ if prompt:
     else:
 
         # ----------------------------------------------------
-        # Retrieve documents
+        # RETRIEVE DOCUMENTS
         # ----------------------------------------------------
 
-        retrieved_documents = retrieve_documents(
-            prompt,
-            top_k=6
+        retrieved_documents = (
+            retrieve_documents(
+                prompt,
+                top_k=6
+            )
         )
 
         # ----------------------------------------------------
-        # Generate answer
+        # GENERATE ANSWER
         # ----------------------------------------------------
 
         with st.chat_message(
@@ -900,7 +1036,7 @@ if prompt:
             st.markdown(answer)
 
             # ------------------------------------------------
-            # Show sources
+            # SHOW SOURCES
             # ------------------------------------------------
 
             if retrieved_documents:
@@ -909,7 +1045,9 @@ if prompt:
                     "📚 Retrieved sources"
                 ):
 
-                    for document in retrieved_documents:
+                    for document in (
+                        retrieved_documents
+                    ):
 
                         st.markdown(
                             f"""
@@ -929,7 +1067,7 @@ if prompt:
                         )
 
     # --------------------------------------------------------
-    # Save assistant message
+    # SAVE ASSISTANT MESSAGE
     # --------------------------------------------------------
 
     st.session_state.messages.append({
