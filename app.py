@@ -1,5 +1,4 @@
-# app.py
-
+```python
 import streamlit as st
 from groq import Groq
 from pypdf import PdfReader
@@ -27,79 +26,76 @@ st.set_page_config(
 
 st.markdown(
     """
-    <style>
-        .hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
-            padding: 32px 36px;
-            border-radius: 18px;
-            margin-bottom: 25px;
-            color: white;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.20);
-        }
+<style>
+.hero-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 25px;
+    color: white;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.20);
+}
 
-        .hero-content {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
+.hero-inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
 
-        .hero-logo {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
-            background: white;
-            border-radius: 12px;
-            padding: 8px;
-        }
+.hero-logo {
+    width: 95px;
+    height: 95px;
+    object-fit: contain;
+    background: white;
+    border-radius: 12px;
+    padding: 8px;
+    flex-shrink: 0;
+}
 
-        .hero h1 {
-            color: white;
-            margin: 0;
-            font-size: 2.2rem;
-        }
+.hero-title {
+    color: white !important;
+    font-size: 2.1rem !important;
+    font-weight: 700;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 
-        .hero p {
-            color: #dbeafe;
-            margin-top: 8px;
-            font-size: 1.05rem;
-        }
+.hero-subtitle {
+    color: #dbeafe !important;
+    font-size: 1rem;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
 
-        .sidebar-logo {
-            display: block;
-            margin: 0 auto 15px auto;
-            max-width: 150px;
-            max-height: 100px;
-            object-fit: contain;
-        }
+.sidebar-logo {
+    display: block;
+    width: 140px;
+    height: 100px;
+    object-fit: contain;
+    margin: 0 auto 15px auto;
+}
 
-        .status-badge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            text-align: center;
-            margin: 10px 0;
-        }
+.status-badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    margin: 10px 0;
+}
 
-        .source-box {
-            background: #f8fafc;
-            border-left: 4px solid #1e40af;
-            padding: 10px 14px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
+.source-box {
+    background: #f8fafc;
+    border-left: 4px solid #1e40af;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
 
-        .small-text {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        div[data-testid="stChatMessage"] {
-            border-radius: 12px;
-        }
-    </style>
-    """,
+</style>
+""",
     unsafe_allow_html=True
 )
 
@@ -110,44 +106,53 @@ st.markdown(
 
 def find_logo():
     """
-    Scan the current directory recursively enough for normal
-    project layouts and return the first image whose filename
-    contains 'logo' or 'b0d1fb'.
+    Search the current directory for a PNG/JPG/JPEG file
+    containing 'logo' or 'b0d1fb' in its filename.
     """
 
     valid_extensions = (".png", ".jpg", ".jpeg")
 
-    search_directories = ["."]
+    try:
+        for filename in os.listdir("."):
 
-    for root in search_directories:
-        try:
-            for filename in os.listdir(root):
-                lower_name = filename.lower()
+            if filename.startswith("."):
+                continue
 
-                if (
-                    lower_name.endswith(valid_extensions)
-                    and ("logo" in lower_name or "b0d1fb" in lower_name)
-                ):
-                    return os.path.join(root, filename)
+            lower_name = filename.lower()
 
-        except OSError:
-            pass
+            if not lower_name.endswith(valid_extensions):
+                continue
+
+            if "logo" in lower_name or "b0d1fb" in lower_name:
+                return os.path.join(".", filename)
+
+    except Exception:
+        pass
 
     return None
 
 
 def image_to_base64(image_path):
-    """Convert an image file to base64."""
+    """
+    Convert the logo image into a base64 data URL.
+    """
+
+    if not image_path:
+        return None
 
     try:
         with open(image_path, "rb") as image_file:
-            encoded = base64.b64encode(image_file.read()).decode("utf-8")
+            encoded = base64.b64encode(
+                image_file.read()
+            ).decode("utf-8")
 
-        extension = os.path.splitext(image_path)[1].lower()
+        extension = os.path.splitext(
+            image_path
+        )[1].lower()
 
         if extension == ".png":
             mime_type = "image/png"
-        elif extension in (".jpg", ".jpeg"):
+        elif extension in [".jpg", ".jpeg"]:
             mime_type = "image/jpeg"
         else:
             mime_type = "image/png"
@@ -159,7 +164,7 @@ def image_to_base64(image_path):
 
 
 LOGO_PATH = find_logo()
-LOGO_BASE64 = image_to_base64(LOGO_PATH) if LOGO_PATH else None
+LOGO_BASE64 = image_to_base64(LOGO_PATH)
 
 
 # ============================================================
@@ -168,68 +173,83 @@ LOGO_BASE64 = image_to_base64(LOGO_PATH) if LOGO_PATH else None
 
 if LOGO_BASE64:
 
-    st.markdown(
-        f"""
-        <div class="hero">
-            <div class="hero-content">
-                <img
-                    src="{LOGO_BASE64}"
-                    class="hero-logo"
-                    alt="Vidyashilp University Logo"
-                >
+    hero_html = (
+        '<div class="hero-banner">'
+        '<div class="hero-inner">'
+        f'<img src="{LOGO_BASE64}" '
+        'class="hero-logo" '
+        'alt="Vidyashilp University Logo">'
+        '<div>'
+        '<h1 class="hero-title">'
+        'Vidyashilp University AI Academic Advisor'
+        '</h1>'
+        '<p class="hero-subtitle">'
+        'Your RAG-powered academic assistant for course, '
+        'curriculum and academic guidance.'
+        '</p>'
+        '</div>'
+        '</div>'
+        '</div>'
+    )
 
-                <div>
-                    <h1>Vidyashilp University AI Academic Advisor</h1>
-                    <p>
-                        Your RAG-powered academic assistant for course,
-                        curriculum and academic guidance.
-                    </p>
-                </div>
-            </div>
-        </div>
-        """,
+    st.markdown(
+        hero_html,
         unsafe_allow_html=True
     )
 
 else:
 
+    hero_html = (
+        '<div class="hero-banner">'
+        '<div>'
+        '<h1 class="hero-title">'
+        'Vidyashilp University AI Academic Advisor'
+        '</h1>'
+        '<p class="hero-subtitle">'
+        'Your RAG-powered academic assistant for course, '
+        'curriculum and academic guidance.'
+        '</p>'
+        '</div>'
+        '</div>'
+    )
+
     st.markdown(
-        """
-        <div class="hero">
-            <h1>Vidyashilp University AI Academic Advisor</h1>
-            <p>
-                Your RAG-powered academic assistant for course,
-                curriculum and academic guidance.
-            </p>
-        </div>
-        """,
+        hero_html,
         unsafe_allow_html=True
     )
 
 
 # ============================================================
-# TOKENIZATION / STOPWORDS
+# STOPWORDS
 # ============================================================
 
 STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "been", "being",
-    "but", "by", "can", "could", "did", "do", "does", "for", "from",
-    "had", "has", "have", "he", "her", "here", "hers", "him", "his",
-    "how", "i", "if", "in", "into", "is", "it", "its", "me", "my",
-    "no", "not", "of", "on", "or", "our", "ours", "she", "should",
-    "so", "some", "than", "that", "the", "their", "theirs", "them",
-    "then", "there", "these", "they", "this", "those", "to", "too",
-    "was", "we", "were", "what", "when", "where", "which", "who",
-    "why", "will", "with", "would", "you", "your", "yours"
+    "but", "by", "can", "could", "did", "do", "does", "for",
+    "from", "had", "has", "have", "he", "her", "here", "hers",
+    "him", "his", "how", "i", "if", "in", "into", "is", "it",
+    "its", "me", "my", "no", "not", "of", "on", "or", "our",
+    "ours", "she", "should", "so", "some", "than", "that",
+    "the", "their", "theirs", "them", "then", "there", "these",
+    "they", "this", "those", "to", "too", "was", "we", "were",
+    "what", "when", "where", "which", "who", "why", "will",
+    "with", "would", "you", "your", "yours"
 }
 
 
+# ============================================================
+# TOKENIZATION
+# ============================================================
+
 def tokenize(text):
     """
-    Tokenize text using [a-z0-9]+ and remove standard stopwords.
+    Tokenize text using [a-z0-9]+ and remove stopwords.
     """
 
-    tokens = re.findall(r"[a-z0-9]+", text.lower())
+    tokens = re.findall(
+        r"[a-z0-9]+",
+        text.lower()
+    )
 
     return [
         token
@@ -239,17 +259,11 @@ def tokenize(text):
 
 
 # ============================================================
-# KNOWLEDGE BASE
+# LOAD KNOWLEDGE BASE
 # ============================================================
 
 @st.cache_data(show_spinner=False)
 def load_knowledge_base():
-    """
-    Load PDF, TXT and CSV documents from DOCS if available.
-    Otherwise scan the current directory.
-
-    Documents are split into approximately 120-word chunks.
-    """
 
     docs_directory = "DOCS"
 
@@ -258,7 +272,7 @@ def load_knowledge_base():
     else:
         base_directory = "."
 
-    excluded_keywords = {
+    excluded_keywords = [
         "Evaluation_Dataset",
         "Held_Out",
         "results_",
@@ -266,38 +280,46 @@ def load_knowledge_base():
         "phase4",
         "advisor_scoring",
         "requirements"
-    }
+    ]
 
     chunks = []
 
     try:
         filenames = os.listdir(base_directory)
-    except OSError:
+    except Exception:
         filenames = []
 
     for filename in filenames:
 
-        # Exclude hidden files.
+        # Ignore hidden files.
         if filename.startswith("."):
             continue
 
-        # Exclude Python and Markdown files.
-        if filename.endswith(".py") or filename.endswith(".md"):
+        # Ignore Python and Markdown files.
+        if filename.lower().endswith(".py"):
             continue
 
-        # Exclude evaluation-related files.
+        if filename.lower().endswith(".md"):
+            continue
+
+        # Ignore evaluation-related files.
         if any(
             keyword.lower() in filename.lower()
             for keyword in excluded_keywords
         ):
             continue
 
-        extension = os.path.splitext(filename)[1].lower()
+        extension = os.path.splitext(
+            filename
+        )[1].lower()
 
-        if extension not in (".pdf", ".txt", ".csv"):
+        if extension not in [".pdf", ".txt", ".csv"]:
             continue
 
-        filepath = os.path.join(base_directory, filename)
+        filepath = os.path.join(
+            base_directory,
+            filename
+        )
 
         text = ""
 
@@ -310,6 +332,7 @@ def load_knowledge_base():
                 pages = []
 
                 for page in reader.pages:
+
                     page_text = page.extract_text()
 
                     if page_text:
@@ -335,23 +358,35 @@ def load_knowledge_base():
             continue
 
         # Normalize whitespace.
-        text = re.sub(r"\s+", " ", text).strip()
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
+        ).strip()
 
         words = text.split()
 
         # Approximately 120 words per chunk.
         chunk_size = 120
 
-        for start in range(0, len(words), chunk_size):
+        for start in range(
+            0,
+            len(words),
+            chunk_size
+        ):
 
-            chunk_words = words[start:start + chunk_size]
+            chunk_words = words[
+                start:start + chunk_size
+            ]
 
             if not chunk_words:
                 continue
 
             chunk_index = start // chunk_size
 
-            chunk_id = f"{filename}#{chunk_index}"
+            chunk_id = (
+                f"{filename}#{chunk_index}"
+            )
 
             chunks.append(
                 {
@@ -365,21 +400,19 @@ def load_knowledge_base():
 
 
 # ============================================================
-# TF-IDF INDEX
+# BUILD DOCUMENT FREQUENCY INDEX
 # ============================================================
 
 @st.cache_data(show_spinner=False)
 def build_tfidf_index(chunks):
-    """
-    Build document frequency information for the manually
-    implemented TF-IDF keyword retrieval system.
-    """
 
     document_frequency = Counter()
 
     for chunk in chunks:
 
-        tokens = set(tokenize(chunk["text"]))
+        tokens = set(
+            tokenize(chunk["text"])
+        )
 
         for token in tokens:
             document_frequency[token] += 1
@@ -387,11 +420,13 @@ def build_tfidf_index(chunks):
     return document_frequency
 
 
-# Load knowledge base.
+# Load documents.
 knowledge_base = load_knowledge_base()
 
-# Build document-frequency index.
-DOC_FREQ = build_tfidf_index(knowledge_base)
+# Build TF-IDF document frequency.
+DOC_FREQ = build_tfidf_index(
+    knowledge_base
+)
 
 N_CHUNKS = len(knowledge_base)
 
@@ -400,15 +435,17 @@ N_CHUNKS = len(knowledge_base)
 # RETRIEVAL
 # ============================================================
 
-def retrieve_chunks(query, top_k=6):
-    """
-    Retrieve the top-k chunks using manual TF-IDF-style
-    keyword scoring.
-    """
+def retrieve_chunks(
+    query,
+    top_k=6
+):
 
     query_tokens = tokenize(query)
 
-    if not query_tokens or not knowledge_base:
+    if not query_tokens:
+        return []
+
+    if not knowledge_base:
         return []
 
     query_tokens = set(query_tokens)
@@ -417,9 +454,15 @@ def retrieve_chunks(query, top_k=6):
 
     for chunk in knowledge_base:
 
-        chunk_tokens = set(tokenize(chunk["text"]))
+        chunk_tokens = set(
+            tokenize(chunk["text"])
+        )
 
-        matching_tokens = query_tokens.intersection(chunk_tokens)
+        matching_tokens = (
+            query_tokens.intersection(
+                chunk_tokens
+            )
+        )
 
         score = 0.0
 
@@ -435,6 +478,7 @@ def retrieve_chunks(query, top_k=6):
             )
 
         if score > 0:
+
             scored_chunks.append(
                 (
                     score,
@@ -458,14 +502,6 @@ def retrieve_chunks(query, top_k=6):
 # ============================================================
 
 def is_gibberish(prompt):
-    """
-    Detect obviously invalid or nonsensical queries.
-
-    Returns:
-        (True, fallback_message)
-        or
-        (False, None)
-    """
 
     if not prompt or not prompt.strip():
 
@@ -477,7 +513,10 @@ def is_gibberish(prompt):
     cleaned = prompt.strip()
 
     # Character diversity ratio.
-    unique_characters = len(set(cleaned.lower()))
+    unique_characters = len(
+        set(cleaned.lower())
+    )
+
     total_characters = len(cleaned)
 
     diversity_ratio = (
@@ -494,11 +533,13 @@ def is_gibberish(prompt):
             "Please enter a clear academic question."
         )
 
-    words = re.findall(r"\S+", cleaned)
+    words = re.findall(
+        r"\S+",
+        cleaned
+    )
 
     for word in words:
 
-        # Remove common punctuation around a word.
         clean_word = re.sub(
             r"^[^\w]+|[^\w]+$",
             "",
@@ -517,15 +558,12 @@ def is_gibberish(prompt):
 
 
 # ============================================================
-# GROQ CLIENT
+# GROQ API KEY
 # ============================================================
 
 def get_groq_api_key():
-    """
-    Read the Groq API key from Streamlit secrets first.
-    Fall back to the sidebar password field.
-    """
 
+    # First try Streamlit secrets.
     try:
 
         secret_key = st.secrets.get(
@@ -539,8 +577,9 @@ def get_groq_api_key():
     except Exception:
         pass
 
+    # Otherwise use sidebar input.
     return st.session_state.get(
-        "sidebar_groq_api_key",
+        "groq_key_input",
         ""
     )
 
@@ -551,45 +590,55 @@ def get_groq_api_key():
 
 with st.sidebar:
 
-    # Sidebar logo.
+    # --------------------------------------------------------
+    # SIDEBAR LOGO
+    # --------------------------------------------------------
+
     if LOGO_BASE64:
 
+        sidebar_logo_html = (
+            '<img '
+            f'src="{LOGO_BASE64}" '
+            'class="sidebar-logo" '
+            'alt="Vidyashilp University Logo">'
+        )
+
         st.markdown(
-            f"""
-            <img
-                src="{LOGO_BASE64}"
-                class="sidebar-logo"
-                alt="Vidyashilp University Logo"
-            >
-            """,
+            sidebar_logo_html,
             unsafe_allow_html=True
         )
 
     st.header("🎓 Student Profile")
 
     st.caption(
-        "Configure optional student information to make "
-        "academic guidance more relevant."
+        "Add your academic information to receive "
+        "more relevant guidance."
     )
 
-    # API key fallback.
-    api_key_from_secret = ""
+    # --------------------------------------------------------
+    # GROQ API KEY
+    # --------------------------------------------------------
 
     try:
-        api_key_from_secret = st.secrets.get(
+
+        secret_key = st.secrets.get(
             "GROQ_API_KEY",
             ""
         )
+
     except Exception:
-        api_key_from_secret = ""
 
-    if api_key_from_secret:
+        secret_key = ""
 
-        st.success("Groq API key loaded from secrets.")
+    if secret_key:
+
+        st.success(
+            "Groq API key loaded from secrets."
+        )
 
     else:
 
-        st.session_state["sidebar_groq_api_key"] = st.text_input(
+        st.text_input(
             "Groq API Key",
             type="password",
             placeholder="Enter your Groq API key",
@@ -598,6 +647,10 @@ with st.sidebar:
 
     st.divider()
 
+    # --------------------------------------------------------
+    # STUDENT PROFILE
+    # --------------------------------------------------------
+
     include_profile = st.checkbox(
         "Include Student Profile",
         value=True
@@ -605,7 +658,10 @@ with st.sidebar:
 
     completed_courses = st.text_input(
         "Completed Courses",
-        value="CS101 Intro to CS, CS201 Data Structures"
+        value=(
+            "CS101 Intro to CS, "
+            "CS201 Data Structures"
+        )
     )
 
     credits_earned = st.number_input(
@@ -622,25 +678,34 @@ with st.sidebar:
 
     st.divider()
 
+    # --------------------------------------------------------
+    # KNOWLEDGE BASE STATUS
+    # --------------------------------------------------------
+
     st.subheader("Knowledge Base")
 
     st.markdown(
-        f"""
-        <div class="status-badge">
-            📚 {N_CHUNKS} active indexed text chunks
-        </div>
-        """,
+        f'<div class="status-badge">'
+        f'📚 {N_CHUNKS} active indexed text chunks'
+        f'</div>',
         unsafe_allow_html=True
     )
 
-    st.caption(
-        "Sources are loaded from DOCS/ when available; "
-        "otherwise the current directory is scanned."
-    )
+    if N_CHUNKS > 0:
+
+        st.caption(
+            "Knowledge base loaded successfully."
+        )
+
+    else:
+
+        st.warning(
+            "No PDF, TXT, or CSV knowledge files were found."
+        )
 
 
 # ============================================================
-# STUDENT PROFILE CONTEXT
+# STUDENT PROFILE
 # ============================================================
 
 def build_student_profile():
@@ -648,14 +713,18 @@ def build_student_profile():
     if not include_profile:
         return "Student Profile: Not provided."
 
-    profile = f"""
+    status = (
+        cgpa_status.strip()
+        if cgpa_status.strip()
+        else "Not provided"
+    )
+
+    return f"""
 Student Profile:
 - Completed Courses: {completed_courses}
 - Credits Earned: {credits_earned}
-- CGPA/Status: {cgpa_status if cgpa_status.strip() else "Not provided"}
-"""
-
-    return profile.strip()
+- CGPA/Status: {status}
+""".strip()
 
 
 student_profile = build_student_profile()
@@ -668,46 +737,50 @@ student_profile = build_student_profile()
 SYSTEM_PROMPT = """
 You are the Vidyashilp University AI Academic Advisor.
 
-Your job is to provide accurate academic guidance to students using
-ONLY the supplied handbook excerpts.
+Your job is to provide accurate academic guidance using ONLY the
+provided Vidyashilp University handbook excerpts.
 
-STRICT KNOWLEDGE RULES:
-1. Do not use outside knowledge.
-2. Do not invent university policies, courses, prerequisites,
-   credit requirements, faculty information, deadlines, or rules.
-3. If the supplied handbook excerpts do not contain enough information,
-   clearly say that the available handbook information is insufficient.
-4. Ask a clarifying follow-up question when critical information is
-   missing.
-5. You may use the Student Profile context when determining whether
-   information in the provided handbook excerpts appears applicable
-   to the student.
-6. Do not claim that a student is eligible for a course unless the
-   provided handbook excerpts support that conclusion.
-7. Cite handbook evidence using source tags exactly in this style:
+STRICT RULES:
+
+1. Use only the provided handbook excerpts.
+2. Do not use outside knowledge.
+3. Do not invent university policies, courses, prerequisites,
+   credit requirements, deadlines, faculty information, or rules.
+4. If the handbook excerpts do not contain enough information,
+   clearly state that the available handbook information is
+   insufficient.
+5. Ask a clarifying question when critical information is missing.
+6. Use the Student Profile only when it helps determine course
+   eligibility or academic relevance.
+7. Never claim that a student is eligible for a course unless the
+   provided handbook information supports that conclusion.
+8. Cite handbook information using source tags such as:
    [filename.pdf#0]
-8. Keep answers clear, practical, and student-friendly.
-9. When multiple handbook sources support an answer, cite the relevant
-   source tags.
-10. If the student asks something unrelated to the academic handbook,
-    politely explain that you are designed to help with Vidyashilp
-    University academic guidance.
+9. Keep answers clear and student-friendly.
+10. When multiple sources support an answer, cite the relevant
+    source tags.
+11. If the question is unrelated to Vidyashilp University academic
+    guidance, politely explain that you are designed for academic
+    advising.
 """
 
 
 # ============================================================
-# GROQ RESPONSE
+# GENERATE GROQ RESPONSE
 # ============================================================
 
-def generate_answer(user_prompt, retrieved_chunks):
+def generate_answer(
+    user_prompt,
+    retrieved_chunks
+):
 
     api_key = get_groq_api_key()
 
     if not api_key:
 
         return (
-            "Please provide a Groq API key in the sidebar or configure "
-            "`GROQ_API_KEY` in Streamlit secrets."
+            "Please enter your Groq API key in the sidebar "
+            "or configure GROQ_API_KEY in Streamlit secrets."
         )
 
     try:
@@ -720,15 +793,19 @@ def generate_answer(user_prompt, retrieved_chunks):
 
         return (
             "I could not initialize the Groq client. "
-            f"Please check your API key. Details: {error}"
+            "Please check your API key.\n\n"
+            f"Error: {error}"
         )
 
-    # Build handbook context.
-    handbook_context_parts = []
+    # --------------------------------------------------------
+    # CREATE HANDBOOK CONTEXT
+    # --------------------------------------------------------
+
+    handbook_parts = []
 
     for chunk in retrieved_chunks:
 
-        handbook_context_parts.append(
+        handbook_parts.append(
             f"""
 SOURCE: [{chunk["id"]}]
 CONTENT:
@@ -737,7 +814,7 @@ CONTENT:
         )
 
     handbook_context = "\n".join(
-        handbook_context_parts
+        handbook_parts
     )
 
     if not handbook_context:
@@ -746,20 +823,39 @@ CONTENT:
             "No relevant handbook excerpts were retrieved."
         )
 
+    # --------------------------------------------------------
+    # USER MESSAGE
+    # --------------------------------------------------------
+
     user_message = f"""
 STUDENT PROFILE:
+
 {student_profile}
 
+
 HANDBOOK EXCERPTS:
+
 {handbook_context}
 
+
 STUDENT QUESTION:
+
 {user_prompt}
 
-Answer the student's question using only the handbook excerpts above.
-Include source tags such as [filename.pdf#0] for factual claims based
-on the handbook.
+
+Answer the student's question using only the handbook excerpts.
+
+If the information is available, provide a direct and clear answer.
+
+If the information is not available, say that the handbook excerpts
+provided do not contain enough information.
+
+Use source tags such as [filename.pdf#0] for factual claims.
 """
+
+    # --------------------------------------------------------
+    # GROQ CALL
+    # --------------------------------------------------------
 
     try:
 
@@ -783,10 +879,45 @@ on the handbook.
     except Exception as error:
 
         return (
-            "I encountered an error while generating the response. "
-            f"Please check your Groq API configuration.\n\n"
+            "I encountered an error while generating the response.\n\n"
             f"Error: {error}"
         )
+
+
+# ============================================================
+# DISPLAY RETRIEVED SOURCES
+# ============================================================
+
+def display_sources(
+    retrieved_chunks
+):
+
+    if not retrieved_chunks:
+
+        with st.expander(
+            "📚 Retrieved Handbook Excerpts"
+        ):
+
+            st.info(
+                "No matching handbook excerpts were found."
+            )
+
+        return
+
+    with st.expander(
+        "📚 Retrieved Handbook Excerpts"
+    ):
+
+        for chunk in retrieved_chunks:
+
+            st.markdown(
+                f'<div class="source-box">'
+                f'<strong>[{chunk["id"]}]</strong>'
+                f'<br><br>'
+                f'{chunk["text"]}'
+                f'</div>',
+                unsafe_allow_html=True
+            )
 
 
 # ============================================================
@@ -799,14 +930,12 @@ if "messages" not in st.session_state:
 
 
 # ============================================================
-# DISPLAY PREVIOUS CHAT
+# DISPLAY PREVIOUS MESSAGES
 # ============================================================
 
 for message in st.session_state.messages:
 
-    role = message["role"]
-
-    if role == "user":
+    if message["role"] == "user":
 
         with st.chat_message(
             "user",
@@ -828,31 +957,12 @@ for message in st.session_state.messages:
                 message["content"]
             )
 
-            retrieved_for_message = message.get(
-                "retrieved_chunks",
-                []
+            display_sources(
+                message.get(
+                    "retrieved_chunks",
+                    []
+                )
             )
-
-            if retrieved_for_message:
-
-                with st.expander(
-                    "📚 Retrieved Handbook Excerpts"
-                ):
-
-                    for chunk in retrieved_for_message:
-
-                        st.markdown(
-                            f"""
-                            <div class="source-box">
-                                <strong>
-                                    [{chunk["id"]}]
-                                </strong>
-                                <br>
-                                {chunk["text"]}
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
 
 
 # ============================================================
@@ -867,15 +977,8 @@ prompt = st.chat_input(
 if prompt:
 
     # --------------------------------------------------------
-    # USER MESSAGE
+    # DISPLAY USER MESSAGE
     # --------------------------------------------------------
-
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
 
     with st.chat_message(
         "user",
@@ -884,11 +987,20 @@ if prompt:
 
         st.markdown(prompt)
 
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": prompt
+        }
+    )
+
     # --------------------------------------------------------
     # GIBBERISH CHECK
     # --------------------------------------------------------
 
-    gibberish, fallback_message = is_gibberish(prompt)
+    gibberish, fallback_message = is_gibberish(
+        prompt
+    )
 
     if gibberish:
 
@@ -896,10 +1008,17 @@ if prompt:
 
         answer = fallback_message
 
+        with st.chat_message(
+            "assistant",
+            avatar="🎓"
+        ):
+
+            st.markdown(answer)
+
     else:
 
         # ----------------------------------------------------
-        # RETRIEVAL
+        # RETRIEVE HANDBOOK CHUNKS
         # ----------------------------------------------------
 
         retrieved_chunks = retrieve_chunks(
@@ -908,7 +1027,7 @@ if prompt:
         )
 
         # ----------------------------------------------------
-        # GENERATION
+        # GENERATE RESPONSE
         # ----------------------------------------------------
 
         with st.chat_message(
@@ -927,44 +1046,12 @@ if prompt:
 
             st.markdown(answer)
 
-            # ------------------------------------------------
-            # RETRIEVED SOURCES
-            # ------------------------------------------------
-
-            if retrieved_chunks:
-
-                with st.expander(
-                    "📚 Retrieved Handbook Excerpts"
-                ):
-
-                    for chunk in retrieved_chunks:
-
-                        st.markdown(
-                            f"""
-                            <div class="source-box">
-                                <strong>
-                                    [{chunk["id"]}]
-                                </strong>
-                                <br>
-                                {chunk["text"]}
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-            else:
-
-                with st.expander(
-                    "📚 Retrieved Handbook Excerpts"
-                ):
-
-                    st.info(
-                        "No matching handbook excerpts were found "
-                        "for this question."
-                    )
+            display_sources(
+                retrieved_chunks
+            )
 
     # --------------------------------------------------------
-    # SAVE ASSISTANT MESSAGE
+    # SAVE ASSISTANT RESPONSE
     # --------------------------------------------------------
 
     st.session_state.messages.append(
@@ -974,3 +1061,4 @@ if prompt:
             "retrieved_chunks": retrieved_chunks
         }
     )
+```
