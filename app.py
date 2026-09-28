@@ -8,182 +8,234 @@ import math
 import base64
 from collections import Counter
 
-
 # ============================================================
-# CONFIGURATION
+# PAGE CONFIG
 # ============================================================
 
 st.set_page_config(
-    page_title="Vidyashilp University AI Academic Advisor",
+    page_title="Academic Advisor — Vidyashilp University",
     page_icon="🎓",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# IMPORTANT:
-# llama-3.1-8b-instant was deprecated by Groq.
-# Use the current replacement.
-MODEL = "openai/gpt-oss-20b"
-
-
 # ============================================================
-# CUSTOM CSS
+# CSS — clean, professional university look
 # ============================================================
 
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
 
 .stApp {
-    background-color: #f8fafc;
+    background-color: #f5f6fa;
 }
 
-.hero {
-    background: linear-gradient(
-        135deg,
-        #0f172a 0%,
-        #1e40af 100%
-    );
-    padding: 28px;
-    border-radius: 18px;
-    margin-bottom: 25px;
-    color: white;
+/* ---- Top header bar ---- */
+.vu-header {
+    background: #0a2240;
+    padding: 18px 28px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
 
-.hero-title {
-    font-size: 32px;
+.vu-header-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    background: white;
+    border-radius: 8px;
+    padding: 5px;
+    flex-shrink: 0;
+}
+
+.vu-header-text {}
+
+.vu-header-title {
+    color: #ffffff;
+    font-size: 20px;
     font-weight: 700;
-    margin-bottom: 5px;
+    line-height: 1.2;
+    margin: 0;
 }
 
-.hero-subtitle {
-    font-size: 16px;
-    opacity: 0.9;
-}
-
-.source-box {
-    background-color: #f1f5f9;
-    border-left: 4px solid #1e40af;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-top: 8px;
-}
-
-.small-text {
+.vu-header-sub {
+    color: #94b8d6;
     font-size: 13px;
-    color: #64748b;
+    margin: 3px 0 0 0;
 }
 
-.status-box {
-    background-color: #eff6ff;
-    padding: 10px;
+/* ---- Chat messages ---- */
+.vu-msg-user {
+    background: #0a2240;
+    color: #ffffff;
+    border-radius: 14px 14px 4px 14px;
+    padding: 12px 16px;
+    max-width: 78%;
+    margin-left: auto;
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin-bottom: 14px;
+}
+
+.vu-msg-bot {
+    background: #ffffff;
+    color: #1a1a2e;
+    border-radius: 14px 14px 14px 4px;
+    padding: 14px 18px;
+    max-width: 82%;
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    border: 1px solid #e4e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.vu-msg-bot strong {
+    color: #0a2240;
+}
+
+/* ---- Source chip ---- */
+.vu-source-chip {
+    display: inline-block;
+    background: #eef3fb;
+    color: #1e4a8a;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin: 2px 3px 2px 0;
+    border: 1px solid #c8d9f5;
+    font-weight: 500;
+}
+
+/* ---- Sidebar ---- */
+section[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    border-right: 1px solid #e4e8f0;
+}
+
+.vu-sidebar-section {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8492a6;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 18px 0 8px 0;
+}
+
+.vu-profile-badge {
+    background: #f0f4ff;
+    border: 1px solid #c8d9f5;
     border-radius: 8px;
-    border: 1px solid #bfdbfe;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #2c3e50;
+    margin-bottom: 10px;
 }
 
+.vu-profile-badge span {
+    color: #1e4a8a;
+    font-weight: 600;
+}
+
+.vu-status {
+    background: #f0faf4;
+    border: 1px solid #b8dfc8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: #2d6a4f;
+}
+
+/* ---- Input area ---- */
+.stChatInput > div {
+    border-radius: 12px !important;
+    border: 1.5px solid #c8d9f5 !important;
+    background: #ffffff !important;
+}
+
+/* ---- Suggested questions ---- */
+.vu-suggestion {
+    background: #ffffff;
+    border: 1px solid #dde4f0;
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-size: 13px;
+    color: #1e4a8a;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: background 0.15s;
+}
+
+.vu-suggestion:hover {
+    background: #eef3fb;
+}
+
+/* ---- Divider ---- */
+.vu-divider {
+    border: none;
+    border-top: 1px solid #e4e8f0;
+    margin: 16px 0;
+}
+
+/* hide streamlit branding */
+#MainMenu, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
+# ============================================================
+# MODEL
+# ============================================================
+
+MODEL = "llama-3.3-70b-versatile"
 
 # ============================================================
-# LOGO
+# LOGO HELPER
 # ============================================================
 
 def find_logo():
-
-    possible_files = []
-
     for filename in os.listdir("."):
-
         if filename.startswith("."):
             continue
-
-        lower_name = filename.lower()
-
-        if (
-            lower_name.endswith(".png")
-            or lower_name.endswith(".jpg")
-            or lower_name.endswith(".jpeg")
-        ):
-
-            if "logo" in lower_name or "b0d1fb" in lower_name:
-                possible_files.append(filename)
-
-    if possible_files:
-        return possible_files[0]
-
+        lower = filename.lower()
+        if lower.endswith((".png", ".jpg", ".jpeg")) and ("logo" in lower or "b0d1fb" in lower):
+            return filename
     return None
 
-
 def image_to_base64(path):
-
     try:
         with open(path, "rb") as f:
             return base64.b64encode(f.read()).decode()
-
     except Exception:
         return None
 
+# ============================================================
+# HEADER
+# ============================================================
 
 logo_file = find_logo()
-
-
-# ============================================================
-# HERO SECTION
-# ============================================================
-
+logo_html = ""
 if logo_file:
+    b64 = image_to_base64(logo_file)
+    if b64:
+        logo_html = f'<img class="vu-header-logo" src="data:image/png;base64,{b64}">'
 
-    logo_data = image_to_base64(logo_file)
-
-    hero_html = f"""
-    <div class="hero">
-
-        <div style="display:flex; align-items:center; gap:20px;">
-
-            <img
-                src="data:image/png;base64,{logo_data}"
-                style="
-                    width:75px;
-                    height:75px;
-                    object-fit:contain;
-                    background:white;
-                    border-radius:12px;
-                    padding:6px;
-                "
-            >
-
-            <div>
-
-                <div class="hero-title">
-                    Vidyashilp University AI Academic Advisor
-                </div>
-
-                <div class="hero-subtitle">
-                    Your AI assistant for academic planning and university handbook guidance
-                </div>
-
-            </div>
-
-        </div>
-
+st.markdown(f"""
+<div class="vu-header">
+    {logo_html}
+    <div class="vu-header-text">
+        <p class="vu-header-title">AI Academic Advisor</p>
+        <p class="vu-header-sub">Vidyashilp University &nbsp;·&nbsp; Powered by Retrieval-Augmented Generation</p>
     </div>
-    """
-
-else:
-
-    st.markdown("""
-    <div class="hero">
-
-        <div class="hero-title">
-            🎓 Vidyashilp University AI Academic Advisor
-        </div>
-
-        <div class="hero-subtitle">
-            Your AI assistant for academic planning and university handbook guidance
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
+</div>
+""", unsafe_allow_html=True)
 
 # ============================================================
 # SESSION STATE
@@ -191,749 +243,356 @@ else:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
-
 if "knowledge_base" not in st.session_state:
     st.session_state.knowledge_base = None
 
-
 # ============================================================
-# STOPWORDS
+# STOPWORDS & TOKENIZER
 # ============================================================
 
 STOPWORDS = {
-    "the", "is", "a", "an", "and", "or", "of",
-    "to", "in", "on", "for", "with", "what",
-    "are", "was", "were", "be", "can", "i",
-    "my", "me", "do", "does", "how", "much",
-    "many", "about", "from", "at", "this",
-    "that", "it", "as", "by", "if", "minimum"
+    "the", "is", "a", "an", "and", "or", "of", "to", "in", "on",
+    "for", "with", "what", "are", "was", "were", "be", "can", "i",
+    "my", "me", "do", "does", "how", "much", "many", "about",
+    "from", "at", "this", "that", "it", "as", "by", "if", "minimum"
 }
 
-
-# ============================================================
-# TEXT TOKENIZER
-# ============================================================
-
 def tokenize(text):
-
     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
-
-    return [
-        word
-        for word in words
-        if word not in STOPWORDS
-    ]
-
+    return [w for w in words if w not in STOPWORDS]
 
 # ============================================================
 # LOAD KNOWLEDGE BASE
 # ============================================================
 
+EXCLUDE_KEYWORDS = [
+    "evaluation_dataset", "held_out", "results_", "before_after",
+    "phase4", "advisor_scoring", "requirements", "synthetic_student",
+    "manual_spot", "question_bank", "generalization"
+]
+
 def load_knowledge_base():
-
     documents = []
-
-    docs_folder = "DOCS"
-
-    if os.path.exists(docs_folder):
-
-        source_folder = docs_folder
-
-    else:
-
-        source_folder = "."
-
-    excluded_words = [
-        "evaluation_dataset",
-        "held_out",
-        "results_",
-        "before_after",
-        "phase4",
-        "advisor_scoring",
-        "requirements",
-    ]
+    source_folder = "DOCS" if os.path.exists("DOCS") else "."
 
     try:
-
         filenames = os.listdir(source_folder)
-
     except Exception:
-
         return []
 
     for filename in filenames:
-
         if filename.startswith("."):
             continue
-
-        lower_name = filename.lower()
-
-        # Do not read Python code
-        if lower_name.endswith(".py"):
+        lower = filename.lower()
+        if lower.endswith((".py", ".md", ".ipynb", ".csv")):
             continue
-
-        # Do not read markdown files
-        if lower_name.endswith(".md"):
-            continue
-
-        # Skip evaluation/result files
-        if any(word in lower_name for word in excluded_words):
+        if any(w in lower for w in EXCLUDE_KEYWORDS):
             continue
 
         filepath = os.path.join(source_folder, filename)
-
         text = ""
 
-        # ----------------------------------------------------
-        # PDF
-        # ----------------------------------------------------
-
-        if lower_name.endswith(".pdf"):
-
+        if lower.endswith(".pdf"):
             try:
-
                 reader = PdfReader(filepath)
-
-                pages = []
-
-                for page in reader.pages:
-
-                    try:
-                        page_text = page.extract_text()
-
-                        if page_text:
-                            pages.append(page_text)
-
-                    except Exception:
-                        continue
-
+                pages = [p.extract_text() for p in reader.pages if p.extract_text()]
                 text = "\n".join(pages)
-
             except Exception:
                 continue
 
-        # ----------------------------------------------------
-        # TXT
-        # ----------------------------------------------------
-
-        elif lower_name.endswith(".txt"):
-
+        elif lower.endswith(".txt"):
             try:
-
-                with open(
-                    filepath,
-                    "r",
-                    encoding="utf-8",
-                    errors="ignore"
-                ) as f:
-
+                with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                     text = f.read()
-
             except Exception:
                 continue
 
-        # ----------------------------------------------------
-        # CSV
-        # ----------------------------------------------------
-
-        elif lower_name.endswith(".csv"):
-
+        elif lower.endswith(".csv"):
             try:
-
-                with open(
-                    filepath,
-                    "r",
-                    encoding="utf-8",
-                    errors="ignore"
-                ) as f:
-
+                with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                     text = f.read()
-
             except Exception:
                 continue
 
         else:
-
             continue
 
         if not text.strip():
             continue
 
-        # ----------------------------------------------------
-        # Clean text
-        # ----------------------------------------------------
-
         text = re.sub(r"\s+", " ", text).strip()
-
-        # ----------------------------------------------------
-        # Create chunks
-        # ----------------------------------------------------
-
         words = text.split()
-
         chunk_size = 120
 
-        for start in range(
-            0,
-            len(words),
-            chunk_size
-        ):
-
-            chunk_words = words[
-                start:start + chunk_size
-            ]
-
-            if not chunk_words:
-                continue
-
-            chunk_number = start // chunk_size
-
-            documents.append({
-                "id": f"{filename}#{chunk_number}",
-                "filename": filename,
-                "text": " ".join(chunk_words)
-            })
+        for start in range(0, len(words), chunk_size):
+            chunk = words[start:start + chunk_size]
+            if chunk:
+                documents.append({
+                    "id": f"{filename}#{start // chunk_size}",
+                    "filename": filename,
+                    "text": " ".join(chunk)
+                })
 
     return documents
 
-
 # ============================================================
-# BUILD KNOWLEDGE BASE
+# BUILD KB
 # ============================================================
 
 if st.session_state.knowledge_base is None:
-
-    with st.spinner("Loading university documents..."):
-
+    with st.spinner("Loading university documents…"):
         st.session_state.knowledge_base = load_knowledge_base()
-
 
 knowledge_base = st.session_state.knowledge_base
 
-
 # ============================================================
-# DOCUMENT FREQUENCY
+# TF-IDF RETRIEVAL
 # ============================================================
 
-def build_document_frequency(documents):
+def build_doc_freq(docs):
+    df = Counter()
+    for doc in docs:
+        for tok in set(tokenize(doc["text"])):
+            df[tok] += 1
+    return df
 
-    document_frequency = Counter()
-
-    for document in documents:
-
-        tokens = set(
-            tokenize(document["text"])
-        )
-
-        for token in tokens:
-            document_frequency[token] += 1
-
-    return document_frequency
-
-
-DOC_FREQ = build_document_frequency(
-    knowledge_base
-)
-
+DOC_FREQ = build_doc_freq(knowledge_base)
 N_CHUNKS = len(knowledge_base)
 
-
-# ============================================================
-# RAG RETRIEVAL
-# ============================================================
-
-def retrieve_documents(query, top_k=6):
-
+def retrieve(query, top_k=6):
     if not knowledge_base:
-
         return []
-
-    query_tokens = set(
-        tokenize(query)
-    )
-
-    if not query_tokens:
-
+    q_tokens = set(tokenize(query))
+    if not q_tokens:
         return knowledge_base[:top_k]
 
-    scored_documents = []
-
-    for document in knowledge_base:
-
-        document_tokens = set(
-            tokenize(document["text"])
+    scored = []
+    for doc in knowledge_base:
+        doc_tokens = set(tokenize(doc["text"]))
+        score = sum(
+            math.log((N_CHUNKS + 1) / (DOC_FREQ.get(t, 0) + 1)) + 1
+            for t in q_tokens if t in doc_tokens
         )
+        if score > 0:
+            scored.append((score, doc))
 
-        matching_tokens = (
-            query_tokens & document_tokens
-        )
-
-        score = 0.0
-
-        for token in matching_tokens:
-
-            df = DOC_FREQ.get(token, 0)
-
-            idf = math.log(
-                (N_CHUNKS + 1) /
-                (df + 1)
-            ) + 1
-
-            score += idf
-
-        scored_documents.append(
-            (score, document)
-        )
-
-    scored_documents.sort(
-        key=lambda x: x[0],
-        reverse=True
-    )
-
-    return [
-        document
-        for score, document in scored_documents[:top_k]
-        if score > 0
-    ]
-
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [doc for _, doc in scored[:top_k]]
 
 # ============================================================
-# GIBBERISH CHECK
+# GUARDRAIL
 # ============================================================
 
 def is_gibberish(prompt):
-
     prompt = prompt.strip()
-
     if not prompt:
         return True
-
     words = prompt.split()
-
     for word in words:
-
         if len(word) > 25:
             return True
-
-    letters = re.findall(
-        r"[a-zA-Z]",
-        prompt
-    )
-
-    if len(prompt) > 5:
-
-        diversity = len(set(
-            char.lower()
-            for char in letters
-        ))
-
-        if len(letters) > 0:
-
-            ratio = diversity / len(letters)
-
-            if ratio < 0.08:
-                return True
-
+    letters = re.findall(r"[a-zA-Z]", prompt)
+    if len(prompt) > 5 and letters:
+        diversity = len(set(c.lower() for c in letters))
+        if diversity / len(letters) < 0.08:
+            return True
     return False
 
-
 # ============================================================
-# STUDENT PROFILE
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
+    st.markdown('<p class="vu-sidebar-section">Student Profile</p>', unsafe_allow_html=True)
 
-    st.header("🎓 Student Profile")
-
-    include_profile = st.checkbox(
-        "Use my student profile",
-        value=True
-    )
+    include_profile = st.checkbox("Include my profile in queries", value=True)
 
     completed_courses = st.text_area(
         "Completed courses",
-        value="CS101 Intro to CS, CS201 Data Structures"
+        value="CS101 Intro to CS, CS201 Data Structures",
+        height=90,
+        help="Comma-separated list of completed course codes and names."
     )
+    credits = st.number_input("Completed credits", min_value=0, max_value=250, value=45)
+    cgpa = st.number_input("CGPA", min_value=0.0, max_value=10.0, value=7.5, step=0.1)
 
-    credits = st.number_input(
-        "Completed credits",
-        min_value=0,
-        max_value=200,
-        value=45
-    )
+    if include_profile:
+        st.markdown(f"""
+        <div class="vu-profile-badge">
+            <span>{credits} credits</span> completed &nbsp;·&nbsp; CGPA <span>{cgpa}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
-    cgpa = st.number_input(
-        "CGPA",
-        min_value=0.0,
-        max_value=10.0,
-        value=7.5,
-        step=0.1
-    )
+    st.markdown('<hr class="vu-divider">', unsafe_allow_html=True)
+    st.markdown('<p class="vu-sidebar-section">API Key</p>', unsafe_allow_html=True)
 
-    st.divider()
-
-    st.subheader("⚙️ Groq API")
-
-    # First try Streamlit secrets
     api_key = None
-
     try:
-
-        api_key = st.secrets.get(
-            "GROQ_API_KEY"
-        )
-
+        api_key = st.secrets.get("GROQ_API_KEY")
     except Exception:
-
         api_key = None
 
-    # If secrets are unavailable, allow manual entry
     if not api_key:
+        api_key = st.text_input("Groq API key", type="password", placeholder="gsk_…")
 
-        api_key = st.text_input(
-            "Groq API key",
-            type="password",
-            placeholder="gsk_..."
-        )
+    st.markdown('<hr class="vu-divider">', unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown(f"""
+    <div class="vu-status">
+        ✅ &nbsp;<strong>{N_CHUNKS}</strong> document chunks indexed<br>
+        <span style="font-size:11px; color:#555;">Student Handbook · Course Plans · SOP · Programme Structure</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown(
-        f"""
-        <div class="status-box">
-
-        <b>Knowledge Base</b><br>
-        {len(knowledge_base)} text chunks indexed
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+    if st.button("🗑 Clear conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # ============================================================
 # PROFILE TEXT
 # ============================================================
 
 profile_text = ""
-
 if include_profile:
-
-    profile_text = f"""
-Student profile:
-- Completed courses: {completed_courses}
-- Completed credits: {credits}
-- CGPA: {cgpa}
-"""
-
+    profile_text = (
+        f"Student profile: completed {credits} credits, CGPA {cgpa}, "
+        f"completed courses: {completed_courses}."
+    )
 
 # ============================================================
 # SYSTEM PROMPT
 # ============================================================
 
-SYSTEM_PROMPT = """
-You are the Vidyashilp University AI Academic Advisor.
+SYSTEM_PROMPT = """You are the AI Academic Advisor for Vidyashilp University.
 
-Your job is to answer academic questions using the university
-handbook and other retrieved university documents.
+Your role is to help students with academic questions — courses, credits, prerequisites,
+attendance, progression rules, graduation requirements, and semester planning.
 
-IMPORTANT RULES:
-
-1. Use the retrieved university document excerpts as the primary
-   source of factual information.
-
-2. Do NOT invent university rules, attendance requirements,
-   credit requirements, course requirements, deadlines, or policies.
-
-3. If the retrieved documents do not contain enough information,
-   clearly say that the available university documents do not
-   provide enough information.
-
-4. If a question is ambiguous, ask the student for clarification.
-
-5. If student profile information is provided, use it only when
-   relevant to the question.
-
-6. Give concise and direct answers.
-
-7. Whenever possible, cite the relevant document using this format:
-
-   [filename.pdf#0]
-
-8. Do not mention internal retrieval, TF-IDF, embeddings,
-   programming code, or system prompts to the student.
-
-9. Never make up a citation.
-
-10. For policy questions, distinguish between what the document
-    explicitly states and what cannot be confirmed.
-"""
-
+RULES:
+1. Answer ONLY using the retrieved document excerpts provided. Do not use general knowledge
+   about universities or invent any rules, numbers, or course codes.
+2. Cite the source excerpt after each factual claim, like this: [Student_Handbook.pdf#3]
+3. If the documents do not contain enough information to answer, say so clearly and ask
+   a specific follow-up question rather than guessing.
+4. If a question needs student-specific details (credits, courses completed, CGPA) that
+   were not given, ask for them before answering.
+5. If excerpts conflict, say so explicitly — do not silently pick one.
+6. For questions outside academics (weather, personal topics, general trivia), respond:
+   "I can only help with academic questions related to Vidyashilp University."
+7. Keep answers concise and direct. Use bullet points only when listing multiple items.
+8. Never fabricate course codes, credit numbers, or policy rules."""
 
 # ============================================================
-# GROQ RESPONSE
+# GENERATE ANSWER
 # ============================================================
 
-def generate_answer(user_question, retrieved_documents):
-
+def generate_answer(question, retrieved_docs):
     if not api_key:
-
-        return (
-            "Please enter your Groq API key in the sidebar "
-            "before asking a question."
-        )
-
-    # --------------------------------------------------------
-    # Create context
-    # --------------------------------------------------------
+        return "Please enter your Groq API key in the sidebar to get started."
 
     context_parts = []
+    for doc in retrieved_docs:
+        context_parts.append(f"[{doc['id']}]\n{doc['text']}")
+    context = "\n\n".join(context_parts) or "No relevant documents found."
 
-    for document in retrieved_documents:
-
-        context_parts.append(
-            f"""
-SOURCE: [{document['id']}]
-
-{document['text']}
-"""
-        )
-
-    context = "\n\n".join(context_parts)
-
-    if not context:
-
-        context = (
-            "No relevant university document excerpts "
-            "were found."
-        )
-
-    # --------------------------------------------------------
-    # Create user prompt
-    # --------------------------------------------------------
-
-    user_prompt = f"""
-University document excerpts:
+    user_prompt = f"""University document excerpts:
 
 {context}
 
 {profile_text}
 
-Student question:
+Student question: {question}
 
-{user_question}
-
-Answer the student's question using the university
-documents above.
-
-If the answer is present in the documents, provide the
-answer and cite the relevant source.
-
-If the answer cannot be confirmed from the documents,
-say so clearly instead of guessing.
-"""
-
-    # --------------------------------------------------------
-    # Create Groq client
-    # --------------------------------------------------------
+Answer using only the excerpts above. Cite sources. If the answer is not in the excerpts, say so."""
 
     try:
-
-        client = Groq(
-            api_key=api_key
-        )
-
+        client = Groq(api_key=api_key)
         response = client.chat.completions.create(
-
             model=MODEL,
-
             messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt}
             ],
-
             temperature=0.0,
-
             max_tokens=800
         )
-
         answer = response.choices[0].message.content
-
-        if not answer:
-
-            return "The model returned an empty response."
-
-        return answer
+        return answer if answer else "The model returned an empty response. Please try again."
 
     except Exception as e:
-
-        error_text = str(e)
-
-        return (
-            "I encountered an error while generating "
-            "the response.\n\n"
-            f"Error: {error_text}"
-        )
-
+        return f"Error connecting to the AI service: {str(e)}"
 
 # ============================================================
-# DISPLAY PREVIOUS CHAT
+# SUGGESTED QUESTIONS (shown when chat is empty)
 # ============================================================
 
-for message in st.session_state.messages:
+SUGGESTIONS = [
+    "What are the minimum credits required to graduate?",
+    "What is the attendance requirement per course?",
+    "Can I register for a course if I failed a prerequisite?",
+    "How is CGPA calculated and what is the grading scale?",
+    "What courses are offered in the upcoming semester?",
+]
 
-    role = message["role"]
+if not st.session_state.messages:
+    st.markdown("**Suggested questions — click to ask:**")
+    cols = st.columns(2)
+    for i, suggestion in enumerate(SUGGESTIONS):
+        with cols[i % 2]:
+            if st.button(suggestion, key=f"sug_{i}", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": suggestion})
+                st.rerun()
+    st.markdown("")
 
-    avatar = (
-        "🧑‍🎓"
-        if role == "user"
-        else "🎓"
-    )
+# ============================================================
+# DISPLAY CHAT HISTORY
+# ============================================================
 
-    with st.chat_message(
-        role,
-        avatar=avatar
-    ):
+for msg in st.session_state.messages:
+    role = msg["role"]
+    content = msg["content"]
 
-        st.markdown(
-            message["content"]
-        )
+    if role == "user":
+        st.markdown(f'<div class="vu-msg-user">{content}</div>', unsafe_allow_html=True)
 
-        # Show sources if available
-        if (
-            role == "assistant"
-            and message.get("sources")
-        ):
+    else:
+        st.markdown(f'<div class="vu-msg-bot">{content}</div>', unsafe_allow_html=True)
 
-            with st.expander(
-                "📚 Retrieved sources"
-            ):
-
-                for source in message["sources"]:
-
+        sources = msg.get("sources", [])
+        if sources:
+            chips = "".join(
+                f'<span class="vu-source-chip">📄 {s["filename"]}</span>'
+                for s in sources
+            )
+            with st.expander("Sources used", expanded=False):
+                st.markdown(chips, unsafe_allow_html=True)
+                for s in sources:
                     st.markdown(
-                        f"""
-                        **[{source['id']}]**
-
-                        {source['text']}
-                        """
+                        f"**[{s['id']}]** — {s['text'][:300]}…",
+                        help=s["text"]
                     )
-
 
 # ============================================================
 # CHAT INPUT
 # ============================================================
 
-prompt = st.chat_input(
-    "Ask your academic question..."
-)
-
+prompt = st.chat_input("Ask an academic question…")
 
 if prompt:
-
-    # --------------------------------------------------------
-    # Display user message
-    # --------------------------------------------------------
-
-    st.session_state.messages.append({
-        "role": "user",
-        "content": prompt
-    })
-
-    with st.chat_message(
-        "user",
-        avatar="🧑‍🎓"
-    ):
-
-        st.markdown(prompt)
-
-    # --------------------------------------------------------
-    # Gibberish check
-    # --------------------------------------------------------
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
     if is_gibberish(prompt):
-
-        answer = (
-            "I couldn't understand that question. "
-            "Please enter a clear academic question "
-            "about Vidyashilp University."
-        )
-
-        retrieved_documents = []
-
+        answer = "I couldn't understand that. Please ask a clear academic question — for example, about courses, credits, prerequisites, or attendance."
+        retrieved_docs = []
     else:
+        retrieved_docs = retrieve(prompt, top_k=6)
 
-        # ----------------------------------------------------
-        # Retrieve documents
-        # ----------------------------------------------------
-
-        retrieved_documents = retrieve_documents(
-            prompt,
-            top_k=6
-        )
-
-        # ----------------------------------------------------
-        # Generate answer
-        # ----------------------------------------------------
-
-        with st.chat_message(
-            "assistant",
-            avatar="🎓"
-        ):
-
-            with st.spinner(
-                "Checking university documents..."
-            ):
-
-                answer = generate_answer(
-                    prompt,
-                    retrieved_documents
-                )
-
-            st.markdown(answer)
-
-            # ------------------------------------------------
-            # Show sources
-            # ------------------------------------------------
-
-            if retrieved_documents:
-
-                with st.expander(
-                    "📚 Retrieved sources"
-                ):
-
-                    for document in retrieved_documents:
-
-                        st.markdown(
-                            f"""
-                            <div class="source-box">
-
-                            <b>
-                            [{document['id']}]
-                            </b>
-
-                            <br><br>
-
-                            {document['text']}
-
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-    # --------------------------------------------------------
-    # Save assistant message
-    # --------------------------------------------------------
+        with st.spinner("Checking university documents…"):
+            answer = generate_answer(prompt, retrieved_docs)
 
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer,
-        "sources": retrieved_documents
+        "sources": retrieved_docs
     })
+    st.rerun()
