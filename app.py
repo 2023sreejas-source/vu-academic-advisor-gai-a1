@@ -479,20 +479,12 @@ with st.sidebar:
         step=0.1
     )
 
-    st.markdown("---")
+st.markdown("---")
 
-    st.markdown(
-        '<div class="sidebar-title">🔑 Groq API Key</div>',
-        unsafe_allow_html=True
-    )
-
-    api_key = st.text_input(
-        "Enter Groq API Key",
-        type="password",
-        help="Your Groq API key is used only for this session."
-    )
-
-    st.markdown("---")
+api_key = st.secrets.get(
+    "GROQ_API_KEY",
+    ""
+)
 
     if st.button("🗑️ Clear Chat", use_container_width=True):
 
@@ -1786,39 +1778,6 @@ if not st.session_state.messages:
         unsafe_allow_html=True
     )
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.markdown(
-            f"""
-            <div class="metric-box">
-                <div class="metric-number">
-                    {len(academic_kb)}
-                </div>
-                <div class="metric-label">
-                    📚 Academic source chunks
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with col2:
-
-        st.markdown(
-            f"""
-            <div class="metric-box">
-                <div class="metric-number">
-                    {len(website_kb)}
-                </div>
-                <div class="metric-label">
-                    🌐 Official website chunks
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
     st.markdown(
         "### 💡 Try asking"
