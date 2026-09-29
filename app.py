@@ -129,6 +129,39 @@ div[data-testid="stButton"] > button:hover {
 }
 
 #MainMenu, footer { visibility: hidden; }
+
+.bubble-user {
+    display: flex;
+    justify-content: flex-end;
+    margin: 6px 0;
+}
+.bubble-user-inner {
+    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%);
+    color: #ffffff;
+    border-radius: 18px 18px 4px 18px;
+    padding: 10px 16px;
+    max-width: 68%;
+    font-size: 14px;
+    line-height: 1.55;
+    box-shadow: 0 2px 8px rgba(192,24,42,0.18);
+    word-wrap: break-word;
+}
+.bubble-bot {
+    display: flex;
+    justify-content: flex-start;
+    margin: 6px 0;
+}
+.bubble-bot-inner {
+    background: #ffffff;
+    color: #1a1a2e;
+    border-radius: 18px 18px 18px 4px;
+    padding: 10px 16px;
+    max-width: 72%;
+    font-size: 14px;
+    line-height: 1.65;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    word-wrap: break-word;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -777,7 +810,7 @@ for msg in st.session_state.messages:
     content = msg.get("content", "")
     if role == "user":
         st.markdown(
-            f'<div style="display:flex;justify-content:flex-end;margin:6px 0;">'
+            f'<div class="bubble-user">'
             f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
             f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
             f'max-width:70%;font-size:14px;line-height:1.55;'
@@ -786,7 +819,7 @@ for msg in st.session_state.messages:
         )
     else:
         st.markdown(
-            f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+            f'<div class="bubble-bot">'
             f'<div style="background:#ffffff;color:#1a1a2e;'
             f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
             f'max-width:75%;font-size:14px;line-height:1.65;'
@@ -818,7 +851,7 @@ if user_question:
     st.session_state.messages.append({"role": "user", "content": user_question})
 
     st.markdown(
-        f'<div style="display:flex;justify-content:flex-end;margin:6px 0;">'
+        f'<div class="bubble-user">'
         f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
         f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
         f'max-width:70%;font-size:14px;line-height:1.55;'
@@ -854,14 +887,14 @@ if user_question:
                 answer = generate_answer(client, contextual_question, context, category)
 
             st.markdown(
-                f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+                f'<div class="bubble-bot">'
                 f'<div style="background:#ffffff;color:#1a1a2e;'
                 f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
                 f'max-width:75%;font-size:14px;line-height:1.65;'
                 f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{answer}</div></div>',
                 unsafe_allow_html=True
             )
-            if academic_results or website_results:
+            if (academic_results or website_results) and category in ["academic", "website"]:
                 display_sources(academic_results, website_results)
 
             st.session_state.messages.append({
@@ -874,7 +907,7 @@ if user_question:
         except Exception as error:
             answer = "I couldn't process that request right now. Please try again."
             st.markdown(
-                f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+                f'<div class="bubble-bot">'
                 f'<div style="background:#fff0f1;color:#c0182a;'
                 f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
                 f'max-width:75%;font-size:14px;">{answer}</div></div>',
