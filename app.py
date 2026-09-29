@@ -234,7 +234,7 @@ div[data-testid="stButton"] > button:hover {
 
 # llama-3.1-8b-instant is the safest free-tier Groq model (always available)
 # llama-3.3-70b-versatile is better quality but needs a valid key with 70B access
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-3.1-8b-instant"
 
 # ============================================================
 # LOGO HELPER
@@ -516,8 +516,10 @@ RULES:
 4. If a question needs student-specific details (credits, courses completed, CGPA) that
    were not given, ask for them before answering.
 5. If excerpts conflict, say so explicitly — do not silently pick one.
-6. For questions outside academics (weather, personal topics, general trivia), respond:
-   "I can only help with academic questions related to Vidyashilp University."
+6. If someone greets you (hi, hello, hey, etc.), respond warmly and briefly introduce yourself
+   as the Vidyashilp University AI Academic Advisor, then invite them to ask a question.
+   For non-academic questions (weather, personal topics, general trivia), politely say you
+   can only help with academic matters.
 7. Keep answers concise and direct. Use bullet points only when listing multiple items.
 8. Never fabricate course codes, credit numbers, or policy rules."""
 
@@ -546,25 +548,18 @@ Answer using only the excerpts above. Cite sources. If the answer is not in the 
 
     try:
         client = Groq(api_key=api_key)
-        models_to_try = [MODEL, "llama-3.1-8b-instant", "openai/gpt-oss-20b"]
-        last_error = None
-        for m in models_to_try:
-            try:
-                response = client.chat.completions.create(
-                    model=m,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    temperature=0.0,
-                    max_tokens=800
-                )
-                answer = response.choices[0].message.content
-                return answer if answer else "The model returned an empty response. Please try again."
-            except Exception as e:
-                last_error = e
-                continue
-        return f"Error connecting to the AI service: {str(last_error)}"
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.0,
+            max_tokens=800
+        )
+        answer = response.choices[0].message.content
+        return answer if answer else "The model returned an empty response. Please try again."
+
     except Exception as e:
         return f"Error connecting to the AI service: {str(e)}"
 
@@ -624,12 +619,18 @@ for msg in st.session_state.messages:
 
 prompt = st.chat_input("Ask an academic question…")
 
+GREETINGS = {"hi","hey","hello","hii","hiii","heya","howdy","greetings","sup","yo"}
+
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     if is_gibberish(prompt):
         answer = "I couldn't understand that. Please ask a clear academic question — for example, about courses, credits, prerequisites, or attendance."
         retrieved_docs = []
+    elif prompt.strip().lower().rstrip("!.,") in GREETINGS:
+        retrieved_docs = []
+        with st.spinner(""):
+            answer = generate_answer(prompt, [])
     else:
         retrieved_docs = retrieve(prompt, top_k=6)
 
