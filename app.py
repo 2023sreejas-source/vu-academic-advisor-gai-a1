@@ -689,7 +689,7 @@ STUDENT QUESTION:
 
 Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions."""
 
-    models_to_try = [MODEL, "llama-3.1-8b-instant", "mixtral-8x7b-32768"]
+    models_to_try = [MODEL, "llama3-70b-8192", "gemma2-9b-it"]
     last_error = None
     for m in models_to_try:
         try:
