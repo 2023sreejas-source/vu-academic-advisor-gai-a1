@@ -47,19 +47,14 @@ html, body, [class*="css"] {
     background: #ffffff !important;
 }
 
-/* Force all standard Streamlit text and headers to be black */
-[data-testid="stMarkdownContainer"] h1,
-[data-testid="stMarkdownContainer"] h2,
-[data-testid="stMarkdownContainer"] h3,
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] strong,
-[data-testid="stMarkdownContainer"] span {
-    color: #000000 !important;
-}
-
-/* Ensure the blue user chat bubbles keep their white text */
-.bubble-user-inner, .bubble-user-inner * {
-    color: #ffffff !important;
+/* Force main area markdown text and headers to be dark, leaving sidebar untouched */
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h1,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h2,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h3,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] strong,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] span {
+    color: #172033 !important;
 }
 
 /* -------------------- Sidebar -------------------- */
@@ -242,9 +237,9 @@ div[data-testid="stButton"] > button:hover {
     justify-content: flex-end;
     margin: 11px 0 14px;
 }
-.bubble-user-inner {
+.bubble-user-inner, .bubble-user-inner * {
     background: #0b4f8a;
-    color: #ffffff;
+    color: #ffffff !important;
     border-radius: 18px 18px 5px 18px;
     padding: 11px 17px;
     max-width: 68%;
@@ -309,7 +304,6 @@ div[data-testid="stButton"] > button:hover {
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ============================================================
 # CONSTANTS
