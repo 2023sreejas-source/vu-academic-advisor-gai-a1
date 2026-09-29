@@ -141,7 +141,7 @@ div[data-testid="stButton"] > button:hover {
     align-items: stretch;
     justify-content: space-between;
     width: 100%;
-    min-height: 158px;
+    height: 176px;
     background: #ffffff;
     border-bottom: 1px solid #dfe5eb;
     overflow: hidden;
@@ -157,8 +157,8 @@ div[data-testid="stButton"] > button:hover {
     background: #ffffff;
 }
 .vu-header-brand img {
-    width: 150px;
-    height: 110px;
+    width: 128px;
+    height: 104px;
     object-fit: contain;
     border-radius: 10px;
 }
@@ -175,15 +175,14 @@ div[data-testid="stButton"] > button:hover {
     font-weight: 500;
 }
 .vu-campus-photo {
-    flex: 1;
-    min-width: 38%;
+    flex: 0 0 38%;
+    height: 176px;
     overflow: hidden;
     position: relative;
 }
 .vu-campus-photo img {
     width: 100%;
-    height: 100%;
-    min-height: 158px;
+    height: 176px;
     object-fit: cover;
     object-position: center;
     display: block;
@@ -274,16 +273,16 @@ div[data-testid="stButton"] > button:hover {
 
 /* -------------------- Responsive layout -------------------- */
 @media (max-width: 900px) {
-    .vu-header { min-height: 130px; }
+    .vu-header { height: 140px; }
     .vu-header-brand { min-width: 60%; padding-left: 4px; gap: 12px; }
     .vu-header-brand img { width: 105px; height: 88px; }
     .vu-header-copy h2 { font-size: 22px; }
-    .vu-campus-photo { min-width: 34%; }
-    .vu-campus-photo img { min-height: 130px; }
+    .vu-campus-photo { flex-basis: 34%; height: 140px; }
+    .vu-campus-photo img { height: 140px; }
     .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
 }
 @media (max-width: 640px) {
-    .vu-header { min-height: 112px; }
+    .vu-header { height: 112px; }
     .vu-header-brand { padding: 10px 8px 10px 0; gap: 8px; }
     .vu-header-brand img { width: 82px; height: 72px; }
     .vu-header-copy h2 { font-size: 18px; }
@@ -394,8 +393,12 @@ def find_logo():
 
 logo_path = find_logo()
 CAMPUS_IMAGE_URL = "https://vidyashilp.edu.in/wp-content/uploads/2023/04/slide_banner1.jpg"
+OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2020/12/Logo.png"
 
-logo_html = f'<img src="{logo_path}" alt="Vidyashilp University logo">' if logo_path else '<div style="font-size:48px;">🎓</div>'
+# Use the repository logo when it exists; otherwise use VU's official hosted logo.
+# This prevents a broken image if logo.png is not included in the deployment build.
+logo_src = logo_path if logo_path else OFFICIAL_LOGO_URL
+logo_html = f'<img src="{logo_src}" alt="Vidyashilp University logo">'
 
 st.markdown(
     f"""
