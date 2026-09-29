@@ -46,39 +46,33 @@ html, body, [class*="css"] {
 [data-testid="block-container"] {
     background: #F5F7FA !important;
 }
+[data-testid="stHeader"] { background: transparent !important; }
 
-[data-testid="stHeader"] {
-    background: transparent !important;
-}
-
-[data-testid="stSidebar"] {
-    background: #0B5394 !important;
-}
+/* ========================= SIDEBAR ========================= */
+[data-testid="stSidebar"],
 [data-testid="stSidebar"] > div:first-child {
     background: #0B5394 !important;
 }
-[data-testid="stSidebar"] * {
-    color: #FFFFFF !important;
-}
+[data-testid="stSidebar"] * { color: #FFFFFF !important; }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
     color: #D9ECFA !important;
 }
 [data-testid="stSidebar"] hr {
     border-color: rgba(255,255,255,0.24) !important;
+    margin: 12px 0 !important;
 }
 
-/* Sidebar selectboxes: dark controls, matching the requested design. */
 [data-testid="stSidebar"] [data-baseweb="select"] > div {
     background: #22252A !important;
     border-color: #22252A !important;
     color: #FFFFFF !important;
+    border-radius: 7px !important;
 }
 [data-testid="stSidebar"] [data-baseweb="select"] input,
 [data-testid="stSidebar"] [data-baseweb="select"] span {
     color: #FFFFFF !important;
 }
 
-/* Sidebar numeric inputs: white fields. */
 [data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
     background: #FFFFFF !important;
     border-radius: 7px !important;
@@ -87,12 +81,15 @@ html, body, [class*="css"] {
     color: #22252A !important;
     background: #FFFFFF !important;
 }
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input::placeholder {
+    color: #6B7280 !important;
+    opacity: 1 !important;
+}
 [data-testid="stSidebar"] [data-testid="stNumberInput"] button {
     background: #FFFFFF !important;
     color: #0B5394 !important;
 }
 
-/* Clear Chat button. */
 [data-testid="stSidebar"] div[data-testid="stButton"] > button {
     background: transparent !important;
     color: #FFFFFF !important;
@@ -101,152 +98,112 @@ html, body, [class*="css"] {
     box-shadow: none !important;
 }
 
-/* Main cards. */
+.vu-sidebar-group-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.22);
+    margin: 14px 0 12px;
+}
+
+/* ========================= MAIN ========================= */
 .vu-card {
     background: #FFFFFF;
     border: 1px solid #E2E7ED;
     border-radius: 12px;
-    padding: 22px 24px;
-    margin: 0 0 16px 0;
+    padding: 18px 20px;
+    margin: 0 0 12px 0;
     box-shadow: 0 1px 3px rgba(16,24,40,0.04);
 }
-
 .vu-top-card {
-    padding: 18px 22px 16px;
-    min-height: 150px;
-}
-.vu-accent {
-    width: 42px;
-    height: 4px;
-    background: #C9474E;
-    border-radius: 3px;
-    margin-bottom: 10px;
+    padding: 14px 18px 13px;
 }
 .vu-heading {
     color: #123B63;
-    font-size: 28px;
+    font-size: 26px;
+    line-height: 1.2;
     font-weight: 700;
     margin: 0;
 }
 .vu-status {
-    color: #7A858F;
-    font-size: 13px;
-    margin-top: 6px;
+    color: #66717D;
+    font-size: 12px;
+    margin-top: 5px;
 }
-.vu-status-dot {
-    color: #28A745;
-    font-size: 11px;
-}
-.vu-logo-space {
-    height: 62px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-}
-.vu-logo-space img {
-    max-height: 62px !important;
-    width: auto !important;
-    object-fit: contain !important;
-}
-.vu-campus-wrap {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    height: 100%;
-}
-.vu-campus-wrap img {
-    width: 300px !important;
-    max-width: 100% !important;
-    height: 145px !important;
-    object-fit: contain !important;
-    object-position: center !important;
-    border-radius: 12px !important;
-    border: 1px solid #E2E7ED !important;
-}
+.vu-status-dot { color: #28A745; font-size: 10px; }
 
 .vu-prompt-title {
     color: #27364A;
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
 }
 .vu-prompt-text {
     color: #66717D;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.55;
     margin: 0;
 }
 .vu-try {
     color: #4E5965;
     font-size: 13px;
     font-weight: 600;
-    margin: 4px 0 8px;
+    margin: 8px 0 6px;
 }
 
-/* Suggested-question buttons. */
+/* Light suggestion cards. */
 main div[data-testid="stButton"] > button {
     background: #FFFFFF !important;
-    border: 1px solid #DCE3EB !important;
+    border: 1px solid #D9E2EC !important;
     border-radius: 10px !important;
-    color: #174B78 !important;
+    color: #0B5394 !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    min-height: 54px !important;
-    box-shadow: 0 1px 3px rgba(16,24,40,0.04) !important;
-    padding: 10px 12px !important;
+    min-height: 48px !important;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04) !important;
+    padding: 8px 11px !important;
 }
 main div[data-testid="stButton"] > button:hover {
-    background: #F7FAFD !important;
+    background: #F8FBFF !important;
     border-color: #0B5394 !important;
+    color: #0B5394 !important;
 }
 
-/* Chat history bubbles. */
-.bubble-user {
-    display: flex;
-    justify-content: flex-end;
-    margin: 10px 0 12px;
-}
+/* ========================= CHAT ========================= */
+.bubble-user { display: flex; justify-content: flex-end; margin: 10px 0 12px; }
 .bubble-user-inner {
-    background: #0B5394;
-    color: #FFFFFF;
+    background: #0B5394; color: #FFFFFF;
     border-radius: 16px 16px 4px 16px;
-    padding: 10px 15px;
-    max-width: 68%;
-    font-size: 15px;
-    line-height: 1.6;
+    padding: 10px 15px; max-width: 68%;
+    font-size: 15px; line-height: 1.6;
 }
-.bubble-bot {
-    display: flex;
-    justify-content: flex-start;
-    margin: 10px 0 12px;
-}
+.bubble-bot { display: flex; justify-content: flex-start; margin: 10px 0 12px; }
 .bubble-bot-inner {
-    background: #FFFFFF;
-    color: #1F2933;
+    background: #FFFFFF; color: #1F2933;
     border: 1px solid #E2E7ED;
     border-radius: 16px 16px 16px 4px;
-    padding: 11px 16px;
-    max-width: 76%;
-    font-size: 15px;
-    line-height: 1.65;
+    padding: 11px 16px; max-width: 76%;
+    font-size: 15px; line-height: 1.65;
 }
 
 .source-panel, .source-panel * { color: #7A858F !important; }
 .source-panel .source-label { color: #0B5394 !important; font-weight: 600; }
 [data-testid="stExpander"] summary { color: #7A858F !important; font-size: 12px !important; }
 
-/* Dark Streamlit chat composer. */
+/* Only the actual composer is dark. The fixed bottom area stays transparent. */
 [data-testid="stBottom"] {
-    background: #F5F7FA !important;
+    background: transparent !important;
     border-top: none !important;
-    padding: 8px 16px 26px !important;
+    padding: 5px 18px 8px !important;
 }
-[data-testid="stChatInputContainer"],
-[data-testid="stChatInputContainer"] > div {
+[data-testid="stChatInputContainer"] {
     background: #22252A !important;
     border: 1px solid #22252A !important;
-    border-radius: 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10) !important;
+    border-radius: 11px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+[data-testid="stChatInputContainer"] > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 [data-testid="stChatInputContainer"] textarea {
     color: #FFFFFF !important;
@@ -254,33 +211,24 @@ main div[data-testid="stButton"] > button:hover {
     background: transparent !important;
 }
 [data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #B8BEC5 !important;
+    color: #C2C7CD !important;
+    opacity: 1 !important;
 }
 [data-testid="stChatInputContainer"] button {
     color: #FFFFFF !important;
     background: #17191C !important;
-    border-radius: 8px !important;
+    border-radius: 7px !important;
 }
 
 .ai-disclaimer {
-    position: fixed;
-    left: 20%;
-    right: 0;
-    bottom: 3px;
-    z-index: 999999;
-    text-align: center;
-    color: #A0A7AF;
-    font-size: 10px;
-    pointer-events: none;
+    position: fixed; left: 20%; right: 0; bottom: 2px;
+    z-index: 999999; text-align: center;
+    color: #9AA2AA; font-size: 10px; pointer-events: none;
 }
-
 .footer-text {
-    text-align: center;
-    color: #A0A7AF;
-    font-size: 11px;
-    padding: 8px 0 60px;
+    text-align: center; color: #A0A7AF;
+    font-size: 11px; padding: 5px 0 18px;
 }
-
 #MainMenu, footer { visibility: hidden; }
 
 @media (max-width: 900px) {
@@ -320,13 +268,13 @@ SOCIAL_RE = re.compile(
 )
 
 GREETING_REPLY = (
-    "Hey! 👋 I'm VU's AI Academic Advisor. "
+    "Hey! I'm VU's AI Academic Advisor. "
     "I can help with attendance, credits, prerequisites, registration, "
     "course eligibility, progression rules and more. "
     "What would you like to know?"
 )
 
-THANKS_REPLY = "Happy to help! 😊 Feel free to ask anything else about your academics at VU."
+THANKS_REPLY = "Happy to help! Feel free to ask anything else about your academics at VU."
 
 OUT_OF_SCOPE_RE = re.compile(
     r"\b(weather|temperature|rain|forecast|cricket|football|soccer|match|movie|movies|"
@@ -344,12 +292,12 @@ PERSONAL_RE = re.compile(
 
 OUT_OF_SCOPE_REPLY = (
     "I’m VU’s AI Academic Advisor, so I can help with Vidyashilp University "
-    "academic and programme-related questions, but not that topic. 😊"
+    "academic and programme-related questions, but not that topic."
 )
 
 PERSONAL_REPLY = (
     "I’m an AI academic advisor, so I don’t have a personal family or personal life. "
-    "But I can definitely help with your VU academic questions. 😊"
+    "But I can definitely help with your VU academic questions."
 )
 
 
@@ -373,33 +321,30 @@ if "pending_question" not in st.session_state:
 
 # ============================================================
 # LOGO & HEADER
-# ============================================================
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 logo_path = os.path.join(APP_DIR, "logo.png")
 campus_path = os.path.join(APP_DIR, "uni pic.jpg")
 
-header_left, header_right = st.columns([1.35, 2.65], gap="large", vertical_alignment="center")
+header_left, header_right = st.columns([2.2, 1.0], gap="medium", vertical_alignment="center")
 
 with header_left:
-    st.markdown('<div class="vu-card vu-top-card">', unsafe_allow_html=True)
+    # Render the local PNG directly. Do not put st.image inside raw HTML;
+    # Streamlit renders it as a separate component and that can create a blank placeholder.
     if os.path.isfile(logo_path):
-        st.markdown('<div class="vu-logo-space">', unsafe_allow_html=True)
-        st.image(logo_path, width=145)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.image(logo_path, width=135)
     st.markdown(
-        '<div class="vu-accent"></div>'
+        '<div class="vu-card vu-top-card">'
         '<div class="vu-heading">Academic Advisor</div>'
-        '<div class="vu-status"><span class="vu-status-dot">●</span> AI Academic Advisor · Online</div>',
+        '<div class="vu-status"><span class="vu-status-dot">●</span> AI Academic Advisor · Online</div>'
+        '</div>',
         unsafe_allow_html=True
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with header_right:
-    st.markdown('<div class="vu-campus-wrap">', unsafe_allow_html=True)
     if os.path.isfile(campus_path):
-        st.image(campus_path, width=300)
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Local JPEG, deliberately compact and never cropped.
+        st.image(campus_path, width=250)
 
 
 # ============================================================
@@ -426,6 +371,8 @@ with st.sidebar:
         index=None,
         placeholder="Select if needed"
     )
+
+    st.markdown('<div class="vu-sidebar-group-divider"></div>', unsafe_allow_html=True)
 
     completed_credits = st.number_input(
         "Completed Credits", min_value=0, max_value=400, value=None, step=1,
@@ -1193,6 +1140,7 @@ if not st.session_state.messages:
     )
 
 
+
 # ============================================================
 # DISPLAY CHAT HISTORY
 # ============================================================
@@ -1329,13 +1277,3 @@ if user_question:
                 "role": "assistant", "content": answer,
                 "academic_sources": [], "website_sources": []
             })
-
-
-# ============================================================
-# FOOTER
-# ============================================================
-
-st.markdown(
-    '<div class="footer-text">Vidyashilp University · AI Academic Advisor</div>',
-    unsafe_allow_html=True
-)
