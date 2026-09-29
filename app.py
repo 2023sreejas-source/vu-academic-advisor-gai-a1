@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CSS
+# CSS — Instagram-style chat, VU red+navy gradient
 # ============================================================
 
 st.markdown("""
@@ -31,66 +31,121 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-.stApp {
-    background-color: #ffffff;
+/* ---- App background ---- */
+.stApp,
+.stApp > div,
+.main,
+.main > div,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="block-container"] {
+    background-color: #f0f2f5 !important;
+    color: #1a1a2e !important;
 }
 
+/* ---- Top header — like Instagram DM header ---- */
 .vu-header {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding-bottom: 16px;
+    gap: 16px;
+    background: #ffffff;
+    padding: 14px 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
     border-bottom: 3px solid #c0182a;
-    margin-bottom: 28px;
 }
 
 .vu-header-logo {
     width: 52px;
     height: 52px;
     object-fit: contain;
+    border-radius: 50%;
+    border: 2.5px solid #c0182a;
+    padding: 3px;
+    background: #fff;
     flex-shrink: 0;
 }
 
 .vu-header-title {
     color: #0a2240;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    line-height: 1.2;
     margin: 0;
+    line-height: 1.2;
 }
 
 .vu-header-sub {
-    color: #6b7a8d;
-    font-size: 12.5px;
+    color: #8a9bb0;
+    font-size: 12px;
     margin: 2px 0 0 0;
 }
 
-.vu-msg-user {
-    background: #0a2240;
-    color: #ffffff;
-    border-radius: 16px 16px 4px 16px;
-    padding: 11px 16px;
-    max-width: 72%;
-    margin-left: auto;
-    font-size: 14px;
-    line-height: 1.55;
-    margin-bottom: 16px;
+.vu-header-dot {
+    width: 9px;
+    height: 9px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
 }
 
+/* ---- Chat area background ---- */
+.vu-chat-area {
+    background: #f0f2f5;
+    padding: 8px 0;
+}
+
+/* ---- User message — right side, red→navy gradient ---- */
+.vu-msg-user {
+    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%);
+    color: #ffffff;
+    border-radius: 20px 20px 4px 20px;
+    padding: 12px 18px;
+    max-width: 68%;
+    margin-left: auto;
+    margin-right: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 8px rgba(192,24,42,0.18);
+    word-wrap: break-word;
+}
+
+/* ---- Bot message — left side, white bubble ---- */
 .vu-msg-bot {
-    background: #f7f8fa;
+    background: #ffffff;
     color: #1a1a2e;
-    border-radius: 16px 16px 16px 4px;
-    padding: 13px 17px;
-    max-width: 78%;
+    border-radius: 20px 20px 20px 4px;
+    padding: 13px 18px;
+    max-width: 74%;
+    margin-right: auto;
+    margin-left: 0;
     font-size: 14px;
     line-height: 1.65;
-    margin-bottom: 16px;
-    border: 1px solid #eaecf0;
+    margin-bottom: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    word-wrap: break-word;
 }
 
 .vu-msg-bot strong { color: #0a2240; }
 
+/* ---- Message wrapper for alignment ---- */
+.vu-row-user {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+.vu-row-bot {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+/* ---- Source chip ---- */
 .vu-source-chip {
     display: inline-block;
     background: #fff0f1;
@@ -103,8 +158,9 @@ html, body, [class*="css"] {
     font-weight: 500;
 }
 
+/* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
-    background-color: #fafafa;
+    background-color: #ffffff !important;
     border-right: 1px solid #eaecf0;
 }
 
@@ -128,10 +184,7 @@ section[data-testid="stSidebar"] {
     margin-bottom: 10px;
 }
 
-.vu-profile-badge span {
-    color: #c0182a;
-    font-weight: 600;
-}
+.vu-profile-badge span { color: #c0182a; font-weight: 600; }
 
 .vu-status {
     background: #f7f8fa;
@@ -140,59 +193,6 @@ section[data-testid="stSidebar"] {
     padding: 9px 12px;
     font-size: 12px;
     color: #4a5568;
-}
-
-.stApp, .stApp > div, .main, .main > div,
-[data-testid="stAppViewContainer"],
-[data-testid="stAppViewBlockContainer"],
-[data-testid="block-container"] {
-    background-color: #ffffff !important;
-    color: #1a1a2e !important;
-}
-
-[data-testid="stBottom"],
-[data-testid="stBottom"] > div,
-.stBottom, .stBottom > div {
-    background-color: #ffffff !important;
-    border-top: 1px solid #eaecf0 !important;
-}
-
-[data-testid="stChatInputContainer"],
-[data-testid="stChatInputContainer"] > div,
-.stChatInput, .stChatInput > div {
-    background: #f7f8fa !important;
-    border: 1.5px solid #eaecf0 !important;
-    border-radius: 10px !important;
-    color: #1a1a2e !important;
-}
-
-[data-testid="stChatInputContainer"] textarea,
-.stChatInput textarea {
-    color: #1a1a2e !important;
-    background: transparent !important;
-    caret-color: #c0182a !important;
-}
-
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #9aa3af !important;
-}
-
-div[data-testid="stButton"] > button {
-    background: #f7f8fa !important;
-    border: 1px solid #eaecf0 !important;
-    border-radius: 8px !important;
-    color: #0a2240 !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    text-align: left !important;
-    padding: 10px 14px !important;
-    transition: border-color 0.15s, color 0.15s !important;
-}
-
-div[data-testid="stButton"] > button:hover {
-    border-color: #c0182a !important;
-    color: #c0182a !important;
-    background: #fff0f1 !important;
 }
 
 .vu-divider {
@@ -208,6 +208,53 @@ div[data-testid="stButton"] > button:hover {
     margin-bottom: 10px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+}
+
+/* ---- Bottom input bar ---- */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div,
+.stBottom, .stBottom > div {
+    background-color: #ffffff !important;
+    border-top: 1px solid #eaecf0 !important;
+}
+
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div,
+.stChatInput, .stChatInput > div {
+    background: #f0f2f5 !important;
+    border: 1.5px solid #eaecf0 !important;
+    border-radius: 24px !important;
+    color: #1a1a2e !important;
+}
+
+[data-testid="stChatInputContainer"] textarea,
+.stChatInput textarea {
+    color: #1a1a2e !important;
+    background: transparent !important;
+    caret-color: #c0182a !important;
+}
+
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #9aa3af !important;
+}
+
+/* ---- Suggestion buttons ---- */
+div[data-testid="stButton"] > button {
+    background: #ffffff !important;
+    border: 1px solid #eaecf0 !important;
+    border-radius: 20px !important;
+    color: #0a2240 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    padding: 9px 14px !important;
+    transition: all 0.15s !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+div[data-testid="stButton"] > button:hover {
+    border-color: #c0182a !important;
+    color: #c0182a !important;
+    background: #fff0f1 !important;
 }
 
 #MainMenu, footer { visibility: hidden; }
@@ -241,7 +288,7 @@ def image_to_base64(path):
         return None
 
 # ============================================================
-# HEADER
+# HEADER — logo standalone on left, like Instagram
 # ============================================================
 
 logo_file = find_logo()
@@ -250,13 +297,15 @@ if logo_file:
     b64 = image_to_base64(logo_file)
     if b64:
         logo_html = f'<img class="vu-header-logo" src="data:image/png;base64,{b64}">'
+else:
+    logo_html = '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#c0182a,#0a2240);flex-shrink:0;"></div>'
 
 st.markdown(f"""
 <div class="vu-header">
     {logo_html}
     <div>
-        <p class="vu-header-title">AI Academic Advisor &nbsp;<span style="color:#c0182a;">|</span>&nbsp; Vidyashilp University</p>
-        <p class="vu-header-sub">Retrieval-Augmented Generation &nbsp;·&nbsp; Grounded in official university documents</p>
+        <p class="vu-header-title">Vidyashilp University</p>
+        <p class="vu-header-sub"><span class="vu-header-dot"></span>AI Academic Advisor &nbsp;·&nbsp; Online</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -291,7 +340,7 @@ def tokenize(text):
 
 EXCLUDE_KEYWORDS = [
     "evaluation_dataset", "held_out", "results_", "before_after",
-    "phase4", "advisor_scoring", "requirements", "synthetic_student",
+    "phase4", "advisor_scoring", "synthetic_student",
     "manual_spot", "question_bank", "generalization"
 ]
 
@@ -308,7 +357,7 @@ def load_knowledge_base():
         if filename.startswith("."):
             continue
         lower = filename.lower()
-        if lower.endswith((".py", ".md", ".ipynb", ".csv")):
+        if lower.endswith((".py", ".md", ".ipynb")):
             continue
         if any(w in lower for w in EXCLUDE_KEYWORDS):
             continue
@@ -335,6 +384,21 @@ def load_knowledge_base():
             try:
                 with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                     text = f.read()
+            except Exception:
+                continue
+
+        elif lower.endswith(".xlsx"):
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(filepath, data_only=True)
+                rows = []
+                for sheet in wb.worksheets:
+                    rows.append(f"[Sheet: {sheet.title}]")
+                    for row in sheet.iter_rows(values_only=True):
+                        row_text = " | ".join(str(c) for c in row if c is not None)
+                        if row_text.strip():
+                            rows.append(row_text)
+                text = "\n".join(rows)
             except Exception:
                 continue
 
@@ -463,7 +527,7 @@ with st.sidebar:
 
     st.markdown(f"""
     <div class="vu-status">
-        <strong>{N_CHUNKS}</strong> chunks indexed &nbsp;·&nbsp; Handbook · SOP · Courses
+        <strong>{N_CHUNKS}</strong> chunks indexed &nbsp;·&nbsp; Handbook · SOP · Courses · Semester
     </div>
     """, unsafe_allow_html=True)
 
@@ -565,7 +629,7 @@ Answer using only the excerpts above. Cite sources. If the answer is not in the 
         return f"Error connecting to the AI service: {str(e)}"
 
 # ============================================================
-# SUGGESTED QUESTIONS (shown when chat is empty)
+# SUGGESTED QUESTIONS
 # ============================================================
 
 SUGGESTIONS = [
@@ -595,10 +659,15 @@ for msg in st.session_state.messages:
     content = msg["content"]
 
     if role == "user":
-        st.markdown(f'<div class="vu-msg-user">{content}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="vu-row-user"><div class="vu-msg-user">{content}</div></div>',
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown(f'<div class="vu-msg-bot">{content}</div>', unsafe_allow_html=True)
-
+        st.markdown(
+            f'<div class="vu-row-bot"><div class="vu-msg-bot">{content}</div></div>',
+            unsafe_allow_html=True
+        )
         sources = msg.get("sources", [])
         if sources:
             chips = "".join(
@@ -617,7 +686,7 @@ for msg in st.session_state.messages:
 # CHAT INPUT
 # ============================================================
 
-prompt = st.chat_input("Ask an academic question…")
+prompt = st.chat_input("Message VU Advisor…")
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
