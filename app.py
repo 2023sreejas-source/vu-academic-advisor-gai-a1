@@ -142,7 +142,9 @@ div[data-testid="stButton"] > button:hover {
     justify-content: space-between;
     width: 100%;
     height: 176px;
-    background: #ffffff;
+    background: linear-gradient(rgba(8, 47, 91, 0.65), rgba(8, 47, 91, 0.65)), url('campus.jpeg');
+    background-size: cover;
+    background-position: center;
     border-bottom: 1px solid #dfe5eb;
     overflow: hidden;
     border-radius: 0 0 12px 12px;
@@ -154,7 +156,7 @@ div[data-testid="stButton"] > button:hover {
     gap: 22px;
     padding: 18px 28px 18px 8px;
     min-width: 52%;
-    background: #ffffff;
+    background: transparent;
 }
 .vu-header-brand img {
     width: 128px;
@@ -164,13 +166,13 @@ div[data-testid="stButton"] > button:hover {
 }
 .vu-header-copy h2 {
     margin: 0 0 8px 0;
-    color: #000000 !important;
+    color: #ffffff !important;
     font-size: 29px;
     line-height: 1.15;
     font-weight: 650;
 }
 .vu-subtitle {
-    color: #172033 !important;
+    color: #ffffff !important;
     font-size: 14px;
     font-weight: 500;
 }
