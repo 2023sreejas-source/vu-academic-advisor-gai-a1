@@ -37,7 +37,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Gemini-inspired typography: use Google Sans when available, with safe fallbacks. */
 html, body, [class*="css"] {
     font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Inter', Arial, sans-serif;
 }
@@ -45,123 +44,252 @@ html, body, [class*="css"] {
 .stApp, [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
 [data-testid="block-container"] {
-    background-color: #f0f2f5 !important;
+    background: #ffffff !important;
 }
 
-[data-testid="stSidebar"] { background-color: #ffffff !important; }
+/* -------------------- Sidebar -------------------- */
+[data-testid="stSidebar"] {
+    background: #082f5b !important;
+    border-right: 1px solid #dbe4ee !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    background: #082f5b !important;
+}
+[data-testid="stSidebar"] * {
+    color: #ffffff !important;
+}
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.20) !important;
+}
+[data-testid="stSidebar"] label {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] input {
+    color: #172033 !important;
+    background: #ffffff !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] [data-baseweb="input"] > div {
+    background: #ffffff !important;
+    border-color: #d9e2ec !important;
+    color: #172033 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-baseweb="input"] input {
+    color: #172033 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] svg {
+    fill: #34516d !important;
+}
+[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.70) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    background: rgba(255,255,255,0.10) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+}
 
+/* -------------------- Bottom chat input -------------------- */
 [data-testid="stBottom"], [data-testid="stBottom"] > div {
-    background-color: #ffffff !important;
-    border-top: 1px solid #eaecf0 !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e7ebf0 !important;
     padding: 10px 16px !important;
 }
-
 [data-testid="stChatInputContainer"],
 [data-testid="stChatInputContainer"] > div {
     background: #ffffff !important;
-    border: 1.5px solid #dde0e6 !important;
+    border: 1.5px solid #d9e1ea !important;
     border-radius: 26px !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.07) !important;
 }
-
 [data-testid="stChatInputContainer"] textarea {
-    color: #1a1a2e !important;
-    caret-color: #c0182a !important;
+    color: #172033 !important;
+    caret-color: #0b4f8a !important;
     background: transparent !important;
+    font-size: 15px !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #9aa7b5 !important;
 }
 
-[data-testid="stChatInputContainer"] textarea::placeholder { color: #adb5bd !important; }
+/* -------------------- General buttons -------------------- */
+div[data-testid="stButton"] > button {
+    background: #ffffff !important;
+    border: 1px solid #d9e2ec !important;
+    border-radius: 20px !important;
+    color: #0b4f8a !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 9px 14px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    transition: all 0.15s !important;
+}
+div[data-testid="stButton"] > button:hover {
+    border-color: #0b4f8a !important;
+    color: #0b4f8a !important;
+    background: #f3f7fb !important;
+}
 
+/* -------------------- Header -------------------- */
+.vu-header {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 158px;
+    background: #ffffff;
+    border-bottom: 1px solid #dfe5eb;
+    overflow: hidden;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 18px;
+}
+.vu-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 28px 18px 8px;
+    min-width: 52%;
+    background: #ffffff;
+}
+.vu-header-brand img {
+    width: 150px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+.vu-header-copy h2 {
+    margin: 0 0 8px 0;
+    color: #0b4f8a;
+    font-size: 29px;
+    line-height: 1.15;
+    font-weight: 650;
+}
+.vu-subtitle {
+    color: #0b4f8a !important;
+    font-size: 14px;
+    font-weight: 500;
+}
+.vu-campus-photo {
+    flex: 1;
+    min-width: 38%;
+    overflow: hidden;
+    position: relative;
+}
+.vu-campus-photo img {
+    width: 100%;
+    height: 100%;
+    min-height: 158px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* -------------------- Welcome card -------------------- */
+.info-box {
+    background: #ffffff;
+    padding: 17px 20px;
+    border-radius: 14px;
+    border: 1px solid #e1e7ee;
+    border-left: 4px solid #0b4f8a;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.05);
+}
+.info-box h3 {
+    color: #172033 !important;
+    margin-bottom: 8px !important;
+}
+.info-box p {
+    color: #334155 !important;
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+}
+
+/* -------------------- Chat -------------------- */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 4px 0 !important;
 }
-
 .stChatMessage .stMarkdown p,
 .stChatMessage .stMarkdown {
     font-size: 15px !important;
     line-height: 1.7 !important;
 }
-
-div[data-testid="stButton"] > button {
-    background: #ffffff !important;
-    border: 1px solid #dce3eb !important;
-    border-radius: 20px !important;
-    color: #0b4f8a !important;
-    font-size: 14px !important;
-    font-weight: 400 !important;
-    padding: 9px 14px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-    transition: all 0.15s !important;
+.bubble-user {
+    display: flex;
+    justify-content: flex-end;
+    margin: 11px 0 14px;
+}
+.bubble-user-inner {
+    background: #0b4f8a;
+    color: #ffffff;
+    border-radius: 18px 18px 5px 18px;
+    padding: 11px 17px;
+    max-width: 68%;
+    font-size: 15px;
+    line-height: 1.65;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.14);
+    word-wrap: break-word;
+}
+.bubble-bot {
+    display: flex;
+    justify-content: flex-start;
+    margin: 11px 0 14px;
+}
+.bubble-bot-inner {
+    background: #f7f9fc;
+    color: #172033;
+    border: 1px solid #dfe6ee;
+    border-radius: 18px 18px 18px 5px;
+    padding: 12px 17px;
+    max-width: 76%;
+    font-size: 15px;
+    line-height: 1.7;
+    box-shadow: 0 2px 7px rgba(8,47,91,0.05);
+    word-wrap: break-word;
 }
 
-div[data-testid="stButton"] > button:hover {
-    border-color: #0b4f8a !important;
-    color: #0b4f8a !important;
-    background: #f1f6fb !important;
-}
-
-.info-box {
-    background-color: white;
-    padding: 16px 18px;
-    border-radius: 14px;
-    border-left: 4px solid #0b4f8a;
-    margin-bottom: 18px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-}
-
-.footer-text {
-    text-align: center;
-    color: #adb5bd;
-    font-size: 11px;
-    padding-top: 20px;
-}
-
-#MainMenu, footer { visibility: hidden; }
-
-/* VU-style blue accents and softer source text */
+/* -------------------- Sources -------------------- */
 .vu-title { color: #0b4f8a !important; }
-.vu-subtitle { color: #0b4f8a !important; font-size: 14px; }
 .source-panel, .source-panel * { color: #6b7280 !important; }
 .source-panel .source-label { color: #0b4f8a !important; font-weight: 600; }
 [data-testid="stExpander"] summary { color: #6b7280 !important; font-size: 13px !important; }
 [data-testid="stExpander"] a { color: #0b4f8a !important; }
 [data-testid="stExpander"] { border-color: #e1e6ec !important; }
 
+.footer-text {
+    text-align: center;
+    color: #a1aab5;
+    font-size: 11px;
+    padding-top: 20px;
+}
 
-.bubble-user {
-    display: flex;
-    justify-content: flex-end;
-    margin: 10px 0 12px;
+#MainMenu, footer { visibility: hidden; }
+
+/* -------------------- Responsive layout -------------------- */
+@media (max-width: 900px) {
+    .vu-header { min-height: 130px; }
+    .vu-header-brand { min-width: 60%; padding-left: 4px; gap: 12px; }
+    .vu-header-brand img { width: 105px; height: 88px; }
+    .vu-header-copy h2 { font-size: 22px; }
+    .vu-campus-photo { min-width: 34%; }
+    .vu-campus-photo img { min-height: 130px; }
+    .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
 }
-.bubble-user-inner {
-    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%);
-    color: #ffffff;
-    border-radius: 18px 18px 4px 18px;
-    padding: 10px 16px;
-    max-width: 68%;
-    font-size: 15px;
-    line-height: 1.65;
-    box-shadow: 0 2px 8px rgba(192,24,42,0.18);
-    word-wrap: break-word;
-}
-.bubble-bot {
-    display: flex;
-    justify-content: flex-start;
-    margin: 10px 0 12px;
-}
-.bubble-bot-inner {
-    background: #ffffff;
-    color: #1a1a2e;
-    border-radius: 18px 18px 18px 4px;
-    padding: 10px 16px;
-    max-width: 72%;
-    font-size: 15px;
-    line-height: 1.7;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    word-wrap: break-word;
+@media (max-width: 640px) {
+    .vu-header { min-height: 112px; }
+    .vu-header-brand { padding: 10px 8px 10px 0; gap: 8px; }
+    .vu-header-brand img { width: 82px; height: 72px; }
+    .vu-header-copy h2 { font-size: 18px; }
+    .vu-subtitle { font-size: 12px !important; }
+    .vu-campus-photo { display: none; }
+    .bubble-user-inner, .bubble-bot-inner { max-width: 94%; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -265,20 +393,27 @@ def find_logo():
     return None
 
 logo_path = find_logo()
+CAMPUS_IMAGE_URL = "https://vidyashilp.edu.in/wp-content/uploads/2023/04/slide_banner1.jpg"
 
-header_col1, header_col2 = st.columns([1, 7], vertical_alignment="center")
+logo_html = f'<img src="{logo_path}" alt="Vidyashilp University logo">' if logo_path else '<div style="font-size:48px;">🎓</div>'
 
-with header_col1:
-    if logo_path:
-        st.image(logo_path, width=90)
-    else:
-        st.markdown("🎓")
-
-with header_col2:
-    st.markdown('<h2 class="vu-title">Vidyashilp University</h2>', unsafe_allow_html=True)
-    st.markdown('<div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>', unsafe_allow_html=True)
-
-st.divider()
+st.markdown(
+    f"""
+    <div class="vu-header">
+        <div class="vu-header-brand">
+            {logo_html}
+            <div class="vu-header-copy">
+                <h2>Vidyashilp University</h2>
+                <div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>
+            </div>
+        </div>
+        <div class="vu-campus-photo">
+            <img src="{CAMPUS_IMAGE_URL}" alt="Vidyashilp University campus">
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
