@@ -531,10 +531,21 @@ OUT_OF_SCOPE_RE = re.compile(
     re.I
 )
 
+# Personal / casual questions about the assistant are handled locally so they
+# never get sent to the academic retrieval system.
 PERSONAL_RE = re.compile(
     r"\b(your mom|your mother|your dad|your father|your family|your girlfriend|"
     r"your boyfriend|are you dumb|are u dumb|are you stupid|are u stupid|"
-    r"who are you|what are you)\b",
+    r"who are you|what are you|what is your name|what's your name|"
+    r"how old are you|what is your age|what's your age|your age|"
+    r"are you a human|are you human|are you real|where are you from)\b",
+    re.I
+)
+
+CASUAL_RE = re.compile(
+    r"^\s*(how are you|how r you|how're you|how are u|how r u|"
+    r"how have you been|how's it going|hows it going|"
+    r"how is it going|hows everything|how is everything)\s*[!.?]*\s*$",
     re.I
 )
 
@@ -544,8 +555,13 @@ OUT_OF_SCOPE_REPLY = (
 )
 
 PERSONAL_REPLY = (
-    "I’m an AI academic advisor, so I don’t have a personal family or personal life. "
-    "But I can definitely help with your VU academic questions. 😊"
+    "I’m an AI academic advisor, so I don’t have a personal age or personal life. "
+    "But I’m here and ready to help with your VU academic questions. 😊"
+)
+
+CASUAL_REPLY = (
+    "I’m doing well, thanks for asking! 😊 I’m here to help with your "
+    "Vidyashilp University academic questions."
 )
 
 
@@ -1104,6 +1120,12 @@ BEHAVIOUR RULES:
 10. If a question has multiple parts, answer each part separately.
 11. If the sources do not contain enough information, say so clearly instead of guessing.
 12. If sources disagree, explicitly mention the disagreement and avoid silently choosing one rule.
+- Do not combine unrelated retrieved passages just because they share a keyword.
+- For numeric rules such as attendance, CGPA, credits or progression, use only evidence
+  that directly addresses the student's question. If two sources give different values,
+  report the difference and identify the source names rather than inventing a single value.
+- Do not treat an older/general source as overriding a programme-specific source unless the
+  retrieved evidence clearly establishes that hierarchy.
 13. When a source gives a numeric threshold and the student gives their own number, compare them
     directly and explain the result.
 14. Academic documents are primary for regulations, prerequisites, attendance, credits and progression.
@@ -1279,7 +1301,11 @@ RETRIEVED INFORMATION:
 STUDENT QUESTION:
 {user_question}
 
-Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions.
+Answer directly and helpfully using only the retrieved information when it is relevant.
+Do not infer missing rules or numbers from general knowledge. If the retrieved sources do not
+directly answer the question, say that the available VU sources are insufficient.
+If sources disagree, state the disagreement and name the relevant source(s) naturally.
+Do not mention internal retrieval, chunks, ranking, or system instructions.
 Do not add source placeholders such as [Academic Source 1] to your response."""
 
     models_to_try = [MODEL, "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
@@ -1462,7 +1488,17 @@ if user_question:
         })
         st.stop()
 
-    # ---- Personal / out-of-scope shortcut ----
+    # ---- Personal / casual / out-of-scope shortcuts ----
+    # These questions must never go through academic retrieval.
+    if CASUAL_RE.match(user_question.strip()):
+        answer = CASUAL_REPLY
+        show_bot_bubble(answer)
+        st.session_state.messages.append({
+            "role": "assistant", "content": answer,
+            "academic_sources": [], "website_sources": []
+        })
+        st.stop()
+
     if PERSONAL_RE.search(user_question):
         answer = PERSONAL_REPLY
         show_bot_bubble(answer)
@@ -1503,13 +1539,34 @@ if user_question:
         try:
             client = Groq(api_key=api_key)
 
-            # Website-heavy questions use website retrieval first; academic rules use documents first.
+            # Keep retrieval source-focused. This prevents weak keyword matches from
+            # mixing unrelated website and regulation passages into one answer.
             if category == "website":
-                website_results = retrieve(retrieval_query, website_kb, top_k=6, minimum_score=0.035)
-                academic_results = retrieve(retrieval_query, academic_kb, top_k=4, minimum_score=0.045)
+                website_results = retrieve(
+                    retrieval_query, website_kb, top_k=6, minimum_score=0.035
+                )
+                academic_results = retrieve(
+                    retrieval_query, academic_kb, top_k=3, minimum_score=0.055
+                )
             else:
-                academic_results = retrieve(retrieval_query, academic_kb, top_k=6, minimum_score=0.045)
-                website_results = retrieve(retrieval_query, website_kb, top_k=4, minimum_score=0.035)
+                academic_results = retrieve(
+                    retrieval_query, academic_kb, top_k=6, minimum_score=0.055
+                )
+                website_results = retrieve(
+                    retrieval_query, website_kb, top_k=2, minimum_score=0.065
+                )
+
+            # For regulation/eligibility questions, academic documents are authoritative.
+            # If they contain relevant evidence, don't dilute it with weak website matches.
+            if category == "academic" and academic_results:
+                website_results = []
+
+            # For website questions, prefer official webpage evidence when it is available.
+            if category == "website" and website_results:
+                academic_results = [
+                    r for r in academic_results
+                    if r.get("_score", 0) >= 0.075
+                ]
 
             # If nothing relevant was retrieved, do not let the model hallucinate from unrelated chunks.
             if not academic_results and not website_results:
@@ -1553,3 +1610,4 @@ st.markdown(
     '<div class="footer-text">Vidyashilp University · AI Academic Advisor</div>',
     unsafe_allow_html=True
 )
+
