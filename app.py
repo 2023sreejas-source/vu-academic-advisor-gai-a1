@@ -20,14 +20,13 @@ st.set_page_config(
 )
 
 # ============================================================
-# CSS — clean, professional university look
+# CSS
 # ============================================================
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* ---- Base ---- */
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
@@ -36,7 +35,6 @@ html, body, [class*="css"] {
     background-color: #ffffff;
 }
 
-/* ---- Header: just a thin top bar with a red underline ---- */
 .vu-header {
     display: flex;
     align-items: center;
@@ -67,7 +65,6 @@ html, body, [class*="css"] {
     margin: 2px 0 0 0;
 }
 
-/* ---- Chat messages ---- */
 .vu-msg-user {
     background: #0a2240;
     color: #ffffff;
@@ -94,7 +91,6 @@ html, body, [class*="css"] {
 
 .vu-msg-bot strong { color: #0a2240; }
 
-/* ---- Source chip ---- */
 .vu-source-chip {
     display: inline-block;
     background: #fff0f1;
@@ -107,7 +103,6 @@ html, body, [class*="css"] {
     font-weight: 500;
 }
 
-/* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
     background-color: #fafafa;
     border-right: 1px solid #eaecf0;
@@ -147,7 +142,6 @@ section[data-testid="stSidebar"] {
     color: #4a5568;
 }
 
-/* ---- Force entire app white (override Streamlit dark theme) ---- */
 .stApp, .stApp > div, .main, .main > div,
 [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
@@ -156,7 +150,6 @@ section[data-testid="stSidebar"] {
     color: #1a1a2e !important;
 }
 
-/* ---- Bottom chat bar — the dark band ---- */
 [data-testid="stBottom"],
 [data-testid="stBottom"] > div,
 .stBottom, .stBottom > div {
@@ -164,7 +157,6 @@ section[data-testid="stSidebar"] {
     border-top: 1px solid #eaecf0 !important;
 }
 
-/* ---- Chat input box ---- */
 [data-testid="stChatInputContainer"],
 [data-testid="stChatInputContainer"] > div,
 .stChatInput, .stChatInput > div {
@@ -174,7 +166,6 @@ section[data-testid="stSidebar"] {
     color: #1a1a2e !important;
 }
 
-/* ---- Input text itself ---- */
 [data-testid="stChatInputContainer"] textarea,
 .stChatInput textarea {
     color: #1a1a2e !important;
@@ -182,12 +173,10 @@ section[data-testid="stSidebar"] {
     caret-color: #c0182a !important;
 }
 
-/* ---- Placeholder text ---- */
 [data-testid="stChatInputContainer"] textarea::placeholder {
     color: #9aa3af !important;
 }
 
-/* ---- Suggested question buttons ---- */
 div[data-testid="stButton"] > button {
     background: #f7f8fa !important;
     border: 1px solid #eaecf0 !important;
@@ -206,14 +195,12 @@ div[data-testid="stButton"] > button:hover {
     background: #fff0f1 !important;
 }
 
-/* ---- Divider ---- */
 .vu-divider {
     border: none;
     border-top: 1px solid #eaecf0;
     margin: 14px 0;
 }
 
-/* ---- Suggestion label ---- */
 .vu-suggest-label {
     font-size: 12px;
     color: #9aa3af;
@@ -223,7 +210,6 @@ div[data-testid="stButton"] > button:hover {
     text-transform: uppercase;
 }
 
-/* hide streamlit branding */
 #MainMenu, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
@@ -232,8 +218,6 @@ div[data-testid="stButton"] > button:hover {
 # MODEL
 # ============================================================
 
-# llama-3.1-8b-instant is the safest free-tier Groq model (always available)
-# llama-3.3-70b-versatile is better quality but needs a valid key with 70B access
 MODEL = "openai/gpt-oss-20b"
 
 # ============================================================
@@ -502,7 +486,7 @@ if include_profile:
 # SYSTEM PROMPT
 # ============================================================
 
-SYSTEM_PROMPT = """You are the AI Academic Advisor for Vidyashilp University.
+SYSTEM_PROMPT = """You are the AI Academic Advisor for Vidyashilp University (VU), a private university in Bengaluru, India.
 
 Your role is to help students with academic questions — courses, credits, prerequisites,
 attendance, progression rules, graduation requirements, and semester planning.
@@ -516,12 +500,29 @@ RULES:
 4. If a question needs student-specific details (credits, courses completed, CGPA) that
    were not given, ask for them before answering.
 5. If excerpts conflict, say so explicitly — do not silently pick one.
-6. If someone greets you (hi, hello, hey, etc.), respond warmly and briefly introduce yourself
-   as the Vidyashilp University AI Academic Advisor, then invite them to ask a question.
-   For non-academic questions (weather, personal topics, general trivia), politely say you
-   can only help with academic matters.
+6. If the message is a greeting, casual opener, or someone asking who you are or what
+   you do (in any phrasing, formal or informal — hi, hii, hiii, hiiii, hey, heyy, hlo,
+   hello, wsp, sup, who r u, what r u, ur name, wht u do, etc.), ALWAYS respond warmly:
+   "Hi! I'm the Vidyashilp University AI Academic Advisor. I'm here to help you with
+   courses, credits, prerequisites, attendance, graduation requirements, and semester
+   planning. What can I help you with today?"
+   Never search documents for this. Answer directly from this instruction.
 7. Keep answers concise and direct. Use bullet points only when listing multiple items.
-8. Never fabricate course codes, credit numbers, or policy rules."""
+8. Never fabricate course codes, credit numbers, or policy rules.
+9. If a student seems stressed or mentions failing, backlogs, or academic trouble,
+   respond with empathy first before giving information. Example: "I understand
+   that's stressful — let me help you figure this out."
+10. Never give medical, legal, financial, or mental health advice. If a student
+    mentions mental health struggles, respond with: "I'd encourage you to reach
+    out to the university counselling centre for support. I can only help with
+    academic queries."
+11. If a question has multiple parts, answer each part clearly and separately.
+12. Always respond in the same language or style the student uses — if they write
+    informally, respond in a friendly but professional tone. Never be robotic.
+13. If a student asks about fees, payments, or financial matters, say: "For fee-related
+    queries, please contact the Accounts or Finance office directly."
+14. If a student asks about a specific professor, HOD, or staff member, say:
+    "For staff-specific queries, please contact the department office directly." """
 
 # ============================================================
 # GENERATE ANSWER
@@ -595,7 +596,6 @@ for msg in st.session_state.messages:
 
     if role == "user":
         st.markdown(f'<div class="vu-msg-user">{content}</div>', unsafe_allow_html=True)
-
     else:
         st.markdown(f'<div class="vu-msg-bot">{content}</div>', unsafe_allow_html=True)
 
@@ -619,21 +619,14 @@ for msg in st.session_state.messages:
 
 prompt = st.chat_input("Ask an academic question…")
 
-GREETINGS = {"hi","hey","hello","hii","hiii","heya","howdy","greetings","sup","yo"}
-
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     if is_gibberish(prompt):
         answer = "I couldn't understand that. Please ask a clear academic question — for example, about courses, credits, prerequisites, or attendance."
         retrieved_docs = []
-    elif prompt.strip().lower().rstrip("!.,") in GREETINGS:
-        retrieved_docs = []
-        with st.spinner(""):
-            answer = generate_answer(prompt, [])
     else:
         retrieved_docs = retrieve(prompt, top_k=6)
-
         with st.spinner("Checking university documents…"):
             answer = generate_answer(prompt, retrieved_docs)
 
