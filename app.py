@@ -38,24 +38,20 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-/* Background */
 .stApp, [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
 [data-testid="block-container"] {
     background-color: #f0f2f5 !important;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] { background-color: #ffffff !important; }
 
-/* Bottom bar */
 [data-testid="stBottom"], [data-testid="stBottom"] > div {
     background-color: #ffffff !important;
     border-top: 1px solid #eaecf0 !important;
     padding: 10px 16px !important;
 }
 
-/* Chat input pill shape */
 [data-testid="stChatInputContainer"],
 [data-testid="stChatInputContainer"] > div {
     background: #ffffff !important;
@@ -72,7 +68,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 [data-testid="stChatInputContainer"] textarea::placeholder { color: #adb5bd !important; }
 
-/* Chat message containers */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
@@ -80,20 +75,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     padding: 4px 0 !important;
 }
 
-/* User bubble */
-[data-testid="stChatMessage"][data-testid*="user"] .stChatMessageContent,
-div[class*="stChatMessage"] + div .stMarkdown {
-    background: transparent !important;
-}
-
-/* All chat content divs */
 .stChatMessage .stMarkdown p,
 .stChatMessage .stMarkdown {
     font-size: 14px !important;
     line-height: 1.6 !important;
 }
 
-/* Suggestion buttons */
 div[data-testid="stButton"] > button {
     background: #ffffff !important;
     border: 1px solid #eaecf0 !important;
@@ -170,7 +157,7 @@ div[data-testid="stButton"] > button:hover {
 # CONSTANTS
 # ============================================================
 
-MODEL = "openai/gpt-oss-20b"
+MODEL = "llama-3.3-70b-versatile"
 
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
 
@@ -188,6 +175,24 @@ DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU PhD", "url": "https://vidyashilp.edu.in/phd/"},
     {"name": "VU Programmes", "url": "https://vidyashilp.edu.in/programmes/"}
 ]
+
+# Greetings and social messages — handled without any document retrieval
+SOCIAL_RE = re.compile(
+    r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
+    r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
+    r"thank(s|\s*you|u)|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|"
+    r"bye|goodbye|see\s*you|take\s*care|cya)\s*[!.?]*\s*$",
+    re.I
+)
+
+GREETING_REPLY = (
+    "Hey! 👋 I'm VU's AI Academic Advisor. "
+    "I can help with attendance, credits, prerequisites, registration, "
+    "course eligibility, progression rules and more. "
+    "What would you like to know?"
+)
+
+THANKS_REPLY = "Happy to help! 😊 Feel free to ask anything else about your academics at VU."
 
 
 # ============================================================
@@ -247,48 +252,24 @@ st.divider()
 # ============================================================
 
 with st.sidebar:
-
     st.markdown("### 🎓 Student Profile")
     st.markdown("Enter your details to get personalised answers.")
     st.markdown("---")
 
     program = st.selectbox(
         "Program",
-        [
-            "B.Tech",
-            "BMS",
-            "BA LLB",
-            "BMS LLB",
-            "B.A. Economics",
-            "B.A. Psychology",
-            "B.Des",
-        ]
+        ["B.Tech", "BMS", "BA LLB", "BMS LLB", "B.A. Economics", "B.A. Psychology", "B.Des"]
     )
 
     semester = st.selectbox(
         "Current Semester",
-        [
-            "Not specified",
-            "1st Semester",
-            "2nd Semester",
-            "3rd Semester",
-            "4th Semester",
-            "5th Semester",
-            "6th Semester",
-            "7th Semester",
-            "8th Semester",
-            "9th Semester",
-            "10th Semester"
-        ]
+        ["Not specified", "1st Semester", "2nd Semester", "3rd Semester",
+         "4th Semester", "5th Semester", "6th Semester", "7th Semester",
+         "8th Semester", "9th Semester", "10th Semester"]
     )
 
-    completed_credits = st.number_input(
-        "Completed Credits", min_value=0, max_value=400, value=45, step=1
-    )
-
-    cgpa = st.number_input(
-        "CGPA", min_value=0.0, max_value=10.0, value=7.5, step=0.1
-    )
+    completed_credits = st.number_input("Completed Credits", min_value=0, max_value=400, value=45, step=1)
+    cgpa = st.number_input("CGPA", min_value=0.0, max_value=10.0, value=7.5, step=0.1)
 
     st.markdown("---")
 
@@ -553,10 +534,10 @@ def retrieve(query, documents, top_k=5, minimum_score=0.05):
             for t, qc in query_counter.items() if t in tc
         )
         boost_phrases = [
-            "minimum cgpa","attendance","eligibility","eligible",
-            "prerequisite","minor","semester","admission","course",
-            "credits","programme","program","transfer","law","phd",
-            "summer","summer term"
+            "minimum cgpa", "attendance", "eligibility", "eligible",
+            "prerequisite", "minor", "semester", "admission", "course",
+            "credits", "programme", "program", "transfer", "law", "phd",
+            "summer", "summer term"
         ]
         ql = query.lower()
         tl = doc["text"].lower()
@@ -581,42 +562,15 @@ def retrieve(query, documents, top_k=5, minimum_score=0.05):
 def classify_query(query):
     q = query.lower().strip()
     website_patterns = [
-        "admission","apply","application","how do i join","join vu",
-        "contact","phone number","email","address","campus","location",
-        "where is vu","where is vidyashilp","programmes offered",
-        "about vu","vidyashilp university","law programme","phd programme"
+        "admission", "apply", "application", "how do i join", "join vu",
+        "contact", "phone number", "email", "address", "campus", "location",
+        "where is vu", "where is vidyashilp", "programmes offered",
+        "about vu", "vidyashilp university", "law programme", "phd programme"
     ]
     for pattern in website_patterns:
         if pattern in q:
             return "website"
     return "academic"
-
-
-# ============================================================
-# FOLLOW-UP CONTEXT
-# ============================================================
-
-def get_previous_user_question():
-    for msg in reversed(st.session_state.messages[:-1]):
-        if msg.get("role") == "user":
-            return msg.get("content", "")
-    return ""
-
-def is_short_followup(query):
-    if len(tokenize(query)) <= 5:
-        return True
-    for phrase in ["i am in","im in","i'm in","what about","and what","then what","why then"]:
-        if phrase in query.lower():
-            return True
-    return False
-
-def build_contextual_question(query):
-    if not is_short_followup(query):
-        return query
-    previous = get_previous_user_question()
-    if not previous:
-        return query
-    return f"Previous question: {previous}\nFollow-up: {query}"
 
 
 # ============================================================
@@ -681,6 +635,10 @@ BEHAVIOUR RULES:
 10. For queries about specific professors or HODs, say:
     "Please contact the department office directly."
 11. If a question has multiple parts, answer each part separately.
+12. NUMERIC RULES: when the excerpts state a numeric threshold (e.g. minimum 75%,
+    CGPA >= 4.00) and the student's message states their own number for that same thing,
+    compare the two and give a direct yes/no/eligible/not-eligible answer using that
+    comparison. Do not ask the student to repeat a number they already gave you.
 
 SOURCE RULES:
 - Use academic documents as PRIMARY source for regulations, prerequisites, eligibility,
@@ -731,38 +689,37 @@ STUDENT QUESTION:
 
 Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions."""
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": build_system_prompt()},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=0.1,
-        max_tokens=800
-    )
-    return response.choices[0].message.content.strip()
+    models_to_try = [MODEL, "llama-3.1-8b-instant", "mixtral-8x7b-32768"]
+    last_error = None
+    for m in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=m,
+                messages=[
+                    {"role": "system", "content": build_system_prompt()},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.1,
+                max_tokens=800
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            last_error = e
+            continue
+    return f"I couldn't get a response right now. Please try again. (Error: {last_error})"
 
 
 # ============================================================
-# SOURCE DISPLAY
+# SOURCE DISPLAY — only document names, no website links
 # ============================================================
 
-def display_sources(academic_results, website_results):
+def display_sources(academic_results):
     names = []
     for r in academic_results:
         if r["source"] not in names:
             names.append(r["source"])
-    for r in website_results:
-        if r["source"] not in names:
-            names.append(r["source"])
     if names:
-        st.caption("Sources: " + " · ".join(names))
-    shown = set()
-    for r in website_results:
-        url = r.get("url", "")
-        if url and url not in shown:
-            shown.add(url)
-            st.caption(f"🔗 {url}")
+        st.caption("📄 Sources: " + " · ".join(names))
 
 
 # ============================================================
@@ -777,6 +734,31 @@ SUGGESTIONS = [
     "Which minors are available for B.Tech?",
     "What courses are offered next semester?"
 ]
+
+
+# ============================================================
+# BUBBLE HELPERS
+# ============================================================
+
+def show_user_bubble(text):
+    st.markdown(
+        f'<div class="bubble-user">'
+        f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
+        f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
+        f'max-width:70%;font-size:14px;line-height:1.55;'
+        f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{text}</div></div>',
+        unsafe_allow_html=True
+    )
+
+def show_bot_bubble(text):
+    st.markdown(
+        f'<div class="bubble-bot">'
+        f'<div style="background:#ffffff;color:#1a1a2e;'
+        f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
+        f'max-width:75%;font-size:14px;line-height:1.65;'
+        f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{text}</div></div>',
+        unsafe_allow_html=True
+    )
 
 
 # ============================================================
@@ -809,28 +791,12 @@ for msg in st.session_state.messages:
     role = msg.get("role")
     content = msg.get("content", "")
     if role == "user":
-        st.markdown(
-            f'<div class="bubble-user">'
-            f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
-            f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
-            f'max-width:70%;font-size:14px;line-height:1.55;'
-            f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{content}</div></div>',
-            unsafe_allow_html=True
-        )
+        show_user_bubble(content)
     else:
-        st.markdown(
-            f'<div class="bubble-bot">'
-            f'<div style="background:#ffffff;color:#1a1a2e;'
-            f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
-            f'max-width:75%;font-size:14px;line-height:1.65;'
-            f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{content}</div></div>',
-            unsafe_allow_html=True
-        )
-        if role == "assistant":
-            ac = msg.get("academic_sources", [])
-            wc = msg.get("website_sources", [])
-            if ac or wc:
-                display_sources(ac, wc)
+        show_bot_bubble(content)
+        ac = msg.get("academic_sources", [])
+        if ac:
+            display_sources(ac)
 
 
 # ============================================================
@@ -849,22 +815,25 @@ user_question = pending or st.chat_input("Ask your academic question...")
 if user_question:
 
     st.session_state.messages.append({"role": "user", "content": user_question})
+    show_user_bubble(user_question)
 
-    st.markdown(
-        f'<div class="bubble-user">'
-        f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
-        f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
-        f'max-width:70%;font-size:14px;line-height:1.55;'
-        f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{user_question}</div></div>',
-        unsafe_allow_html=True
-    )
+    # ---- Social / greeting shortcut (no retrieval, no links) ----
+    is_thanks = re.search(r"\b(thank(s|\s*you|u)|thx|ty)\b", user_question, re.I)
+    if SOCIAL_RE.match(user_question.strip()):
+        answer = THANKS_REPLY if is_thanks else GREETING_REPLY
+        show_bot_bubble(answer)
+        st.session_state.messages.append({
+            "role": "assistant", "content": answer,
+            "academic_sources": [], "website_sources": []
+        })
+        st.stop()
 
+    # ---- Real question — retrieval + LLM ----
     category = classify_query(user_question)
 
     if not api_key:
         answer = "The advisor is not configured yet. Please contact the administrator."
-        with st.chat_message("assistant"):
-            st.warning(answer)
+        show_bot_bubble(answer)
         st.session_state.messages.append({
             "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
@@ -885,37 +854,27 @@ if user_question:
             with st.spinner("Thinking..."):
                 answer = generate_answer(client, user_question, context, category)
 
-            st.markdown(
-                f'<div class="bubble-bot">'
-                f'<div style="background:#ffffff;color:#1a1a2e;'
-                f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
-                f'max-width:75%;font-size:14px;line-height:1.65;'
-                f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{answer}</div></div>',
-                unsafe_allow_html=True
-            )
-            if (academic_results or website_results) and category in ["academic", "website"]:
-                display_sources(academic_results, website_results)
+            show_bot_bubble(answer)
+
+            # Show only document source names for academic questions, no links
+            if category == "academic" and academic_results:
+                display_sources(academic_results)
 
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": answer,
                 "academic_sources": academic_results,
-                "website_sources": website_results
+                "website_sources": []
             })
 
         except Exception as error:
             answer = "I couldn't process that request right now. Please try again."
-            st.markdown(
-                f'<div class="bubble-bot">'
-                f'<div style="background:#fff0f1;color:#c0182a;'
-                f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
-                f'max-width:75%;font-size:14px;">{answer}</div></div>',
-                unsafe_allow_html=True
-            )
+            show_bot_bubble(answer)
             st.session_state.messages.append({
                 "role": "assistant", "content": answer,
                 "academic_sources": [], "website_sources": []
             })
+
 
 # ============================================================
 # FOOTER
