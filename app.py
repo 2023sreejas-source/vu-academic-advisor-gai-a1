@@ -47,6 +47,21 @@ html, body, [class*="css"] {
     background: #ffffff !important;
 }
 
+/* Force all standard Streamlit text and headers to be black */
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] strong,
+[data-testid="stMarkdownContainer"] span {
+    color: #000000 !important;
+}
+
+/* Ensure the blue user chat bubbles keep their white text */
+.bubble-user-inner, .bubble-user-inner * {
+    color: #ffffff !important;
+}
+
 /* -------------------- Sidebar -------------------- */
 [data-testid="stSidebar"] {
     background: #082f5b !important;
