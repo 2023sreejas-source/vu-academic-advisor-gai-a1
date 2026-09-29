@@ -304,7 +304,7 @@ main div[data-testid="stButton"] > button * {
 }
 [data-testid="stExpander"] summary { color: #64748B !important; font-size: 12px !important; }
 
-/* Dynamic Floating Composer (Overriding Dark Mode) */
+/* Dynamic Floating Composer */
 [data-testid="stBottom"] {
     background: transparent !important;
     border-top: none !important;
@@ -376,19 +376,21 @@ DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU B.M.S., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/schools/bachelor-of-management-studies-bachelor-of-laws-hons/"},
 ]
 
+# Includes explicit matches for "how are you", "how are u", "how r u", etc.
 SOCIAL_RE = re.compile(
     r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
     r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
+    r"how\s*are\s*(you|u)|how\s*r\s*u|how\s*do\s*you\s*do|how'?s\s*it\s*going|"
     r"thank(s|\s*you|u)|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|"
     r"bye|goodbye|see\s*you|take\s*care|cya)\s*[!.?]*\s*$",
     re.I
 )
 
 GREETING_REPLY = (
-    "Hey! I'm VU's AI Academic Advisor. "
+    "I'm doing well, thank you! 😊 I'm VU's AI Academic Advisor. "
     "I can help with attendance, credits, prerequisites, registration, "
     "course eligibility, progression rules and more. "
-    "What would you like to know?"
+    "What would you like to know today?"
 )
 
 THANKS_REPLY = "Happy to help! Feel free to ask anything else about your academics at VU."
@@ -515,7 +517,7 @@ api_key = get_api_key()
 
 
 # ============================================================
-# STUDENT PROFILE
+# STUDENT PROFILE & DYNAMIC OVERRIDES
 # ============================================================
 
 student_profile = {
@@ -525,9 +527,53 @@ student_profile = {
     "cgpa": cgpa
 }
 
+def effective_profile_for_question(user_query, sidebar_profile):
+    """Extracts inline user context to override blank/different sidebar settings."""
+    effective = dict(sidebar_profile)
+    q_lower = user_query.lower()
+    
+    # Program detection
+    prog_map = {
+        "b.tech": "B.Tech", "btech": "B.Tech", 
+        "bms": "BMS", "b.m.s": "BMS",
+        "ba llb": "BA LLB", "ba.llb": "BA LLB", 
+        "bms llb": "BMS LLB", "bms.llb": "BMS LLB",
+        "economics": "B.A. Economics", "psychology": "B.A. Psychology",
+        "b.des": "B.Des", "bdes": "B.Des"
+    }
+    for key, val in prog_map.items():
+        if key in q_lower:
+            effective["program"] = val
+            break
+
+    # Semester detection
+    sem_match = re.search(r"\b([1-9]|10)(?:st|nd|rd|th)?\s*(?:sem|semester)\b", q_lower)
+    if sem_match:
+        num = sem_match.group(1)
+        suffix = {"1": "1st", "2": "2nd", "3": "3rd"}.get(num, f"{num}th")
+        effective["semester"] = f"{suffix} Semester"
+
+    # CGPA detection
+    cgpa_match = re.search(r"\b(?:cgpa|gpa)\s*(?:of|=|:)?\s*([0-9]\.[0-9]{1,2})\b", q_lower)
+    if cgpa_match:
+        try:
+            effective["cgpa"] = float(cgpa_match.group(1))
+        except ValueError:
+            pass
+
+    # Credits detection
+    cred_match = re.search(r"\b([0-9]{1,3})\s*(?:completed\s*)?credits?\b", q_lower)
+    if cred_match:
+        try:
+            effective["completed_credits"] = int(cred_match.group(1))
+        except ValueError:
+            pass
+
+    return effective
+
 
 # ============================================================
-# TEXT EXTRACTION
+# TEXT EXTRACTION & SECTION HEADING GUESS
 # ============================================================
 
 def clean_text(text):
@@ -538,6 +584,7 @@ def clean_text(text):
     return text.strip()
 
 def guess_section(raw_text):
+    """Inspects raw page lines to find candidate section headers."""
     for line in raw_text.splitlines():
         line = re.sub(r"\s+", " ", line).strip()
         if not line or len(line) > 100:
@@ -639,6 +686,9 @@ def chunk_text(text, chunk_size=150, overlap=30):
 
 def load_academic_documents():
     documents = []
+    if not os.path.exists("."):
+        return documents
+
     for filename in sorted(os.listdir(".")):
         if filename.startswith("."):
             continue
@@ -709,7 +759,7 @@ def load_website_sources():
 def fetch_webpage(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(response.text, "html.parser")
@@ -845,7 +895,7 @@ def retrieve(query, documents, top_k=5, minimum_score=0.05):
 
 
 # ============================================================
-# CLASSIFY QUERY
+# CLASSIFY QUERY & CONTEXT UTILS
 # ============================================================
 
 def classify_query(query):
@@ -861,9 +911,30 @@ def classify_query(query):
             return "website"
     return "academic"
 
+def is_follow_up_question(query):
+    q = query.lower().strip()
+    follow_up_indicators = [
+        "what about", "and for", "how about", "which one", "which ones",
+        "what are the prerequisites", "are there any prerequisites",
+        "tell me more", "can you elaborate", "why", "how so", "is it required"
+    ]
+    if len(q.split()) <= 6 and any(ind in q for ind in follow_up_indicators):
+        return True
+    return False
+
+def conversation_context_for(messages):
+    if not messages:
+        return ""
+    recent = messages[-2:]
+    formatted = []
+    for m in recent:
+        role = "Student" if m["role"] == "user" else "Advisor"
+        formatted.append(f"{role}: {m['content']}")
+    return "\n".join(formatted)
+
 
 # ============================================================
-# PROFILE TEXT
+# PROFILE TEXT & SYSTEM PROMPT
 # ============================================================
 
 def profile_to_text(effective_profile=None):
@@ -878,11 +949,6 @@ def profile_to_text(effective_profile=None):
     if p.get("cgpa") is not None:
         lines.append(f"CGPA: {p['cgpa']}")
     return "\n".join(lines) if lines else "No student profile information was provided."
-
-
-# ============================================================
-# SYSTEM PROMPT
-# ============================================================
 
 def build_system_prompt(effective_profile=None):
     return f"""You are the AI Academic Advisor for Vidyashilp University (VU), Bengaluru, India.
@@ -910,13 +976,12 @@ IMPORTANT PROFILE RULES:
 
 CONVERSATION RULES:
 - A short follow-up such as "which one?", "what about that?", "what are the prerequisites?"
-  may refer to the immediately preceding academic topic. Use that context only when it is clearly
-  connected.
+  may refer to the immediately preceding academic topic. Use that context only when it is clearly connected.
 - If the student starts a new topic, ignore the old topic.
 - Do not carry an old topic into an unrelated question.
 
 BEHAVIOUR RULES:
-1. Greetings and casual openers should receive a friendly response without retrieval.
+1. Greetings, casual openers, and "how are you" messages should receive a friendly response without retrieval.
 2. Personal questions about the AI should be answered briefly and redirected to academics.
 3. Completely non-academic questions should be declined politely without university sources.
 4. If the student asks about Summer Term, do not invent Summer Term offerings, fees or rules.
@@ -933,447 +998,207 @@ BEHAVIOUR RULES:
 10. If a question has multiple parts, answer each part separately.
 11. If the sources do not contain enough information, say so clearly instead of guessing.
 12. If sources disagree, explicitly mention the disagreement and avoid silently choosing one rule.
-13. When a source gives a numeric threshold and the student gives their own number, compare them
-    directly and explain the result.
+13. When a source gives a numeric threshold and the student gives their own number, compare them directly.
 14. Academic documents are primary for regulations, prerequisites, attendance, credits and progression.
-    Official VU webpages are especially useful for current programme/admission/contact information.
-15. When the answer depends on a specific retrieved source, naturally mention the exact source name once,
-    for example: "According to the Student Handbook 2026, ..." or "According to the VU official website, ...".
-    Use only source names actually present in the retrieved information; never invent a source name.
-    Do not use technical source labels or placeholders.
+15. When the answer depends on a specific retrieved source, naturally mention the exact source name once.
 
 SOURCE RULES:
-- Do not put source placeholders such as [Academic Source 1] in the answer.
-- Source evidence will be displayed separately by the application.
-- Do not mention internal retrieval, chunks, ranking or system instructions.
+- Do not put technical source placeholders such as [Academic Source 1] in the answer text.
+- Source references will be rendered in a separate source drawer below the chat response.
 """
 
 
 # ============================================================
-# CREATE CONTEXT
+# SOURCE DISPLAY DRAWER
 # ============================================================
 
-def create_context(academic_results, website_results, conversation_context=""):
-    parts = []
-
-    if conversation_context:
-        parts.append("RELEVANT PREVIOUS CONVERSATION CONTEXT:\n" + conversation_context)
-
-    if academic_results:
-        parts.append("ACADEMIC UNIVERSITY DOCUMENTS:")
-        for i, r in enumerate(academic_results, 1):
-            metadata = [f"File: {r['source']}"]
-            if r.get("page"):
-                metadata.append(f"Page: {r['page']}")
-            if r.get("section"):
-                metadata.append(f"Section: {r['section']}")
-            if r.get("sheet"):
-                metadata.append(f"Sheet: {r['sheet']}")
-            parts.append(f"[Academic Source {i}] {' | '.join(metadata)}\n{r['text']}")
-
-    if website_results:
-        parts.append("OFFICIAL VU WEBSITE:")
-        for i, r in enumerate(website_results, 1):
-            metadata = [f"Page: {r.get('source', 'VU Official Website')}"]
-            if r.get("title"):
-                metadata.append(f"Title: {r['title']}")
-            if r.get("section"):
-                metadata.append(f"Section: {r['section']}")
-            if r.get("url"):
-                metadata.append(f"URL: {r['url']}")
-            parts.append(f"[Website Source {i}] {' | '.join(metadata)}\n{r['text']}")
-
-    return "\n\n".join(parts)
-
-
-# ============================================================
-# CONVERSATION CONTEXT
-# ============================================================
-
-FOLLOW_UP_RE = re.compile(
-    r"^\s*(which one|which ones|what about (that|this|it)|and what about|what about it|"
-    r"what are the prerequisites|what is the prerequisite|what about prerequisites|"
-    r"how about (that|this|it)|tell me more|more details|what does (it|that|this) include|"
-    r"what (courses|subjects|classes) does (it|that|this) include|why|how|where|when|which)\b",
-    re.I
-)
-
-NEW_TOPIC_TERMS = {
-    "attendance", "credits", "credit", "prerequisite", "prerequisites", "registration",
-    "admission", "apply", "application", "fees", "fee", "programme", "program",
-    "minor", "minors", "major", "majors", "semester", "course", "courses",
-    "grading", "cgpa", "backlog", "progression", "graduation", "contact", "address",
-    "weather", "cricket", "football", "movie", "restaurant", "law", "bms", "btech",
-    "psychology", "economics", "design"
-}
-
-def get_last_user_question(skip_current=False):
-    found = 0
-    for msg in reversed(st.session_state.messages):
-        if msg.get("role") == "user":
-            if skip_current and found == 0:
-                found += 1
-                continue
-            return msg.get("content", "")
-    return ""
-
-def is_follow_up_question(question, previous_question):
-    if not previous_question:
-        return False
-    q = question.lower().strip()
-    if len(q.split()) <= 5 and not any(term in q for term in NEW_TOPIC_TERMS):
-        return True
-    if FOLLOW_UP_RE.search(q):
-        return True
-    return False
-
-def conversation_context_for(question):
-    previous = get_last_user_question(skip_current=True)
-    if not is_follow_up_question(question, previous):
-        return ""
-    previous_answer = ""
-    for msg in reversed(st.session_state.messages):
-        if msg.get("role") == "assistant":
-            previous_answer = msg.get("content", "")
-            break
-    return (
-        f"Previous student question: {previous}\n"
-        f"Previous advisor answer: {previous_answer[:1800]}"
-    )
-
-
-def effective_profile_for_question(question):
-    profile = dict(student_profile)
-    q = question.lower()
-
-    aliases = {
-        "b.tech": "B.Tech", "btech": "B.Tech", "bms": "BMS",
-        "ba llb": "BA LLB", "b.a. llb": "BA LLB", "bms llb": "BMS LLB",
-        "b.a. economics": "B.A. Economics", "ba economics": "B.A. Economics",
-        "b.a. psychology": "B.A. Psychology", "ba psychology": "B.A. Psychology",
-        "b.des": "B.Des", "bdes": "B.Des"
-    }
-
-    for alias, label in aliases.items():
-        if re.search(r"\b" + re.escape(alias) + r"\b", q):
-            profile["program"] = label
-            break
-
-    extra_program = re.search(
-        r"\b(\d+(?:st|nd|rd|th)?[- ]year|\d+(?:st|nd|rd|th)?[- ]semester)?\s*"
-        r"(bba|b.arch|barch|mba|mca|bca)\b", q, re.I
-    )
-    if extra_program:
-        profile["program"] = extra_program.group(2).upper().replace("BARCH", "B.Arch")
-
-    cgpa_match = re.search(r"\b(?:cgpa|gpa)\s*(?:is|=|:)?\s*(\d+(?:\.\d+)?)", q, re.I)
-    if cgpa_match:
-        try:
-            profile["cgpa"] = float(cgpa_match.group(1))
-        except ValueError:
-            pass
-
-    credit_match = re.search(r"\b(?:completed\s+)?credits?\s*(?:is|are|=|:)?\s*(\d+)\b", q, re.I)
-    if credit_match:
-        try:
-            profile["completed_credits"] = int(credit_match.group(1))
-        except ValueError:
-            pass
-
-    sem_match = re.search(r"\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th)\s+semester\b", q, re.I)
-    if sem_match:
-        profile["semester"] = sem_match.group(1).lower() + " Semester"
-
-    return profile
-
-
-# ============================================================
-# GENERATE ANSWER
-# ============================================================
-
-def generate_answer(client, user_question, context, category, effective_profile, conversation_context=""):
-    if category == "website":
-        priority = "Prioritize the relevant official VU webpage information for this question."
-    else:
-        priority = "Prioritize VU academic documents for regulations and student eligibility."
-
-    user_prompt = f"""{priority}
-
-RETRIEVED INFORMATION:
-{context}
-
-{conversation_context}
-
-STUDENT QUESTION:
-{user_question}
-
-Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions.
-Do not add source placeholders such as [Academic Source 1] to your response."""
-
-    models_to_try = [MODEL, "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
-    last_error = None
-    for m in models_to_try:
-        try:
-            response = client.chat.completions.create(
-                model=m,
-                messages=[
-                    {"role": "system", "content": build_system_prompt(effective_profile)},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.1,
-                max_tokens=800
-            )
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            last_error = e
-            continue
-    return "I couldn't get a response right now. Please try again."
-
-
-# ============================================================
-# SOURCE DISPLAY
-# ============================================================
-
-def display_sources(academic_results, website_results):
-    unique = []
+def display_sources(retrieved_docs):
+    """Renders a deduplicated drawer showing referenced documents and web pages."""
+    if not retrieved_docs:
+        return
+    
     seen = set()
+    unique_sources = []
+    for doc in retrieved_docs:
+        src_name = doc.get("source", "VU Reference Document")
+        page = doc.get("page")
+        section = doc.get("section", "")
+        url = doc.get("url", "")
+        doc_type = doc.get("type", "academic")
+        
+        key = (src_name, page, section, url)
+        if key not in seen:
+            seen.add(key)
+            unique_sources.append({
+                "source": src_name,
+                "page": page,
+                "section": section,
+                "url": url,
+                "type": doc_type
+            })
 
-    for r in academic_results or []:
-        key = ("academic", r.get("source", ""), r.get("page"), r.get("section"), r.get("sheet"))
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(r)
-
-    for r in website_results or []:
-        key = ("website", r.get("source", ""), r.get("title", ""), r.get("section", ""), r.get("url", ""))
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(r)
-
-    if not unique:
+    if not unique_sources:
         return
 
-    with st.expander("Academic Sources Referenced", expanded=False):
-        st.markdown('<div class="source-panel">', unsafe_allow_html=True)
-        for r in unique:
-            if r.get("type") == "website":
-                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
-                if r.get("title"):
-                    st.caption(r["title"])
-                if r.get("section") and r.get("section") != r.get("title"):
-                    st.caption(f"Section: {r['section']}")
-                if r.get("url"):
-                    st.markdown(f"[View webpage →]({r['url']})")
+    with st.expander("📚 Referenced VU Official Sources"):
+        for s in unique_sources:
+            if s["type"] == "website" and s["url"]:
+                st.markdown(f"- **[{s['source']}]({s['url']})**: {s['section'] or 'Official Page'}")
             else:
-                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
-                if r.get("section"):
-                    st.caption(f"Section: {r['section']}")
-                if r.get("page"):
-                    st.caption(f"Page: {r['page']}")
-                if r.get("sheet"):
-                    st.caption(f"Sheet: {r['sheet']}")
-        st.markdown('</div>', unsafe_allow_html=True)
+                details = []
+                if s["page"]:
+                    details.append(f"Page {s['page']}")
+                if s["section"]:
+                    details.append(f"Section: {s['section']}")
+                detail_str = f" ({', '.join(details)})" if details else ""
+                st.markdown(f"- **{s['source']}**{detail_str}")
 
 
 # ============================================================
-# SUGGESTIONS
+# LLM GENERATION
 # ============================================================
 
-SUGGESTIONS = [
-    "What programmes does VU offer?",
-    "How do I apply to VU?",
-    "What is the minimum CGPA to progress?",
-    "What are the attendance requirements?",
-    "Which minors are available for B.Tech?",
-    "What courses are offered next semester?"
-]
-
-
-# ============================================================
-# BUBBLE HELPERS
-# ============================================================
-
-def render_bubble_text(text):
-    safe = html.escape(str(text)).replace("\r\n", "\n").replace("\r", "\n")
-    safe = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe)
-    safe = safe.replace("\n", "<br>")
-    return safe
-
-
-def show_user_bubble(text):
-    rendered = render_bubble_text(text)
-    st.markdown(
-        f'<div class="bubble-user">'
-        f'<div class="bubble-user-inner">{rendered}</div></div>',
-        unsafe_allow_html=True
-    )
-
-def show_bot_bubble(text):
-    rendered = render_bubble_text(text)
-    st.markdown(
-        f'<div class="bubble-bot">'
-        f'<div class="bubble-bot-inner">{rendered}</div></div>',
-        unsafe_allow_html=True
-    )
-
-
-# ============================================================
-# INTRO / SUGGESTIONS (shown when chat is empty)
-# ============================================================
-
-if not st.session_state.messages:
-    st.markdown("""
-    <div class="vu-card">
-        <div class="vu-prompt-title">Ask your academic question</div>
-        <p class="vu-prompt-text">I can help with VU courses, programmes, prerequisites, eligibility, credits, semesters, admissions and related university information.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="vu-try">Try asking</div>', unsafe_allow_html=True)
-    cols = st.columns(3, gap="small")
-    for i, suggestion in enumerate(SUGGESTIONS):
-        with cols[i % 3]:
-            if st.button(suggestion, key=f"sug_{i}", use_container_width=True):
-                st.session_state.pending_question = suggestion
-                st.rerun()
-
-    st.markdown(
-        '<div class="footer-text">Vidyashilp University · AI Academic Advisor</div>',
-        unsafe_allow_html=True
-    )
-
-
-# ============================================================
-# DISPLAY CHAT HISTORY
-# ============================================================
-
-for msg in st.session_state.messages:
-    role = msg.get("role")
-    content = msg.get("content", "")
-    if role == "user":
-        show_user_bubble(content)
-    else:
-        show_bot_bubble(content)
-        ac = msg.get("academic_sources", [])
-        wc = msg.get("website_sources", [])
-        if ac or wc:
-            display_sources(ac, wc)
-
-
-# ============================================================
-# GET QUESTION
-# ============================================================
-
-pending = st.session_state.pending_question
-st.session_state.pending_question = None
-
-typed_question = st.chat_input("Ask your academic question...")
-user_question = pending or typed_question
-
-st.markdown(
-    '<div class="ai-disclaimer">AI-generated responses can make mistakes. Please verify important academic information with official VU sources.</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# PROCESS QUESTION
-# ============================================================
-
-if user_question:
-
-    st.session_state.messages.append({"role": "user", "content": user_question})
-    show_user_bubble(user_question)
-
-    is_thanks = re.search(r"\b(thank(s|\s*you|u)|thx|ty)\b", user_question, re.I)
-
-    # ---- Social / greeting shortcut ----
-    if SOCIAL_RE.match(user_question.strip()):
-        answer = THANKS_REPLY if is_thanks else GREETING_REPLY
-        show_bot_bubble(answer)
-        st.session_state.messages.append({
-            "role": "assistant", "content": answer,
-            "academic_sources": [], "website_sources": []
-        })
-        st.stop()
-
-    # ---- Personal / out-of-scope shortcut ----
-    if PERSONAL_RE.search(user_question):
-        answer = PERSONAL_REPLY
-        show_bot_bubble(answer)
-        st.session_state.messages.append({
-            "role": "assistant", "content": answer,
-            "academic_sources": [], "website_sources": []
-        })
-        st.stop()
-
-    if OUT_OF_SCOPE_RE.search(user_question):
-        answer = OUT_OF_SCOPE_REPLY
-        show_bot_bubble(answer)
-        st.session_state.messages.append({
-            "role": "assistant", "content": answer,
-            "academic_sources": [], "website_sources": []
-        })
-        st.stop()
-
-    # ---- Academic question ----
-    category = classify_query(user_question)
-    effective_profile = effective_profile_for_question(user_question)
-    conversation_context = conversation_context_for(user_question)
-
-    retrieval_query = user_question
-    if conversation_context:
-        previous = get_last_user_question(skip_current=True)
-        retrieval_query = f"{previous} {user_question}"
-
+def generate_response(user_query, effective_profile):
     if not api_key:
-        answer = "The advisor is not configured yet. Please contact the administrator."
-        show_bot_bubble(answer)
-        st.session_state.messages.append({
-            "role": "assistant", "content": answer,
-            "academic_sources": [], "website_sources": []
-        })
+        return "⚠️ **Groq API key not found.** Please configure `GROQ_API_KEY` in your environment or `.streamlit/secrets.toml`.", []
+
+    client = Groq(api_key=api_key)
+
+    # 1. Check intent pre-filtering regexes
+    if SOCIAL_RE.match(user_query):
+        if re.search(r"thank(s|\s*you|u)|thx|ty", user_query, re.I):
+            return THANKS_REPLY, []
+        return GREETING_REPLY, []
+
+    if OUT_OF_SCOPE_RE.search(user_query):
+        return OUT_OF_SCOPE_REPLY, []
+
+    if PERSONAL_RE.search(user_query):
+        return PERSONAL_REPLY, []
+
+    # 2. Select KB and retrieve
+    q_type = classify_query(user_query)
+    target_kb = website_kb if q_type == "website" else academic_kb
+    if not target_kb:
+        target_kb = academic_kb + website_kb
+
+    retrieved = retrieve(user_query, target_kb, top_k=5)
+    
+    # Fallback to alternate KB if primary KB returned no hits
+    if not retrieved and q_type == "website":
+        retrieved = retrieve(user_query, academic_kb, top_k=5)
+
+    # 3. Build Context String
+    context_blocks = []
+    if is_follow_up_question(user_query):
+        conv_ctx = conversation_context_for(st.session_state.messages)
+        if conv_ctx:
+            context_blocks.append(f"Recent Conversation Context:\n{conv_ctx}")
+
+    for idx, doc in enumerate(retrieved, start=1):
+        src_label = doc.get("source", "VU Source")
+        p_str = f", Page {doc['page']}" if doc.get("page") else ""
+        s_str = f", Section: {doc['section']}" if doc.get("section") else ""
+        context_blocks.append(f"[Source {idx}: {src_label}{p_str}{s_str}]\n{doc['text']}")
+
+    kb_context = "\n\n".join(context_blocks) if context_blocks else "No matching VU official documents found."
+
+    messages = [
+        {"role": "system", "content": build_system_prompt(effective_profile)},
+        {"role": "user", "content": f"Information retrieved from VU databases:\n{kb_context}\n\nStudent question: {user_query}"}
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            temperature=0.2,
+            max_tokens=600
+        )
+        return response.choices[0].message.content, retrieved
+    except Exception as e:
+        return f"⚠️ An error occurred while communicating with the AI service: {str(e)}", []
+
+
+# ============================================================
+# MAIN CHAT INTERFACE
+# ============================================================
+
+# Render Chat History
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.markdown(
+            f'<div class="bubble-user"><div class="bubble-user-inner">{html.escape(msg["content"])}</div></div>',
+            unsafe_allow_html=True
+        )
     else:
-        try:
-            client = Groq(api_key=api_key)
+        st.markdown(
+            f'<div class="bubble-bot"><div class="bubble-bot-inner">{msg["content"]}</div></div>',
+            unsafe_allow_html=True
+        )
+        if msg.get("sources"):
+            display_sources(msg["sources"])
 
-            if category == "website":
-                website_results = retrieve(retrieval_query, website_kb, top_k=6, minimum_score=0.035)
-                academic_results = retrieve(retrieval_query, academic_kb, top_k=4, minimum_score=0.045)
-            else:
-                academic_results = retrieve(retrieval_query, academic_kb, top_k=6, minimum_score=0.045)
-                website_results = retrieve(retrieval_query, website_kb, top_k=4, minimum_score=0.035)
+# Render Default Suggestion Cards if chat is empty
+if not st.session_state.messages:
+    st.markdown('''
+    <div class="vu-card">
+        <div class="vu-prompt-title">Welcome! How can I assist you today?</div>
+        <div class="vu-prompt-text">Ask me anything about attendance criteria, course credits, prerequisites, or degree requirements at Vidyashilp University.</div>
+        <div class="vu-try">Try asking:</div>
+    </div>
+    ''', unsafe_allow_html=True)
 
-            if not academic_results and not website_results:
-                answer = (
-                    "I don't have enough information in the available VU sources to answer that accurately. "
-                    "Please check with the relevant academic office or programme office for the current rule."
-                )
-            else:
-                context = create_context(academic_results, website_results, conversation_context)
-                with st.spinner("Thinking..."):
-                    answer = generate_answer(
-                        client, user_question, context, category, effective_profile, conversation_context
-                    )
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("What is the minimum attendance requirement at VU?", use_container_width=True):
+            st.session_state.pending_question = "What is the minimum attendance requirement at VU?"
+            st.rerun()
+        if st.button("How many credits do I need to graduate from B.Tech?", use_container_width=True):
+            st.session_state.pending_question = "How many credits do I need to graduate from B.Tech?"
+            st.rerun()
+    with col2:
+        if st.button("What are the prerequisites for AI/ML specialization?", use_container_width=True):
+            st.session_state.pending_question = "What are the prerequisites for AI/ML specialization?"
+            st.rerun()
+        if st.button("Can I choose a minor in BMS programme?", use_container_width=True):
+            st.session_state.pending_question = "Can I choose a minor in BMS programme?"
+            st.rerun()
 
-            show_bot_bubble(answer)
+# User Input Handling
+user_input = st.chat_input("Type your academic question here...")
 
-            if academic_results or website_results:
-                display_sources(academic_results, website_results)
+if st.session_state.pending_question:
+    user_input = st.session_state.pending_question
+    st.session_state.pending_question = None
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": answer,
-                "academic_sources": academic_results,
-                "website_sources": website_results
-            })
+if user_input:
+    # 1. Compute dynamic profile for current question
+    effective_prof = effective_profile_for_question(user_input, student_profile)
 
-        except Exception:
-            answer = "I couldn't process that request right now. Please try again."
-            show_bot_bubble(answer)
-            st.session_state.messages.append({
-                "role": "assistant", "content": answer,
-                "academic_sources": [], "website_sources": []
-            })
+    # 2. Append & Render User Question
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.markdown(
+        f'<div class="bubble-user"><div class="bubble-user-inner">{html.escape(user_input)}</div></div>',
+        unsafe_allow_html=True
+    )
+
+    # 3. Generate & Render Bot Response
+    with st.spinner("Consulting VU academic regulations..."):
+        answer, sources = generate_response(user_input, effective_prof)
+
+    st.session_state.messages.append({"role": "assistant", "content": answer, "sources": sources})
+    st.markdown(
+        f'<div class="bubble-bot"><div class="bubble-bot-inner">{answer}</div></div>',
+        unsafe_allow_html=True
+    )
+    if sources:
+        display_sources(sources)
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown('<div class="ai-disclaimer">AI-generated responses can occasionally vary. Please verify official policies with the VU Academic Office.</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer-text">Vidyashilp University Academic Advisor © 2026</div>', unsafe_allow_html=True)
