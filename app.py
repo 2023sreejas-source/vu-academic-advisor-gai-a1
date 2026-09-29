@@ -170,16 +170,13 @@ with st.sidebar:
     program = st.selectbox(
         "Program",
         [
-            "Not specified",
-            "BMS",
-            "BMS (Hons)",
             "B.Tech",
+            "BMS",
+            "BA LLB",
+            "BMS LLB",
             "B.A. Economics",
-            "B.A.",
-            "BA LLB (Law)",
-            "BBA LLB (Law)",
-            "PhD",
-            "Other"
+            "B.A. Psychology",
+            "B.Des",
         ]
     )
 
@@ -598,7 +595,9 @@ SOURCE RULES:
 - Never invent course codes, credit numbers, CGPA requirements, or policy rules.
 - Always cite sources like: [Student_Handbook.pdf] or [VU Official Website].
 - If sources conflict, say so explicitly.
-- If information is not in any source, say so clearly instead of guessing."""
+- If information is not in any source, say so clearly instead of guessing.
+- IMPORTANT: For greetings, casual messages, personal questions, or out-of-scope questions,
+  do NOT cite any sources or show any links. Only show sources for genuine academic answers."""
 
 
 # ============================================================
