@@ -357,7 +357,7 @@ with header_left:
     # Render the local PNG directly. Do not put st.image inside raw HTML;
     # Streamlit renders it as a separate component and that can create a blank placeholder.
     if os.path.isfile(logo_path):
-        st.image(logo_path, width=135)
+        st.image(logo_path, width=78)
     st.markdown(
         '<div class="vu-card vu-top-card">'
         '<div class="vu-heading">Academic Advisor</div>'
