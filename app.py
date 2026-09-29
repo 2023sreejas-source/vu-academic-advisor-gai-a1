@@ -9,8 +9,10 @@ from pypdf import PdfReader
 import os
 import re
 import math
+import base64
 import json
 import requests
+
 from collections import Counter
 
 
@@ -152,17 +154,13 @@ div[data-testid="stButton"] > button:hover {
 
 
 # ============================================================
-# CONSTANTS & MODEL DEFINITIONS
+# CONSTANTS
 # ============================================================
 
-# Valid Groq Models
-GROQ_MODELS = [
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768"
-]
+MODEL = "llama-3.3-70b-versatile"
 
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
+
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
 
 DEFAULT_WEBSITE_SOURCES = [
@@ -178,27 +176,23 @@ DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU Programmes", "url": "https://vidyashilp.edu.in/programmes/"}
 ]
 
-# Expanded Greetings Regex (Handles multilingual greetings & common casual openers)
-GREETING_PATTERNS = re.compile(
-    r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|wassup|bonjour|namaste|namaskaram|halo|howdy|"
-    r"good\s*(morning|afternoon|evening|night|day)|"
-    r"how\s*are\s*you|how\s*r\s*u|how\s*do\s*you\s*do|what'?s\s*up)\s*[!.?]*\s*$",
-    re.I
-)
-
-THANKS_PATTERNS = re.compile(
-    r"^\s*(thank(s|\s*you|\s*u)?|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|bye|goodbye|cya)\s*[!.?]*\s*$",
+# Greetings and social messages — handled without any document retrieval
+SOCIAL_RE = re.compile(
+    r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
+    r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
+    r"thank(s|\s*you|u)|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|"
+    r"bye|goodbye|see\s*you|take\s*care|cya)\s*[!.?]*\s*$",
     re.I
 )
 
 GREETING_REPLY = (
-    "Hello! I am Vidyashilp University's AI Academic Advisor. "
-    "I can assist you with attendance rules, credit requirements, prerequisites, registration, "
-    "course eligibility, and general academic regulations. "
-    "How can I help you today?"
+    "Hey! 👋 I'm VU's AI Academic Advisor. "
+    "I can help with attendance, credits, prerequisites, registration, "
+    "course eligibility, progression rules and more. "
+    "What would you like to know?"
 )
 
-THANKS_REPLY = "You're very welcome! Feel free to ask if you have any more academic questions."
+THANKS_REPLY = "Happy to help! 😊 Feel free to ask anything else about your academics at VU."
 
 
 # ============================================================
@@ -243,10 +237,12 @@ header_col1, header_col2 = st.columns([1, 7], vertical_alignment="center")
 with header_col1:
     if logo_path:
         st.image(logo_path, width=90)
+    else:
+        st.markdown("🎓")
 
 with header_col2:
     st.markdown("## Vidyashilp University")
-    st.markdown(" **AI Academic Advisor · Online**")
+    st.markdown("🟢 **AI Academic Advisor · Online**")
 
 st.divider()
 
@@ -257,7 +253,7 @@ st.divider()
 
 with st.sidebar:
     st.markdown("### 🎓 Student Profile")
-    st.markdown("Enter your details to get personalized guidance.")
+    st.markdown("Enter your details to get personalised answers.")
     st.markdown("---")
 
     program = st.selectbox(
@@ -283,7 +279,7 @@ with st.sidebar:
 
 
 # ============================================================
-# API KEY & PROFILE
+# API KEY
 # ============================================================
 
 def get_api_key():
@@ -297,6 +293,11 @@ def get_api_key():
 
 api_key = get_api_key()
 
+
+# ============================================================
+# STUDENT PROFILE
+# ============================================================
+
 student_profile = {
     "program": program,
     "semester": semester,
@@ -306,7 +307,7 @@ student_profile = {
 
 
 # ============================================================
-# TEXT EXTRACTION & CHUNKING
+# TEXT EXTRACTION
 # ============================================================
 
 def clean_text(text):
@@ -331,34 +332,53 @@ def extract_pdf_text(filepath):
         return ""
     return clean_text("\n".join(pages))
 
+def extract_txt_text(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            return clean_text(f.read())
+    except Exception:
+        return ""
+
+def extract_csv_text(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            return clean_text(f.read())
+    except Exception:
+        return ""
+
+def extract_excel_text(filepath):
+    try:
+        from openpyxl import load_workbook
+        wb = load_workbook(filepath, read_only=True, data_only=True)
+        rows = []
+        for sheet in wb.worksheets:
+            rows.append(f"Sheet: {sheet.title}")
+            for row in sheet.iter_rows(values_only=True):
+                values = [str(v) for v in row if v is not None]
+                if values:
+                    rows.append(" | ".join(values))
+        return clean_text("\n".join(rows))
+    except Exception:
+        return ""
+
 def extract_file_text(filepath):
     ext = os.path.splitext(filepath)[1].lower()
     if ext == ".pdf":
         return extract_pdf_text(filepath)
-    if ext in [".txt", ".csv"]:
-        try:
-            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                return clean_text(f.read())
-        except Exception:
-            return ""
+    if ext == ".txt":
+        return extract_txt_text(filepath)
+    if ext == ".csv":
+        return extract_csv_text(filepath)
     if ext in [".xlsx", ".xls"]:
-        try:
-            from openpyxl import load_workbook
-            wb = load_workbook(filepath, read_only=True, data_only=True)
-            rows = []
-            for sheet in wb.worksheets:
-                rows.append(f"Sheet: {sheet.title}")
-                for row in sheet.iter_rows(values_only=True):
-                    values = [str(v) for v in row if v is not None]
-                    if values:
-                        rows.append(" | ".join(values))
-            return clean_text("\n".join(rows))
-        except Exception:
-            return ""
+        return extract_excel_text(filepath)
     return ""
 
-# Optimized Chunking: 280 words with 50-word overlap for better context retention
-def chunk_text(text, chunk_size=280, overlap=50):
+
+# ============================================================
+# CHUNKING
+# ============================================================
+
+def chunk_text(text, chunk_size=150, overlap=30):
     words = text.split()
     if not words:
         return []
@@ -376,7 +396,7 @@ def chunk_text(text, chunk_size=280, overlap=50):
 
 
 # ============================================================
-# KNOWLEDGE BASE LOADING
+# LOAD ACADEMIC DOCUMENTS
 # ============================================================
 
 def load_academic_documents():
@@ -385,7 +405,9 @@ def load_academic_documents():
         if filename.startswith("."):
             continue
         lower = filename.lower()
-        if not lower.endswith(ACADEMIC_EXTENSIONS) or any(ex in lower for ex in EXCLUDED_FILES):
+        if not lower.endswith(ACADEMIC_EXTENSIONS):
+            continue
+        if any(ex in lower for ex in EXCLUDED_FILES):
             continue
         text = extract_file_text(os.path.join(".", filename))
         if not text:
@@ -398,6 +420,11 @@ def load_academic_documents():
                 "chunk": i + 1
             })
     return documents
+
+
+# ============================================================
+# WEBSITE SOURCES
+# ============================================================
 
 def load_website_sources():
     source_file = "website_sources.json"
@@ -414,8 +441,8 @@ def load_website_sources():
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_webpage(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        response = requests.get(url, headers=headers, timeout=15)
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        response = requests.get(url, headers=headers, timeout=20)
         response.raise_for_status()
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(response.text, "html.parser")
@@ -435,7 +462,7 @@ def load_website_documents():
         text = fetch_webpage(url)
         if not text:
             continue
-        for i, chunk in enumerate(chunk_text(text, chunk_size=250, overlap=40)):
+        for i, chunk in enumerate(chunk_text(text, chunk_size=180, overlap=40)):
             documents.append({
                 "text": chunk,
                 "source": name,
@@ -445,13 +472,18 @@ def load_website_documents():
             })
     return documents
 
+
+# ============================================================
+# LOAD KNOWLEDGE BASE
+# ============================================================
+
 if not st.session_state.knowledge_loaded:
-    with st.spinner("Loading academic knowledge base..."):
+    with st.spinner("Loading academic documents..."):
         st.session_state.academic_kb = load_academic_documents()
         st.session_state.knowledge_loaded = True
 
 if not st.session_state.website_loaded:
-    with st.spinner("Loading website sources..."):
+    with st.spinner("Loading official VU information..."):
         st.session_state.website_kb = load_website_documents()
         st.session_state.website_loaded = True
 
@@ -460,66 +492,61 @@ website_kb = st.session_state.website_kb
 
 
 # ============================================================
-# TOKENIZATION & SMART RETRIEVAL
+# TOKENIZER & RETRIEVAL
 # ============================================================
 
 STOPWORDS = {
     "the","a","an","is","are","am","i","me","my","to","of","in","on",
     "for","and","or","can","could","would","should","do","does","did",
     "be","it","this","that","with","from","at","as","what","which",
-    "how","where","when","why","you","your","please","tell"
+    "how","where","when","why","you","your"
 }
-
-def simple_stem(word):
-    # Simple suffix stripping to match variations like eligibility/eligible, requirement/requirements
-    for suffix in ["ing", "ed", "es", "s", "ment", "ability", "ible"]:
-        if len(word) > 5 and word.endswith(suffix):
-            return word[:-len(suffix)]
-    return word
 
 def tokenize(text):
     tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
-    return [simple_stem(t) for t in tokens if t not in STOPWORDS]
+    return [t for t in tokens if t not in STOPWORDS]
 
-def retrieve(query, documents, top_k=6, minimum_score=0.02):
+def retrieve(query, documents, top_k=5, minimum_score=0.05):
     if not documents:
         return []
     query_tokens = tokenize(query)
     if not query_tokens:
         return []
-    
     query_counter = Counter(query_tokens)
     doc_freq = Counter()
     tokenized_docs = []
-    
     for doc in documents:
         tokens = tokenize(doc["text"])
         for t in set(tokens):
             doc_freq[t] += 1
         tokenized_docs.append(tokens)
-        
     total = len(documents)
     scored = []
-    
     for i, doc in enumerate(documents):
         tokens = tokenized_docs[i]
         if not tokens:
             continue
         tc = Counter(tokens)
-        
-        # TF-IDF Calculation
         score = sum(
             (tc[t] / len(tokens)) *
             (math.log((total + 1) / (doc_freq.get(t, 0) + 1)) + 1) *
             qc
             for t, qc in query_counter.items() if t in tc
         )
-        
+        boost_phrases = [
+            "minimum cgpa", "attendance", "eligibility", "eligible",
+            "prerequisite", "minor", "semester", "admission", "course",
+            "credits", "programme", "program", "transfer", "law", "phd",
+            "summer", "summer term"
+        ]
+        ql = query.lower()
+        tl = doc["text"].lower()
+        for phrase in boost_phrases:
+            if phrase in ql and phrase in tl:
+                score += 0.15
         if score >= minimum_score:
             scored.append((score, doc))
-            
     scored.sort(key=lambda x: x[0], reverse=True)
-    
     results = []
     for score, doc in scored[:top_k]:
         r = dict(doc)
@@ -529,135 +556,225 @@ def retrieve(query, documents, top_k=6, minimum_score=0.02):
 
 
 # ============================================================
-# CLASSIFY QUERY & CONTEXT
+# CLASSIFY QUERY
 # ============================================================
 
 def classify_query(query):
     q = query.lower().strip()
-    website_keywords = [
-        "admission", "apply", "application", "contact", "phone number", "email",
-        "campus", "location", "address", "where is vu", "law programme", "phd"
+    website_patterns = [
+        "admission", "apply", "application", "how do i join", "join vu",
+        "contact", "phone number", "email", "address", "campus", "location",
+        "where is vu", "where is vidyashilp", "programmes offered",
+        "about vu", "vidyashilp university", "law programme", "phd programme"
     ]
-    for word in website_keywords:
-        if word in q:
+    for pattern in website_patterns:
+        if pattern in q:
             return "website"
     return "academic"
+
+
+# ============================================================
+# PROFILE TEXT
+# ============================================================
 
 def profile_to_text():
     return (
         f"Program: {student_profile['program']}\n"
-        f"Current Semester: {student_profile['semester']}\n"
-        f"Completed Credits: {student_profile['completed_credits']}\n"
+        f"Semester: {student_profile['semester']}\n"
+        f"Completed credits: {student_profile['completed_credits']}\n"
         f"CGPA: {student_profile['cgpa']}"
     )
 
-def build_system_prompt():
-    return f"""You are the official AI Academic Advisor for Vidyashilp University (VU), Bengaluru, India.
 
-STUDENT PROFILE:
+# ============================================================
+# SYSTEM PROMPT
+# ============================================================
+
+def build_system_prompt():
+    return f"""You are the AI Academic Advisor for Vidyashilp University (VU), Bengaluru, India.
+
+Student profile:
 {profile_to_text()}
 
-YOUR CORE DIRECTIVE:
-1. You MUST ALWAYS speak as the VU AI Academic Advisor.
-2. Even for small talk or standard greetings, introduce yourself as the VU AI Academic Advisor and ask how you can help academically. NEVER say generic things like "I'm doing well" without identifying your role.
-3. Keep responses direct, helpful, and clear.
-4. Compare numeric thresholds in retrieved rules directly against the student's profile (e.g. compare required CGPA vs student's CGPA).
-5. If the exact rule or credit requirement is not in the documents, state that clearly and advise contacting the Academic Office.
+YOUR ROLE:
+Help students with academic questions — courses, credits, prerequisites, attendance,
+progression rules, graduation requirements, semester planning, admissions, and programmes.
 
-CITATION RULE:
-- Cite source documents like [Student_Handbook.pdf] when answering academic queries.
-- Do NOT cite sources for greetings or general pleasantries."""
+RESPONSE STYLE:
+- Keep responses SHORT and conversational — like texting, not writing a report.
+- NO tables, NO numbered section headers with emoji, NO "What to do next" sections.
+- Max 4-5 bullet points if needed. If it can be said in 2 sentences, say it in 2 sentences.
+- Friendly and warm tone always. Match the student's casual or formal style.
+- NEVER guess or assume CGPA thresholds, credit requirements, or rules not explicitly
+  in the documents. If the exact number isn't in the retrieved text, say you don't have
+  that specific figure and ask them to verify with the academic office.
 
+BEHAVIOUR RULES:
+1. If the message is a greeting or casual opener (hi, hey, hello, bro, hiii, wsp, sup,
+   in any spelling or style), respond warmly and introduce yourself as VU's AI Academic
+   Advisor. Never search documents for this.
+2. If asked personal questions about yourself (your family, your name, your feelings),
+   explain you are an AI and redirect to academic help in a friendly way.
+3. If the question is completely outside academics (weather, sports, movies, cricket,
+   politics, restaurant), politely say you can only help with VU academic matters.
+4. If a student mentions they are in a Summer Term, acknowledge it and say:
+   "For Summer Term-specific course offerings and registration, please contact the
+   academic office or registrar directly, as this information may not be in the
+   available documents."
+5. If a student asks about Law programmes (BA LLB, BBA LLB) — answer from website
+   information if available. If documents don't have enough detail, say:
+   "For detailed Law programme information, please contact the Law School office
+   at Vidyashilp University directly."
+6. If a student asks about PhD — answer from website information if available. If not
+   enough detail, say: "For PhD admissions and programme details, please visit
+   vidyashilp.edu.in or contact the research office directly."
+7. Match the student's tone — informal gets a friendly response, formal gets a
+   professional one. Never be robotic.
+8. If a student seems stressed or mentions failing or backlogs, show empathy first.
+9. For fees or financial queries, say: "Please contact the Accounts office directly."
+10. For queries about specific professors or HODs, say:
+    "Please contact the department office directly."
+11. If a question has multiple parts, answer each part separately.
+12. NUMERIC RULES: when the excerpts state a numeric threshold (e.g. minimum 75%,
+    CGPA >= 4.00) and the student's message states their own number for that same thing,
+    compare the two and give a direct yes/no/eligible/not-eligible answer using that
+    comparison. Do not ask the student to repeat a number they already gave you.
+
+SOURCE RULES:
+- Use academic documents as PRIMARY source for regulations, prerequisites, eligibility,
+  credits, attendance, curriculum, progression rules.
+- Use VU website as supplementary source for admissions, programmes, contact, campus info.
+- Never invent course codes, credit numbers, CGPA requirements, or policy rules.
+- Always cite sources like: [Student_Handbook.pdf] or [VU Official Website].
+- If sources conflict, say so explicitly.
+- If information is not in any source, say so clearly instead of guessing.
+- IMPORTANT: For greetings, casual messages, personal questions, or out-of-scope questions,
+  do NOT cite any sources or show any links. Only show sources for genuine academic answers."""
+
+
+# ============================================================
+# CREATE CONTEXT
+# ============================================================
 
 def create_context(academic_results, website_results):
     parts = []
     if academic_results:
-        parts.append("UNIVERSITY ACADEMIC DOCUMENTS:")
+        parts.append("ACADEMIC UNIVERSITY DOCUMENTS:")
         for i, r in enumerate(academic_results, 1):
             parts.append(f"[Academic Source {i}] File: {r['source']}\n{r['text']}")
     if website_results:
-        parts.append("OFFICIAL VU WEBSITE INFORMATION:")
+        parts.append("OFFICIAL VU WEBSITE:")
         for i, r in enumerate(website_results, 1):
             parts.append(f"[Website Source {i}] Page: {r['source']} ({r.get('url','')})\n{r['text']}")
     return "\n\n".join(parts)
 
 
 # ============================================================
-# LLM RESPONSE GENERATION
+# GENERATE ANSWER
 # ============================================================
 
 def generate_answer(client, user_question, context, category):
-    user_prompt = f"""RETRIEVED UNIVERSITY CONTEXT:
+    priority = (
+        "Prioritize official VU website information for this question."
+        if category == "website"
+        else "Prioritize the university academic documents for this question."
+    )
+    user_prompt = f"""{priority}
+
+RETRIEVED INFORMATION:
 {context}
 
 STUDENT QUESTION:
 {user_question}
 
-Answer concisely as the VU AI Academic Advisor based on the context above."""
+Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions."""
 
+    models_to_try = ["llama-3.3-70b-versatile", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
     last_error = None
-    for model in GROQ_MODELS:
+    for m in models_to_try:
         try:
             response = client.chat.completions.create(
-                model=model,
+                model=m,
                 messages=[
                     {"role": "system", "content": build_system_prompt()},
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.1,
-                max_tokens=700
+                max_tokens=800
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
             last_error = e
             continue
-    return f"I'm experiencing connectivity issues right now. Please try again shortly. (Error: {last_error})"
+    return f"I couldn't get a response right now. Please try again. (Error: {last_error})"
 
 
 # ============================================================
-# UI HELPERS
+# SOURCE DISPLAY — only document names, no website links
 # ============================================================
 
 def display_sources(academic_results):
-    names = list({r["source"] for r in academic_results if "source" in r})
+    names = []
+    for r in academic_results:
+        if r["source"] not in names:
+            names.append(r["source"])
     if names:
-        st.caption("📄 **Sources:** " + " · ".join(names))
+        st.caption("📄 Sources: " + " · ".join(names))
+
+
+# ============================================================
+# SUGGESTIONS
+# ============================================================
+
+SUGGESTIONS = [
+    "What programmes does VU offer?",
+    "How do I apply to VU?",
+    "What is the minimum CGPA to progress?",
+    "What are the attendance requirements?",
+    "Which minors are available for B.Tech?",
+    "What courses are offered next semester?"
+]
+
+
+# ============================================================
+# BUBBLE HELPERS
+# ============================================================
 
 def show_user_bubble(text):
     st.markdown(
-        f'<div class="bubble-user"><div class="bubble-user-inner">{text}</div></div>',
+        f'<div class="bubble-user">'
+        f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
+        f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
+        f'max-width:70%;font-size:14px;line-height:1.55;'
+        f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{text}</div></div>',
         unsafe_allow_html=True
     )
 
 def show_bot_bubble(text):
     st.markdown(
-        f'<div class="bubble-bot"><div class="bubble-bot-inner">{text}</div></div>',
+        f'<div class="bubble-bot">'
+        f'<div style="background:#ffffff;color:#1a1a2e;'
+        f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
+        f'max-width:75%;font-size:14px;line-height:1.65;'
+        f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{text}</div></div>',
         unsafe_allow_html=True
     )
 
 
 # ============================================================
-# SUGGESTIONS & MAIN CHAT DISPLAY
+# INTRO / SUGGESTIONS (shown when chat is empty)
 # ============================================================
-
-SUGGESTIONS = [
-    "What programmes does VU offer?",
-    "How do I apply for admission?",
-    "What is the minimum CGPA requirement?",
-    "What are the attendance regulations?",
-    "Which minor courses are available?",
-    "How are credits calculated?"
-]
 
 if not st.session_state.messages:
     st.markdown("""
     <div class="info-box">
-    <h3>Welcome! Ask your academic questions below</h3>
-    <p>I can assist with course regulations, credit transfers, attendance rules, prerequisites, and general university information.</p>
+    <h3>Ask your academic question</h3>
+    <p>I can help with VU courses, programmes, prerequisites, eligibility,
+    credits, semesters, admissions and related university information.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 💡 Frequently Asked Questions")
+    st.markdown("### 💡 Try asking")
     cols = st.columns(3)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 3]:
@@ -665,80 +782,98 @@ if not st.session_state.messages:
                 st.session_state.pending_question = suggestion
                 st.rerun()
 
+
+# ============================================================
+# DISPLAY CHAT HISTORY
+# ============================================================
+
 for msg in st.session_state.messages:
-    if msg.get("role") == "user":
-        show_user_bubble(msg.get("content", ""))
+    role = msg.get("role")
+    content = msg.get("content", "")
+    if role == "user":
+        show_user_bubble(content)
     else:
-        show_bot_bubble(msg.get("content", ""))
-        if msg.get("academic_sources"):
-            display_sources(msg.get("academic_sources"))
+        show_bot_bubble(content)
+        ac = msg.get("academic_sources", [])
+        if ac:
+            display_sources(ac)
 
 
 # ============================================================
-# PROCESS USER INPUT
+# GET QUESTION
 # ============================================================
 
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
-user_question = pending or st.chat_input("Ask an academic question...")
+user_question = pending or st.chat_input("Ask your academic question...")
+
+
+# ============================================================
+# PROCESS QUESTION
+# ============================================================
 
 if user_question:
+
     st.session_state.messages.append({"role": "user", "content": user_question})
     show_user_bubble(user_question)
 
-    q_clean = user_question.strip()
-
-    # 1. Handle Greetings & Pleasantries cleanly without documents or generic chatter
-    if GREETING_PATTERNS.match(q_clean):
-        show_bot_bubble(GREETING_REPLY)
+    # ---- Social / greeting shortcut (no retrieval, no links) ----
+    is_thanks = re.search(r"\b(thank(s|\s*you|u)|thx|ty)\b", user_question, re.I)
+    if SOCIAL_RE.match(user_question.strip()):
+        answer = THANKS_REPLY if is_thanks else GREETING_REPLY
+        show_bot_bubble(answer)
         st.session_state.messages.append({
-            "role": "assistant", "content": GREETING_REPLY,
+            "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
         })
         st.stop()
 
-    if THANKS_PATTERNS.match(q_clean):
-        show_bot_bubble(THANKS_REPLY)
-        st.session_state.messages.append({
-            "role": "assistant", "content": THANKS_REPLY,
-            "academic_sources": [], "website_sources": []
-        })
-        st.stop()
+    # ---- Real question — retrieval + LLM ----
+    category = classify_query(user_question)
 
-    # 2. Handle Academic & University Queries via RAG
     if not api_key:
-        answer = "Groq API key missing. Please configure GROQ_API_KEY in Streamlit Secrets or Environment Variables."
+        answer = "The advisor is not configured yet. Please contact the administrator."
         show_bot_bubble(answer)
         st.session_state.messages.append({
             "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
         })
     else:
-        category = classify_query(user_question)
-        client = Groq(api_key=api_key)
+        try:
+            client = Groq(api_key=api_key)
 
-        if category == "website":
-            website_results = retrieve(user_question, website_kb, top_k=5)
-            academic_results = retrieve(user_question, academic_kb, top_k=2)
-        else:
-            academic_results = retrieve(user_question, academic_kb, top_k=5)
-            website_results = retrieve(user_question, website_kb, top_k=2)
+            if category == "website":
+                website_results = retrieve(user_question, website_kb, top_k=6)
+                academic_results = retrieve(user_question, academic_kb, top_k=3)
+            else:
+                academic_results = retrieve(user_question, academic_kb, top_k=6)
+                website_results = retrieve(user_question, website_kb, top_k=3)
 
-        context = create_context(academic_results, website_results)
+            context = create_context(academic_results, website_results)
 
-        with st.spinner("Analyzing regulations..."):
-            answer = generate_answer(client, user_question, context, category)
+            with st.spinner("Thinking..."):
+                answer = generate_answer(client, user_question, context, category)
 
-        show_bot_bubble(answer)
-        if category == "academic" and academic_results:
-            display_sources(academic_results)
+            show_bot_bubble(answer)
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": answer,
-            "academic_sources": academic_results if category == "academic" else [],
-            "website_sources": []
-        })
+            # Show only document source names for academic questions, no links
+            if category == "academic" and academic_results:
+                display_sources(academic_results)
+
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": answer,
+                "academic_sources": academic_results,
+                "website_sources": []
+            })
+
+        except Exception as error:
+            answer = "I couldn't process that request right now. Please try again."
+            show_bot_bubble(answer)
+            st.session_state.messages.append({
+                "role": "assistant", "content": answer,
+                "academic_sources": [], "website_sources": []
+            })
 
 
 # ============================================================
