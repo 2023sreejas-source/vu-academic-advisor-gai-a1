@@ -35,7 +35,6 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 # DYNAMIC BACKGROUND & LOGO SETUP
 # ============================================================
 
-# 1. Background Image Setup (Campus photo with 90% frosted glass overlay for readability)
 bg_path = None
 for f in ["campus.jpg", "campus.png", "Vidyashilp.jpg", "vu_campus.jpg"]:
     p = os.path.join(APP_DIR, f)
@@ -65,7 +64,6 @@ else:
     </style>
     """
 
-# 2. Case-Insensitive Logo Setup
 logo_path = os.path.join(APP_DIR, "Logo.png")
 if not os.path.isfile(logo_path):
     logo_path = os.path.join(APP_DIR, "logo.png")
@@ -110,37 +108,24 @@ html, body, [class*="css"] {
     margin: 16px 0 !important;
 }
 
-/* Sidebar Selectboxes */
-[data-testid="stSidebar"] [data-baseweb="select"] > div {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+/* Sidebar Selectboxes & Number Inputs */
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] div[data-baseweb="input"] {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: #FFFFFF !important;
     border-radius: 8px !important;
 }
-[data-testid="stSidebar"] [data-baseweb="select"] input,
+[data-testid="stSidebar"] input {
+    background: transparent !important;
+    color: #FFFFFF !important;
+}
 [data-testid="stSidebar"] [data-baseweb="select"] span {
     color: #FFFFFF !important;
 }
-[data-testid="stSidebar"] [data-baseweb="popover"] {
-    background-color: #0B5394 !important;
-}
-
-/* Sidebar Inputs */
-[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-radius: 8px !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-}
-[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-    color: #FFFFFF !important;
-}
-[data-testid="stSidebar"] [data-testid="stNumberInput"] input::placeholder {
-    color: #CBD5E1 !important;
-    opacity: 1 !important;
-}
-[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
-    background: transparent !important;
-    color: #FFFFFF !important;
+[data-testid="stSidebar"] input::placeholder {
+    color: #E2E8F0 !important;
+    opacity: 0.8 !important;
 }
 
 /* Clear Chat Button */
@@ -237,7 +222,7 @@ html, body, [class*="css"] {
     margin: 16px 0 10px;
 }
 
-/* Light Suggestion Buttons (Overriding Dark Mode) */
+/* Light Suggestion Buttons */
 main div[data-testid="stButton"] > button {
     background: #FFFFFF !important;
     border: 1px solid #CBD5E1 !important;
@@ -294,8 +279,6 @@ main div[data-testid="stButton"] > button * {
     box-shadow: 0 2px 6px rgba(15,23,42,0.03);
 }
 
-.source-panel, .source-panel * { color: #64748B !important; }
-.source-panel .source-label { color: #0B5394 !important; font-weight: 600; }
 [data-testid="stExpander"] {
     background: #FFFFFF !important;
     border: 1px solid #E2E8F0 !important;
@@ -334,9 +317,6 @@ main div[data-testid="stButton"] > button * {
     background: #0B5394 !important;
     border-radius: 8px !important;
 }
-[data-testid="stChatInputContainer"] button svg {
-    fill: #FFFFFF !important;
-}
 
 .ai-disclaimer {
     position: fixed; left: 0; right: 0; bottom: 2px;
@@ -360,10 +340,15 @@ main div[data-testid="stButton"] > button * {
 # CONSTANTS & REGEXES
 # ============================================================
 
-MODEL = "llama-3.3-70b-versatile"
+# Model fallback chain in case one model is unavailable on the API key
+MODEL_CANDIDATES = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "llama3-70b-8192",
+    "llama3-8b-8192"
+]
 
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
-
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
 
 DEFAULT_WEBSITE_SOURCES = [
@@ -376,13 +361,12 @@ DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU B.M.S., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/schools/bachelor-of-management-studies-bachelor-of-laws-hons/"},
 ]
 
-# Includes explicit matches for "how are you", "how are u", "how r u", etc.
 SOCIAL_RE = re.compile(
     r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
     r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
     r"how\s*are\s*(you|u)|how\s*r\s*u|how\s*do\s*you\s*do|how'?s\s*it\s*going|"
     r"thank(s|\s*you|u)|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|"
-    r"bye|goodbye|see\s*you|take\s*care|cya)\s*[!.?]*\s*$",
+    r"bye|goodbye|see\s*you|take\s*care|cya|bonjour)\s*[!.?]*\s*$",
     re.I
 )
 
@@ -439,7 +423,7 @@ if "pending_question" not in st.session_state:
 
 
 # ============================================================
-# INTEGRATED HEADER DISPLAY
+# HEADER
 # ============================================================
 
 st.markdown(
@@ -528,11 +512,9 @@ student_profile = {
 }
 
 def effective_profile_for_question(user_query, sidebar_profile):
-    """Extracts inline user context to override blank/different sidebar settings."""
     effective = dict(sidebar_profile)
     q_lower = user_query.lower()
     
-    # Program detection
     prog_map = {
         "b.tech": "B.Tech", "btech": "B.Tech", 
         "bms": "BMS", "b.m.s": "BMS",
@@ -546,14 +528,12 @@ def effective_profile_for_question(user_query, sidebar_profile):
             effective["program"] = val
             break
 
-    # Semester detection
     sem_match = re.search(r"\b([1-9]|10)(?:st|nd|rd|th)?\s*(?:sem|semester)\b", q_lower)
     if sem_match:
         num = sem_match.group(1)
         suffix = {"1": "1st", "2": "2nd", "3": "3rd"}.get(num, f"{num}th")
         effective["semester"] = f"{suffix} Semester"
 
-    # CGPA detection
     cgpa_match = re.search(r"\b(?:cgpa|gpa)\s*(?:of|=|:)?\s*([0-9]\.[0-9]{1,2})\b", q_lower)
     if cgpa_match:
         try:
@@ -561,7 +541,6 @@ def effective_profile_for_question(user_query, sidebar_profile):
         except ValueError:
             pass
 
-    # Credits detection
     cred_match = re.search(r"\b([0-9]{1,3})\s*(?:completed\s*)?credits?\b", q_lower)
     if cred_match:
         try:
@@ -584,7 +563,6 @@ def clean_text(text):
     return text.strip()
 
 def guess_section(raw_text):
-    """Inspects raw page lines to find candidate section headers."""
     for line in raw_text.splitlines():
         line = re.sub(r"\s+", " ", line).strip()
         if not line or len(line) > 100:
@@ -981,7 +959,7 @@ CONVERSATION RULES:
 - Do not carry an old topic into an unrelated question.
 
 BEHAVIOUR RULES:
-1. Greetings, casual openers, and "how are you" messages should receive a friendly response without retrieval.
+1. Greetings, casual openers, "bonjour", and "how are you" messages should receive a friendly response without retrieval.
 2. Personal questions about the AI should be answered briefly and redirected to academics.
 3. Completely non-academic questions should be declined politely without university sources.
 4. If the student asks about Summer Term, do not invent Summer Term offerings, fees or rules.
@@ -989,8 +967,7 @@ BEHAVIOUR RULES:
 5. For Law programmes, use the specific Law programme sources when available.
 6. IMPORTANT LAW DISTINCTION: In VU's integrated B.A., LL.B. and B.M.S., LL.B. programmes,
    Law is the core legal education component. Do NOT tell a Law student that they can simply choose
-   "Law" as their own major or minor. The programme has its own Liberal Discipline major/minor
-   structure alongside the Law curriculum.
+   "Law" as their own major or minor.
 7. If a BMS student asks about minors, use the BMS-specific source because the current VU BMS page
    explicitly lists minors including Law, Data Science, Economics, Design and Psychology.
 8. For fees or financial queries, say: "Please contact the Accounts office directly."
@@ -1013,7 +990,6 @@ SOURCE RULES:
 # ============================================================
 
 def display_sources(retrieved_docs):
-    """Renders a deduplicated drawer showing referenced documents and web pages."""
     if not retrieved_docs:
         return
     
@@ -1055,7 +1031,7 @@ def display_sources(retrieved_docs):
 
 
 # ============================================================
-# LLM GENERATION
+# LLM GENERATION WITH AUTOMATIC FALLBACK
 # ============================================================
 
 def generate_response(user_query, effective_profile):
@@ -1064,7 +1040,7 @@ def generate_response(user_query, effective_profile):
 
     client = Groq(api_key=api_key)
 
-    # 1. Check intent pre-filtering regexes
+    # 1. Intent pre-filtering
     if SOCIAL_RE.match(user_query):
         if re.search(r"thank(s|\s*you|u)|thx|ty", user_query, re.I):
             return THANKS_REPLY, []
@@ -1084,7 +1060,6 @@ def generate_response(user_query, effective_profile):
 
     retrieved = retrieve(user_query, target_kb, top_k=5)
     
-    # Fallback to alternate KB if primary KB returned no hits
     if not retrieved and q_type == "website":
         retrieved = retrieve(user_query, academic_kb, top_k=5)
 
@@ -1108,23 +1083,37 @@ def generate_response(user_query, effective_profile):
         {"role": "user", "content": f"Information retrieved from VU databases:\n{kb_context}\n\nStudent question: {user_query}"}
     ]
 
-    try:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            temperature=0.2,
-            max_tokens=600
-        )
+    # 4. Attempt model loop with automatic fallback
+    response = None
+    last_error = None
+
+    for model_name in MODEL_CANDIDATES:
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=0.2,
+                max_tokens=600
+            )
+            break
+        except Exception as e:
+            last_error = e
+            err_msg = str(e).lower()
+            if "model_not_found" in err_msg or "404" in err_msg or "does not exist" in err_msg:
+                continue
+            else:
+                break
+
+    if response:
         return response.choices[0].message.content, retrieved
-    except Exception as e:
-        return f"⚠️ An error occurred while communicating with the AI service: {str(e)}", []
+    else:
+        return f"⚠️ An error occurred while communicating with the AI service: {str(last_error)}", []
 
 
 # ============================================================
 # MAIN CHAT INTERFACE
 # ============================================================
 
-# Render Chat History
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(
@@ -1139,7 +1128,6 @@ for msg in st.session_state.messages:
         if msg.get("sources"):
             display_sources(msg["sources"])
 
-# Render Default Suggestion Cards if chat is empty
 if not st.session_state.messages:
     st.markdown('''
     <div class="vu-card">
@@ -1165,7 +1153,6 @@ if not st.session_state.messages:
             st.session_state.pending_question = "Can I choose a minor in BMS programme?"
             st.rerun()
 
-# User Input Handling
 user_input = st.chat_input("Type your academic question here...")
 
 if st.session_state.pending_question:
@@ -1173,17 +1160,14 @@ if st.session_state.pending_question:
     st.session_state.pending_question = None
 
 if user_input:
-    # 1. Compute dynamic profile for current question
     effective_prof = effective_profile_for_question(user_input, student_profile)
 
-    # 2. Append & Render User Question
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.markdown(
         f'<div class="bubble-user"><div class="bubble-user-inner">{html.escape(user_input)}</div></div>',
         unsafe_allow_html=True
     )
 
-    # 3. Generate & Render Bot Response
     with st.spinner("Consulting VU academic regulations..."):
         answer, sources = generate_response(user_input, effective_prof)
 
