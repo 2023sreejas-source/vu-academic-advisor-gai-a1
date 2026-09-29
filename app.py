@@ -112,7 +112,8 @@ html, body, [class*="css"] {
 }
 
 .vu-top-card {
-    padding: 18px 22px;
+    padding: 18px 22px 16px;
+    min-height: 150px;
 }
 .vu-accent {
     width: 42px;
@@ -136,18 +137,31 @@ html, body, [class*="css"] {
     color: #28A745;
     font-size: 11px;
 }
-.vu-logo img {
-    max-height: 70px !important;
+.vu-logo-space {
+    height: 62px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.vu-logo-space img {
+    max-height: 62px !important;
     width: auto !important;
     object-fit: contain !important;
 }
-.vu-campus img {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 170px !important;
+.vu-campus-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+}
+.vu-campus-wrap img {
+    width: 300px !important;
+    max-width: 100% !important;
+    height: 145px !important;
     object-fit: contain !important;
-    object-position: center right !important;
-    border-radius: 10px !important;
+    object-position: center !important;
+    border-radius: 12px !important;
+    border: 1px solid #E2E7ED !important;
 }
 
 .vu-prompt-title {
@@ -178,7 +192,7 @@ main div[data-testid="stButton"] > button {
     font-size: 13px !important;
     font-weight: 500 !important;
     min-height: 54px !important;
-    box-shadow: none !important;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04) !important;
     padding: 10px 12px !important;
 }
 main div[data-testid="stButton"] > button:hover {
@@ -225,7 +239,7 @@ main div[data-testid="stButton"] > button:hover {
 [data-testid="stBottom"] {
     background: #F5F7FA !important;
     border-top: none !important;
-    padding: 8px 16px 30px !important;
+    padding: 8px 16px 26px !important;
 }
 [data-testid="stChatInputContainer"],
 [data-testid="stChatInputContainer"] > div {
@@ -370,8 +384,8 @@ header_left, header_right = st.columns([1.35, 2.65], gap="large", vertical_align
 with header_left:
     st.markdown('<div class="vu-card vu-top-card">', unsafe_allow_html=True)
     if os.path.isfile(logo_path):
-        st.markdown('<div class="vu-logo">', unsafe_allow_html=True)
-        st.image(logo_path, width=150)
+        st.markdown('<div class="vu-logo-space">', unsafe_allow_html=True)
+        st.image(logo_path, width=145)
         st.markdown('</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="vu-accent"></div>'
@@ -382,10 +396,10 @@ with header_left:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with header_right:
+    st.markdown('<div class="vu-campus-wrap">', unsafe_allow_html=True)
     if os.path.isfile(campus_path):
-        st.markdown('<div class="vu-campus">', unsafe_allow_html=True)
-        st.image(campus_path, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.image(campus_path, width=300)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
