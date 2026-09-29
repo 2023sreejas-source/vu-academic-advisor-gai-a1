@@ -873,18 +873,18 @@ if user_question:
         try:
             client = Groq(api_key=api_key)
 
-if category == "website":
-    website_results = retrieve(user_question, website_kb, top_k=6)
-    academic_results = retrieve(user_question, academic_kb, top_k=3)
-else:
-    academic_results = retrieve(user_question, academic_kb, top_k=6)
-    website_results = retrieve(user_question, website_kb, top_k=3)
+            if category == "website":
+                website_results = retrieve(user_question, website_kb, top_k=6)
+                academic_results = retrieve(user_question, academic_kb, top_k=3)
+            else:
+                academic_results = retrieve(user_question, academic_kb, top_k=6)
+                website_results = retrieve(user_question, website_kb, top_k=3)
 
-context = create_context(academic_results, website_results)
+            context = create_context(academic_results, website_results)
 
-with st.spinner("Thinking..."):
-    answer = generate_answer(client, user_question, context, category)
-    
+            with st.spinner("Thinking..."):
+                answer = generate_answer(client, user_question, context, category)
+
             st.markdown(
                 f'<div class="bubble-bot">'
                 f'<div style="background:#ffffff;color:#1a1a2e;'
@@ -916,7 +916,6 @@ with st.spinner("Thinking..."):
                 "role": "assistant", "content": answer,
                 "academic_sources": [], "website_sources": []
             })
-
 
 # ============================================================
 # FOOTER
