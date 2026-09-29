@@ -47,14 +47,20 @@ html, body, [class*="css"] {
     background: #ffffff !important;
 }
 
-/* Force main area markdown text and headers to be dark, leaving sidebar untouched */
+/* Force header column text, headers, and standard markdown in main area to dark blue/slate */
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] h1,
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] h2,
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] h3,
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] p,
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] strong,
+[data-testid="stMainBlockContainer"] [data-testid="stColumn"] span,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h1,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h2,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] h3,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] p,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] strong,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] span {
-    color: #172033 !important;
+    color: #0b4f8a !important;
 }
 
 /* -------------------- Sidebar -------------------- */
@@ -145,61 +151,6 @@ div[data-testid="stButton"] > button:hover {
     background: #f3f7fb !important;
 }
 
-/* -------------------- Header -------------------- */
-.vu-header {
-    display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-    width: 100%;
-    height: 176px;
-    background: linear-gradient(rgba(8, 47, 91, 0.65), rgba(8, 47, 91, 0.65)), url('campus.jpeg');
-    background-size: cover;
-    background-position: center;
-    border-bottom: 1px solid #dfe5eb;
-    overflow: hidden;
-    border-radius: 0 0 12px 12px;
-    margin-bottom: 18px;
-}
-.vu-header-brand {
-    display: flex;
-    align-items: center;
-    gap: 22px;
-    padding: 18px 28px 18px 8px;
-    min-width: 52%;
-    background: transparent;
-}
-.vu-header-brand img {
-    width: 128px;
-    height: 104px;
-    object-fit: contain;
-    border-radius: 10px;
-}
-.vu-header-copy h2 {
-    margin: 0 0 8px 0;
-    color: #ffffff !important;
-    font-size: 29px;
-    line-height: 1.15;
-    font-weight: 650;
-}
-.vu-subtitle {
-    color: #ffffff !important;
-    font-size: 14px;
-    font-weight: 500;
-}
-.vu-campus-photo {
-    flex: 0 0 38%;
-    height: 176px;
-    overflow: hidden;
-    position: relative;
-}
-.vu-campus-photo img {
-    width: 100%;
-    height: 176px;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-}
-
 /* -------------------- Welcome card -------------------- */
 .info-box {
     background: #ffffff;
@@ -282,29 +233,8 @@ div[data-testid="stButton"] > button:hover {
 }
 
 #MainMenu, footer { visibility: hidden; }
-
-/* -------------------- Responsive layout -------------------- */
-@media (max-width: 900px) {
-    .vu-header { height: 140px; }
-    .vu-header-brand { min-width: 60%; padding-left: 4px; gap: 12px; }
-    .vu-header-brand img { width: 105px; height: 88px; }
-    .vu-header-copy h2 { font-size: 22px; }
-    .vu-campus-photo { flex-basis: 34%; height: 140px; }
-    .vu-campus-photo img { height: 140px; }
-    .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
-}
-@media (max-width: 640px) {
-    .vu-header { height: 112px; }
-    .vu-header-brand { padding: 10px 8px 10px 0; gap: 8px; }
-    .vu-header-brand img { width: 82px; height: 72px; }
-    .vu-header-copy h2 { font-size: 18px; }
-    .vu-subtitle { font-size: 12px !important; }
-    .vu-campus-photo { display: none; }
-    .bubble-user-inner, .bubble-bot-inner { max-width: 94%; }
-}
 </style>
 """, unsafe_allow_html=True)
-
 # ============================================================
 # CONSTANTS
 # ============================================================
