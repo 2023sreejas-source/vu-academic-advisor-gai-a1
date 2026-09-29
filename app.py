@@ -370,8 +370,7 @@ logo_base64 = image_to_base64(logo_path) if logo_path else None
 if logo_base64:
 
     logo_html = f"""
-    <img class="vu-header-logo"
-         src="{logo_base64}">
+    <img class="vu-header-logo" src="{logo_base64}">
     """
 
 else:
@@ -394,27 +393,18 @@ else:
 st.markdown(
     f"""
     <div class="vu-header">
-
         {logo_html}
-
         <div>
-
-            <p class="vu-header-title">
-                Vidyashilp University
-            </p>
-
+            <p class="vu-header-title">Vidyashilp University</p>
             <p class="vu-header-sub">
                 <span class="vu-header-dot"></span>
                 AI Academic Advisor &nbsp;·&nbsp; Online
             </p>
-
         </div>
-
     </div>
     """,
     unsafe_allow_html=True
 )
-
 
 # ============================================================
 # SIDEBAR
@@ -943,7 +933,6 @@ if not st.session_state.website_loaded:
         )
 
         st.session_state.website_loaded = True
-
 
 academic_kb = st.session_state.academic_kb
 website_kb = st.session_state.website_kb
