@@ -164,13 +164,13 @@ div[data-testid="stButton"] > button:hover {
 }
 .vu-header-copy h2 {
     margin: 0 0 8px 0;
-    color: #0b4f8a;
+    color: #000000 !important;
     font-size: 29px;
     line-height: 1.15;
     font-weight: 650;
 }
 .vu-subtitle {
-    color: #0b4f8a !important;
+    color: #172033 !important;
     font-size: 14px;
     font-weight: 500;
 }
