@@ -689,7 +689,7 @@ STUDENT QUESTION:
 
 Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions."""
 
-    models_to_try = [MODEL, "llama3-70b-8192", "gemma2-9b-it"]
+    models_to_try = ["llama-3.3-70b-versatile", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
     last_error = None
     for m in models_to_try:
         try:
