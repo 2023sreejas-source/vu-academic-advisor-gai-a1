@@ -37,258 +37,403 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+:root {
+    --vu-blue: #0b4f8a;
+    --vu-blue-dark: #083b68;
+    --vu-blue-soft: #eef6fd;
+    --vu-red: #c0182a;
+    --ink: #172033;
+    --muted: #667085;
+    --line: #e4e9f0;
+    --surface: #ffffff;
+    --page: #f7f9fc;
+}
+
+/* ------------------------------------------------------------
+   Base
+------------------------------------------------------------ */
 html, body, [class*="css"] {
-    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Inter', Arial, sans-serif;
+    font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif;
 }
 
-.stApp, [data-testid="stAppViewContainer"],
+.stApp,
+[data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
+[data-testid="stMain"],
 [data-testid="block-container"] {
-    background: #ffffff !important;
+    background: var(--page) !important;
 }
 
-/* -------------------- Sidebar -------------------- */
+[data-testid="block-container"] {
+    max-width: 1240px !important;
+    padding-top: 1.2rem !important;
+    padding-left: 2.0rem !important;
+    padding-right: 2.0rem !important;
+    padding-bottom: 5rem !important;
+}
+
+/* Remove Streamlit chrome that makes the page feel like a raw prototype. */
+#MainMenu, footer { visibility: hidden; }
+[data-testid="stToolbar"] { visibility: hidden; }
+[data-testid="stDecoration"] { display: none; }
+
+/* ------------------------------------------------------------
+   Sidebar — calm VU blue, clean controls
+------------------------------------------------------------ */
 [data-testid="stSidebar"] {
-    background: #082f5b !important;
-    border-right: 1px solid #dbe4ee !important;
+    background: linear-gradient(180deg, var(--vu-blue-dark) 0%, var(--vu-blue) 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.10) !important;
 }
+
 [data-testid="stSidebar"] > div:first-child {
-    background: #082f5b !important;
+    padding: 1.5rem 1.1rem 1.2rem 1.1rem !important;
 }
+
 [data-testid="stSidebar"] * {
-    color: #ffffff !important;
+    color: #ffffff;
 }
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    color: rgba(255,255,255,0.78) !important;
+    line-height: 1.55 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
+    color: #ffffff !important;
+    font-size: 1.18rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 0.35rem !important;
+}
+
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.20) !important;
+    border-color: rgba(255,255,255,0.18) !important;
+    margin: 1.1rem 0 1.25rem 0 !important;
 }
+
 [data-testid="stSidebar"] label {
-    color: #ffffff !important;
-    font-weight: 500 !important;
+    color: rgba(255,255,255,0.92) !important;
+    font-weight: 550 !important;
+    font-size: 0.86rem !important;
 }
-[data-testid="stSidebar"] input {
-    color: #172033 !important;
-    background: #ffffff !important;
-}
+
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-baseweb="input"] > div {
     background: #ffffff !important;
-    border-color: #d9e2ec !important;
-    color: #172033 !important;
-}
-[data-testid="stSidebar"] [data-baseweb="select"] span,
-[data-testid="stSidebar"] [data-baseweb="input"] input {
-    color: #172033 !important;
-}
-[data-testid="stSidebar"] [data-baseweb="select"] svg {
-    fill: #34516d !important;
-}
-[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    background: transparent !important;
-    border: 1px solid rgba(255,255,255,0.70) !important;
-    color: #ffffff !important;
+    border: 1px solid #d7e0ea !important;
+    border-radius: 10px !important;
+    min-height: 42px !important;
     box-shadow: none !important;
 }
+
+[data-testid="stSidebar"] [data-baseweb="select"] *,
+[data-testid="stSidebar"] [data-baseweb="input"] * {
+    color: #243447 !important;
+}
+
+[data-testid="stSidebar"] input::placeholder {
+    color: #98a2b3 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    background: #f1f5f9 !important;
+    color: var(--vu-blue) !important;
+    border: none !important;
+}
+
+[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    margin-top: 0.2rem !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.55) !important;
+    border-radius: 11px !important;
+    font-weight: 600 !important;
+    height: 42px !important;
+    box-shadow: none !important;
+}
+
 [data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
     background: rgba(255,255,255,0.10) !important;
     border-color: #ffffff !important;
-    color: #ffffff !important;
 }
 
-/* -------------------- Bottom chat input -------------------- */
-[data-testid="stBottom"], [data-testid="stBottom"] > div {
-    background: #ffffff !important;
-    border-top: 1px solid #e7ebf0 !important;
-    padding: 10px 16px !important;
-}
-[data-testid="stChatInputContainer"],
-[data-testid="stChatInputContainer"] > div {
-    background: #ffffff !important;
-    border: 1.5px solid #d9e1ea !important;
-    border-radius: 26px !important;
-    box-shadow: 0 2px 8px rgba(8,47,91,0.07) !important;
-}
-[data-testid="stChatInputContainer"] textarea {
-    color: #172033 !important;
-    caret-color: #0b4f8a !important;
-    background: transparent !important;
-    font-size: 15px !important;
-}
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #9aa7b5 !important;
-}
-
-/* -------------------- General buttons -------------------- */
-div[data-testid="stButton"] > button {
-    background: #ffffff !important;
-    border: 1px solid #d9e2ec !important;
-    border-radius: 20px !important;
-    color: #0b4f8a !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    padding: 9px 14px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-    transition: all 0.15s !important;
-}
-div[data-testid="stButton"] > button:hover {
-    border-color: #0b4f8a !important;
-    color: #0b4f8a !important;
-    background: #f3f7fb !important;
-}
-
-/* -------------------- Header -------------------- */
+/* ------------------------------------------------------------
+   Header
+------------------------------------------------------------ */
 .vu-header {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: space-between;
-    width: 100%;
-    height: 176px;
-    background: #ffffff;
-    border-bottom: 1px solid #dfe5eb;
-    overflow: hidden;
-    border-radius: 0 0 12px 12px;
-    margin-bottom: 18px;
+    gap: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin: 0 0 20px 0;
+    box-shadow: 0 2px 10px rgba(16,24,40,0.04);
 }
-.vu-header-brand {
+
+.vu-brand {
     display: flex;
     align-items: center;
-    gap: 22px;
-    padding: 18px 28px 18px 8px;
-    min-width: 52%;
-    background: #ffffff;
+    gap: 16px;
+    min-width: 0;
 }
-.vu-header-brand img {
-    width: 128px;
-    height: 104px;
+
+.vu-brand-logo {
+    width: 112px;
+    height: 58px;
     object-fit: contain;
-    border-radius: 10px;
+    object-position: left center;
 }
-.vu-header-copy h2 {
-    margin: 0 0 8px 0;
-    color: #0b4f8a;
-    font-size: 29px;
-    line-height: 1.15;
+
+.vu-brand-divider {
+    width: 1px;
+    height: 44px;
+    background: #dfe5ec;
+}
+
+.vu-brand-title {
+    color: var(--ink);
+    font-size: 1.35rem;
+    line-height: 1.2;
     font-weight: 650;
+    letter-spacing: -0.025em;
+    margin: 0;
 }
-.vu-subtitle {
-    color: #0b4f8a !important;
-    font-size: 14px;
+
+.vu-brand-subtitle {
+    color: var(--vu-blue);
+    font-size: 0.86rem;
     font-weight: 500;
+    margin-top: 5px;
 }
-.vu-campus-photo {
-    flex: 0 0 38%;
-    height: 176px;
-    overflow: hidden;
-    position: relative;
+
+.vu-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #20b26b;
+    margin-right: 6px;
 }
-.vu-campus-photo img {
-    width: 100%;
-    height: 176px;
+
+.vu-campus {
+    width: 176px;
+    height: 76px;
     object-fit: cover;
-    object-position: center;
-    display: block;
-}
-
-/* -------------------- Welcome card -------------------- */
-.info-box {
-    background: #ffffff;
-    padding: 17px 20px;
-    border-radius: 14px;
+    border-radius: 10px;
     border: 1px solid #e1e7ee;
-    border-left: 4px solid #0b4f8a;
-    margin-bottom: 18px;
-    box-shadow: 0 2px 8px rgba(8,47,91,0.05);
-}
-.info-box h3 {
-    color: #172033 !important;
-    margin-bottom: 8px !important;
-}
-.info-box p {
-    color: #334155 !important;
-    font-size: 15px !important;
-    line-height: 1.65 !important;
 }
 
-/* -------------------- Chat -------------------- */
-[data-testid="stChatMessage"] {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 4px 0 !important;
+/* ------------------------------------------------------------
+   Welcome card
+------------------------------------------------------------ */
+.info-box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--vu-blue);
+    border-radius: 14px;
+    padding: 20px 22px 18px 22px;
+    margin: 0 0 22px 0;
+    box-shadow: 0 2px 10px rgba(16,24,40,0.04);
 }
-.stChatMessage .stMarkdown p,
-.stChatMessage .stMarkdown {
-    font-size: 15px !important;
-    line-height: 1.7 !important;
+
+.info-box h3 {
+    color: var(--ink);
+    font-size: 1.18rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    margin: 0 0 7px 0;
 }
+
+.info-box p {
+    color: #5f6b7a;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.suggestion-heading {
+    color: #344054;
+    font-size: 0.91rem;
+    font-weight: 600;
+    margin: 0 0 10px 2px;
+}
+
+/* ------------------------------------------------------------
+   Suggestion buttons
+------------------------------------------------------------ */
+div[data-testid="stButton"] > button {
+    background: #ffffff !important;
+    border: 1px solid #dbe3ec !important;
+    border-radius: 12px !important;
+    color: var(--vu-blue) !important;
+    font-size: 0.84rem !important;
+    font-weight: 500 !important;
+    min-height: 42px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.03) !important;
+    transition: all 0.15s ease !important;
+}
+
+div[data-testid="stButton"] > button:hover {
+    border-color: #8bb7dc !important;
+    background: var(--vu-blue-soft) !important;
+    color: var(--vu-blue-dark) !important;
+}
+
+/* ------------------------------------------------------------
+   Chat
+------------------------------------------------------------ */
 .bubble-user {
     display: flex;
     justify-content: flex-end;
-    margin: 11px 0 14px;
+    margin: 16px 0 8px;
 }
+
 .bubble-user-inner {
-    background: #0b4f8a;
+    background: var(--vu-blue);
     color: #ffffff;
-    border-radius: 18px 18px 5px 18px;
-    padding: 11px 17px;
-    max-width: 68%;
-    font-size: 15px;
-    line-height: 1.65;
-    box-shadow: 0 2px 8px rgba(8,47,91,0.14);
+    border-radius: 16px 16px 4px 16px;
+    padding: 11px 15px;
+    max-width: 72%;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    box-shadow: 0 2px 6px rgba(11,79,138,0.14);
     word-wrap: break-word;
 }
+
 .bubble-bot {
     display: flex;
     justify-content: flex-start;
-    margin: 11px 0 14px;
+    margin: 16px 0 8px;
 }
+
 .bubble-bot-inner {
-    background: #f7f9fc;
-    color: #172033;
-    border: 1px solid #dfe6ee;
-    border-radius: 18px 18px 18px 5px;
-    padding: 12px 17px;
-    max-width: 76%;
-    font-size: 15px;
+    background: #ffffff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    max-width: 78%;
+    font-size: 0.94rem;
     line-height: 1.7;
-    box-shadow: 0 2px 7px rgba(8,47,91,0.05);
+    box-shadow: 0 2px 7px rgba(16,24,40,0.045);
     word-wrap: break-word;
 }
 
-/* -------------------- Sources -------------------- */
-.vu-title { color: #0b4f8a !important; }
-.source-panel, .source-panel * { color: #6b7280 !important; }
-.source-panel .source-label { color: #0b4f8a !important; font-weight: 600; }
-[data-testid="stExpander"] summary { color: #6b7280 !important; font-size: 13px !important; }
-[data-testid="stExpander"] a { color: #0b4f8a !important; }
-[data-testid="stExpander"] { border-color: #e1e6ec !important; }
+.bubble-bot-inner strong {
+    font-weight: 650;
+    color: #102a43;
+}
 
+/* ------------------------------------------------------------
+   Sources
+------------------------------------------------------------ */
+.source-panel {
+    margin: 2px 0 6px 0;
+}
+
+.source-panel,
+.source-panel * {
+    color: #667085 !important;
+}
+
+.source-panel .source-label {
+    color: var(--vu-blue) !important;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+[data-testid="stExpander"] {
+    background: #fbfcfe !important;
+    border: 1px solid #e5e9ef !important;
+    border-radius: 10px !important;
+    margin: 3px 0 10px 0 !important;
+}
+
+[data-testid="stExpander"] summary {
+    color: #667085 !important;
+    font-size: 0.82rem !important;
+}
+
+/* ------------------------------------------------------------
+   Chat input
+------------------------------------------------------------ */
+[data-testid="stBottom"] {
+    background: rgba(247,249,252,0.96) !important;
+    border-top: 1px solid #e7ebf0 !important;
+    padding: 10px 0 12px 0 !important;
+}
+
+[data-testid="stChatInputContainer"] {
+    max-width: 860px !important;
+    margin: 0 auto !important;
+}
+
+[data-testid="stChatInputContainer"] > div {
+    background: #ffffff !important;
+    border: 1px solid #d7dee8 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 3px 14px rgba(16,24,40,0.07) !important;
+}
+
+[data-testid="stChatInputContainer"]:focus-within > div {
+    border-color: #8bb7dc !important;
+    box-shadow: 0 3px 16px rgba(11,79,138,0.10) !important;
+}
+
+[data-testid="stChatInputContainer"] textarea {
+    color: var(--ink) !important;
+    caret-color: var(--vu-blue) !important;
+    background: transparent !important;
+}
+
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #98a2b3 !important;
+}
+
+/* Footer */
 .footer-text {
     text-align: center;
-    color: #a1aab5;
-    font-size: 11px;
-    padding-top: 20px;
+    color: #98a2b3;
+    font-size: 0.70rem;
+    padding: 20px 0 6px;
 }
 
-#MainMenu, footer { visibility: hidden; }
+/* Mobile */
+@media (max-width: 800px) {
+    [data-testid="block-container"] {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
 
-/* -------------------- Responsive layout -------------------- */
-@media (max-width: 900px) {
-    .vu-header { height: 140px; }
-    .vu-header-brand { min-width: 60%; padding-left: 4px; gap: 12px; }
-    .vu-header-brand img { width: 105px; height: 88px; }
-    .vu-header-copy h2 { font-size: 22px; }
-    .vu-campus-photo { flex-basis: 34%; height: 140px; }
-    .vu-campus-photo img { height: 140px; }
-    .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
-}
-@media (max-width: 640px) {
-    .vu-header { height: 112px; }
-    .vu-header-brand { padding: 10px 8px 10px 0; gap: 8px; }
-    .vu-header-brand img { width: 82px; height: 72px; }
-    .vu-header-copy h2 { font-size: 18px; }
-    .vu-subtitle { font-size: 12px !important; }
-    .vu-campus-photo { display: none; }
-    .bubble-user-inner, .bubble-bot-inner { max-width: 94%; }
+    .vu-header {
+        padding: 12px 14px;
+    }
+
+    .vu-brand-logo {
+        width: 88px;
+        height: 48px;
+    }
+
+    .vu-brand-title {
+        font-size: 1.05rem;
+    }
+
+    .vu-brand-divider {
+        display: none;
+    }
+
+    .vu-campus {
+        display: none;
+    }
+
+    .bubble-user-inner,
+    .bubble-bot-inner {
+        max-width: 90%;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -378,45 +523,50 @@ if "pending_question" not in st.session_state:
 # LOGO & HEADER
 # ============================================================
 
-def find_logo():
-    for filename in os.listdir("."):
-        if filename.startswith("."):
-            continue
-        lower = filename.lower()
-        if lower.endswith((".png", ".jpg", ".jpeg")) and "logo" in lower:
-            return filename
-    for filename in os.listdir("."):
-        lower = filename.lower()
-        if lower.endswith((".png", ".jpg", ".jpeg")):
-            return filename
-    return None
+from pathlib import Path
 
-logo_path = find_logo()
-CAMPUS_IMAGE_URL = "https://vidyashilp.edu.in/wp-content/uploads/2023/04/slide_banner1.jpg"
-OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2020/12/Logo.png"
+APP_DIR = Path(__file__).resolve().parent
+LOGO_PATH = APP_DIR / "logo.png"
+CAMPUS_PATH = APP_DIR / "uni pic.jpg"
 
-# Use the repository logo when it exists; otherwise use VU's official hosted logo.
-# This prevents a broken image if logo.png is not included in the deployment build.
-logo_src = logo_path if logo_path else OFFICIAL_LOGO_URL
-logo_html = f'<img src="{logo_src}" alt="Vidyashilp University logo">'
+st.markdown('<div class="vu-header">', unsafe_allow_html=True)
 
-st.markdown(
-    f"""
-    <div class="vu-header">
-        <div class="vu-header-brand">
+brand_col, campus_col = st.columns([5.8, 1.5], vertical_alignment="center")
+
+with brand_col:
+    logo_html = ""
+    if LOGO_PATH.exists():
+        try:
+            logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
+            logo_html = (
+                f'<img class="vu-brand-logo" '
+                f'src="data:image/png;base64,{logo_b64}" '
+                f'alt="Vidyashilp University logo">'
+            )
+        except Exception:
+            logo_html = ""
+
+    st.markdown(
+        f"""
+        <div class="vu-brand">
             {logo_html}
-            <div class="vu-header-copy">
-                <h2>Vidyashilp University</h2>
-                <div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>
+            <div class="vu-brand-divider"></div>
+            <div>
+                <div class="vu-brand-title">Academic Advisor</div>
+                <div class="vu-brand-subtitle">
+                    <span class="vu-status-dot"></span>AI Academic Advisor · Online
+                </div>
             </div>
         </div>
-        <div class="vu-campus-photo">
-            <img src="{CAMPUS_IMAGE_URL}" alt="Vidyashilp University campus">
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True
+    )
+
+with campus_col:
+    if CAMPUS_PATH.exists():
+        st.image(str(CAMPUS_PATH), use_container_width=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -455,7 +605,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if st.button("🗑️ Clear Chat", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -1197,7 +1347,7 @@ if not st.session_state.messages:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 💡 Try asking")
+    st.markdown('<div class="suggestion-heading">Try asking</div>', unsafe_allow_html=True)
     cols = st.columns(3)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 3]:
