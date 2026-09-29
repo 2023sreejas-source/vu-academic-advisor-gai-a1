@@ -9,8 +9,11 @@ from pypdf import PdfReader
 import os
 import re
 import math
+import base64
 import json
 import requests
+import html
+
 from collections import Counter
 
 
@@ -20,7 +23,7 @@ from collections import Counter
 
 st.set_page_config(
     page_title="Academic Advisor — Vidyashilp University",
-    page_icon="🎓",
+    page_icon="VU",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -34,206 +37,516 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Force Font & App Background */
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-
-.stApp, [data-testid="stAppViewContainer"], [data-testid="block-container"] {
-    background-color: #f0f2f5 !important;
-    color: #1a1a2e !important;
+html, body, [class*="css"] {
+    font-family: 'Google Sans', 'Google Sans Text', 'Inter', Arial, sans-serif;
 }
 
-/* Force All Global Headers & Body Text to Dark Navy/Charcoal */
-.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, 
-.stApp p, .stApp span, .stApp label, .stApp div,
-[data-testid="stMarkdownContainer"] *,
-.stMarkdown * {
-    color: #1a1a2e !important;
+:root {
+    --vu-blue: #0B4F8A;
+    --vu-blue-dark: #083B68;
+    --vu-red: #C0182A;
+    --vu-ink: #18324A;
+    --vu-muted: #66788A;
+    --vu-line: #DCE5EE;
+    --vu-bg: #F7F9FC;
 }
 
-/* Sidebar Styling & Text Visibility */
+/* Clean VU light canvas */
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="block-container"] {
+    background: var(--vu-bg) !important;
+}
+
+/* Remove Streamlit's dark top chrome/footer */
+header[data-testid="stHeader"] {
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--vu-line) !important;
+}
+#MainMenu, footer { visibility: hidden; }
+
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: #ffffff !important;
-    border-right: 1px solid #e2e8f0 !important;
+    background: var(--vu-blue) !important;
+    border-right: none !important;
 }
-
-[data-testid="stSidebar"] *,
-[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span {
-    color: #0a2240 !important;
+[data-testid="stSidebar"] > div:first-child {
+    background: var(--vu-blue) !important;
 }
-
-/* Form Controls & Dropdown Inputs Text Visibility */
-[data-testid="stWidgetLabel"] *, [data-testid="stWidgetLabel"] p {
-    color: #0a2240 !important;
-    font-weight: 600 !important;
+[data-testid="stSidebar"] * {
+    color: #ffffff;
 }
-
-div[data-baseweb="select"] *, 
-div[data-baseweb="input"] *,
-input, textarea {
-    color: #1a1a2e !important;
-    background-color: #ffffff !important;
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.22) !important;
 }
-
-/* Welcome Info Box Fix */
-.info-box {
-    background-color: #ffffff !important;
-    padding: 18px 20px !important;
-    border-radius: 12px !important;
-    border-left: 5px solid #c0182a !important;
-    margin-bottom: 20px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-}
-
-.info-box h3, .info-box h3 * {
-    color: #0a2240 !important;
-    font-weight: 700 !important;
-    margin-top: 0 !important;
-    margin-bottom: 6px !important;
-}
-
-.info-box p, .info-box p * {
-    color: #4a5568 !important;
-    margin: 0 !important;
-    font-size: 14px !important;
-}
-
-/* FAQ Buttons */
-div[data-testid="stButton"] > button {
-    background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-    padding: 10px 14px !important;
-}
-
-div[data-testid="stButton"] > button * {
-    color: #0a2240 !important;
+[data-testid="stSidebar"] label {
+    color: #ffffff !important;
     font-weight: 500 !important;
-    font-size: 13px !important;
 }
 
-div[data-testid="stButton"] > button:hover {
-    border-color: #c0182a !important;
-    background-color: #fff0f1 !important;
+/* Sidebar controls */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background: #ffffff !important;
+    border: 1px solid #D5E0EA !important;
+    border-radius: 9px !important;
+    color: var(--vu-ink) !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] span {
+    color: var(--vu-ink) !important;
+}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
+    background: #ffffff !important;
+    border: 1px solid #D5E0EA !important;
+    border-radius: 9px !important;
+}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    color: var(--vu-ink) !important;
+    background: #ffffff !important;
+}
+/* Remove Streamlit +/- boxes from numeric fields */
+[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    display: none !important;
+}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input[type="number"]::-webkit-inner-spin-button,
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+[data-testid="stSidebar"] input::placeholder {
+    color: #8A99A8 !important;
 }
 
-/* Bottom Chat Input Bar */
-[data-testid="stBottom"], [data-testid="stBottom"] > div {
-    background-color: #ffffff !important;
-    border-top: 1px solid #e2e8f0 !important;
-}
-
-[data-testid="stChatInputContainer"] {
-    background-color: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 24px !important;
-}
-
-[data-testid="stChatInputContainer"] textarea {
-    color: #1a1a2e !important;
+/* Sidebar Clear Chat */
+[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.65) !important;
+    color: #ffffff !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    background: rgba(255,255,255,0.10) !important;
+    border-color: #ffffff !important;
 }
 
-/* Custom Chat Bubbles */
+/* Header */
+.vu-header-title {
+    color: var(--vu-blue) !important;
+    font-size: 25px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+.vu-header-subtitle {
+    color: var(--vu-muted) !important;
+    font-size: 13px !important;
+    margin-top: 5px !important;
+}
+.vu-status-dot {
+    color: #1FA971 !important;
+}
+.vu-campus img {
+    border-radius: 10px !important;
+    object-fit: cover !important;
+}
+
+/* Welcome card */
+.info-box {
+    background: #ffffff !important;
+    padding: 22px 24px !important;
+    border-radius: 13px !important;
+    border: 1px solid var(--vu-line) !important;
+    border-left: 4px solid var(--vu-blue) !important;
+    margin: 12px 0 20px !important;
+    box-shadow: 0 2px 8px rgba(20,55,85,0.05) !important;
+}
+.info-box h3 {
+    color: #132B40 !important;
+    margin: 0 0 9px !important;
+    font-size: 18px !important;
+}
+.info-box p {
+    color: #587086 !important;
+    margin: 0 !important;
+    line-height: 1.6 !important;
+}
+
+/* Suggestions */
+.try-title {
+    color: #18324A !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    margin: 4px 0 10px !important;
+}
+div[data-testid="stButton"] > button {
+    background: #ffffff !important;
+    border: 1px solid #D9E3EC !important;
+    border-radius: 11px !important;
+    color: var(--vu-blue) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    min-height: 42px !important;
+    padding: 8px 12px !important;
+    box-shadow: none !important;
+}
+div[data-testid="stButton"] > button:hover {
+    border-color: var(--vu-blue) !important;
+    background: #F3F8FC !important;
+}
+
+/* Chat bubbles */
 .bubble-user {
     display: flex;
     justify-content: flex-end;
-    margin: 8px 0;
+    margin: 12px 0;
 }
 .bubble-user-inner {
-    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%);
-    color: #ffffff !important;
-    border-radius: 18px 18px 4px 18px;
-    padding: 12px 18px;
-    max-width: 70%;
-    font-size: 14px;
-    line-height: 1.55;
-    box-shadow: 0 2px 8px rgba(192,24,42,0.18);
-    word-wrap: break-word;
+    background: var(--vu-blue);
+    color: #ffffff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 15px;
+    max-width: 68%;
+    font-size: 15px;
+    line-height: 1.6;
+    box-shadow: 0 2px 7px rgba(11,79,138,0.12);
 }
-.bubble-user-inner * {
-    color: #ffffff !important;
-}
-
 .bubble-bot {
     display: flex;
     justify-content: flex-start;
-    margin: 8px 0;
+    margin: 12px 0;
 }
 .bubble-bot-inner {
     background: #ffffff;
-    color: #1a1a2e !important;
-    border-radius: 18px 18px 18px 4px;
-    padding: 12px 18px;
-    max-width: 75%;
-    font-size: 14px;
-    line-height: 1.65;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
-    word-wrap: break-word;
-}
-.bubble-bot-inner * {
-    color: #1a1a2e !important;
+    color: #18324A;
+    border: 1px solid var(--vu-line);
+    border-radius: 16px 16px 16px 4px;
+    padding: 11px 16px;
+    max-width: 74%;
+    font-size: 15px;
+    line-height: 1.7;
+    box-shadow: 0 1px 4px rgba(20,55,85,0.05);
 }
 
+/* Sources */
+.source-panel, .source-panel * {
+    color: #6B7D8E !important;
+}
+.source-panel .source-label {
+    color: var(--vu-blue) !important;
+    font-weight: 600;
+}
+[data-testid="stExpander"] {
+    border-color: var(--vu-line) !important;
+    background: #ffffff !important;
+}
+[data-testid="stExpander"] summary {
+    color: #607487 !important;
+    font-size: 13px !important;
+}
+[data-testid="stExpander"] a {
+    color: var(--vu-blue) !important;
+}
+
+/* Chat input: white, VU blue accent — never dark */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div {
+    background: #ffffff !important;
+    border-top: 1px solid var(--vu-line) !important;
+    box-shadow: none !important;
+    padding: 12px 16px !important;
+}
+[data-testid="stChatInputContainer"] {
+    background: #ffffff !important;
+    border: 1.5px solid #C9D8E6 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 2px 8px rgba(20,55,85,0.06) !important;
+}
+[data-testid="stChatInputContainer"] > div {
+    background: #ffffff !important;
+}
+[data-testid="stChatInputContainer"] textarea {
+    color: #18324A !important;
+    background: transparent !important;
+    caret-color: var(--vu-blue) !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #8999A8 !important;
+}
+[data-testid="stChatInputContainer"] button {
+    background: var(--vu-blue) !important;
+    color: #ffffff !important;
+    border-radius: 9px !important;
+}
+
+/* Footer */
 .footer-text {
     text-align: center;
-    color: #8898aa !important;
-    font-size: 11px;
-    padding-top: 20px;
+    color: #94A4B3;
+    font-size: 10px;
+    padding: 14px 0 18px;
 }
 
-#MainMenu, footer { visibility: hidden; }
+/* Main spacing */
+[data-testid="block-container"] {
+    padding-top: 1.5rem !important;
+    padding-bottom: 5.5rem !important;
+    max-width: 1280px !important;
+}
+
+/* ===== FINAL VU POLISH OVERRIDES ===== */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif !important;
+}
+header[data-testid="stHeader"] {
+    visibility: hidden !important;
+    height: 0 !important;
+}
+/* Keep platform-only Streamlit chrome out of the submitted product UI. */
+#MainMenu, footer, div[data-testid="stToolbar"],
+div[data-testid="stStatusWidget"], div[data-testid="stDecoration"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+[data-testid="block-container"] {
+    padding-top: 0.7rem !important;
+    padding-bottom: 6.5rem !important;
+    max-width: 1280px !important;
+}
+section[data-testid="stSidebar"] {
+    background: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    background: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"],
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div > div {
+    background: #FFFFFF !important;
+    color: #18324A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+    border: 1px solid #D3E0EA !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+    color: #18324A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+    fill: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
+    background: #FFFFFF !important;
+    border: 1px solid #D3E0EA !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    color: #18324A !important;
+    background: #FFFFFF !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    display: none !important;
+}
+section[data-testid="stSidebar"] input::placeholder {
+    color: #8A99A8 !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.70) !important;
+    color: #FFFFFF !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+.vu-banner {
+    position: relative;
+    min-height: 184px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid #D9E4EE;
+    border-radius: 16px;
+    margin: 0 0 22px 0;
+    box-shadow: 0 3px 12px rgba(20,55,85,0.045);
+}
+.vu-banner-copy {
+    position: relative;
+    z-index: 4;
+    width: 61%;
+    padding: 25px 34px 24px 34px;
+}
+.vu-banner-logo {
+    height: 48px;
+    width: auto;
+    max-width: 285px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+    margin-bottom: 12px;
+}
+.vu-banner-title {
+    color: #0B5A9A !important;
+    font-size: 25px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+}
+.vu-banner-subtitle {
+    color: #60758A !important;
+    font-size: 13px !important;
+    margin-top: 6px !important;
+}
+.vu-status-dot {
+    color: #20A96B !important;
+}
+.vu-banner-image-wrap {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 58%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.vu-banner-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    max-width: 100%;
+    object-position: right center;
+    display: block;
+}
+.vu-banner-fade {
+    position: absolute;
+    left: 28%;
+    top: 0;
+    width: 48%;
+    height: 100%;
+    z-index: 3;
+    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.99) 18%, rgba(255,255,255,0.86) 38%, rgba(255,255,255,0.42) 68%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div {
+    background: #FFFFFF !important;
+    border-top: 1px solid #D9E4EE !important;
+    box-shadow: none !important;
+}
+[data-testid="stBottom"] {
+    padding: 9px 16px 8px !important;
+}
+[data-testid="stBottom"]::after {
+    content: "AI-generated responses can make mistakes. Please verify important academic information with official VU sources.";
+    display: block;
+    text-align: center;
+    color: #8798A8 !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    margin: 5px auto 0 !important;
+    max-width: 900px;
+}
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div,
+[data-testid="stChatInputContainer"] > div > div {
+    background: #FFFFFF !important;
+}
+[data-testid="stChatInputContainer"] {
+    border: 1.5px solid #BFD3E3 !important;
+    border-radius: 13px !important;
+    box-shadow: 0 2px 8px rgba(20,55,85,0.045) !important;
+}
+[data-testid="stChatInputContainer"] textarea,
+[data-testid="stChatInputContainer"] textarea:focus {
+    color: #18324A !important;
+    background: #FFFFFF !important;
+    caret-color: #0B5A9A !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #8798A8 !important;
+}
+[data-testid="stChatInputContainer"] button {
+    background: #0B5A9A !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+@media (max-width: 900px) {
+    .vu-banner { min-height: 154px; }
+    .vu-banner-copy { width: 69%; padding: 22px; }
+    .vu-banner-image-wrap { width: 58%; }
+    .vu-banner-title { font-size: 21px !important; }
+    .vu-banner-logo { height: 38px; max-width: 205px; }
+    .vu-banner-fade { left: 24%; width: 50%; }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 
 # ============================================================
-# ACTIVE GROQ MODELS & CONSTANTS
+# CONSTANTS
 # ============================================================
 
-# Strictly active Groq models (decommissioned models like mixtral-8x7b-32768 removed)
-GROQ_MODELS = [
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant"
-]
+MODEL = "llama-3.3-70b-versatile"
 
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
+
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
 
 DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU Official Website", "url": "https://vidyashilp.edu.in/"},
-    {"name": "VU Admissions", "url": "https://vidyashilp.edu.in/admissions/"},
+    {"name": "VU Admissions", "url": "https://vidyashilp.edu.in/admission-enquiryform/"},
     {"name": "VU Contact", "url": "https://vidyashilp.edu.in/contact/"},
-    {"name": "VU Data Science", "url": "https://vidyashilp.edu.in/data-science/"},
-    {"name": "VU AI and Machine Learning", "url": "https://vidyashilp.edu.in/schools/b_tech_ai_ml/"},
-    {"name": "VU B.Tech", "url": "https://vidyashilp.edu.in/btech/"},
-    {"name": "VU About", "url": "https://vidyashilp.edu.in/about/"},
-    {"name": "VU Law", "url": "https://vidyashilp.edu.in/law/"},
-    {"name": "VU PhD", "url": "https://vidyashilp.edu.in/phd/"},
-    {"name": "VU Programmes", "url": "https://vidyashilp.edu.in/programmes/"}
+    {"name": "VU B.Tech AI/ML", "url": "https://vidyashilp.edu.in/schools/b_tech_ai_ml/"},
+    {"name": "VU BMS", "url": "https://vidyashilp.edu.in/schools/b-m-s-hons-hons-with-research-in-digital-business/"},
+    {"name": "VU B.A., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/ba-llb/"},
+    {"name": "VU B.M.S., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/schools/bachelor-of-management-studies-bachelor-of-laws-hons/"},
 ]
-
-GREETING_PATTERNS = re.compile(
-    r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|wassup|bonjour|namaste|namaskaram|halo|howdy|"
-    r"good\s*(morning|afternoon|evening|night|day)|"
-    r"how\s*are\s*you|how\s*r\s*u|how\s*do\s*you\s*do|what'?s\s*up)\s*[!.?]*\s*$",
-    re.I
-)
-
-THANKS_PATTERNS = re.compile(
-    r"^\s*(thank(s|\s*you|\s*u)?|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|bye|goodbye|cya)\s*[!.?]*\s*$",
+# Greetings and social messages — handled without any document retrieval
+SOCIAL_RE = re.compile(
+    r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
+    r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
+    r"thank(s|\s*you|u)|thx|ty|ok(ay)?|got\s*it|sure|great|nice|cool|"
+    r"bye|goodbye|see\s*you|take\s*care|cya)\s*[!.?]*\s*$",
     re.I
 )
 
 GREETING_REPLY = (
-    "Hello! I am Vidyashilp University's AI Academic Advisor. "
-    "I can assist you with attendance rules, credit requirements, prerequisites, registration, "
-    "course eligibility, and general academic regulations. "
-    "How can I help you today?"
+    "Hey! 👋 I'm VU's AI Academic Advisor. "
+    "I can help with attendance, credits, prerequisites, registration, "
+    "course eligibility, progression rules and more. "
+    "What would you like to know?"
 )
 
-THANKS_REPLY = "You're very welcome! Feel free to ask if you have any more academic questions."
+THANKS_REPLY = "Happy to help! 😊 Feel free to ask anything else about your academics at VU."
+
+OUT_OF_SCOPE_RE = re.compile(
+    r"\b(weather|temperature|rain|forecast|cricket|football|soccer|match|movie|movies|"
+    r"song|music|restaurant|recipe|stock market|politics|election|celebrity|"
+    r"who will win|score today|bitcoin|share price)\b",
+    re.I
+)
+
+PERSONAL_RE = re.compile(
+    r"\b(your mom|your mother|your dad|your father|your family|your girlfriend|"
+    r"your boyfriend|are you dumb|are u dumb|are you stupid|are u stupid|"
+    r"who are you|what are you)\b",
+    re.I
+)
+
+OUT_OF_SCOPE_REPLY = (
+    "I’m VU’s AI Academic Advisor, so I can help with Vidyashilp University "
+    "academic and programme-related questions, but not that topic. 😊"
+)
+
+PERSONAL_REPLY = (
+    "I’m an AI academic advisor, so I don’t have a personal family or personal life. "
+    "But I can definitely help with your VU academic questions. 😊"
+)
 
 
 # ============================================================
@@ -255,83 +568,108 @@ if "pending_question" not in st.session_state:
 
 
 # ============================================================
-# HEADER & LOGO
+# LOGO & HEADER
 # ============================================================
 
-def find_logo():
-    for filename in os.listdir("."):
-        if filename.startswith("."):
-            continue
-        lower = filename.lower()
-        if lower.endswith((".png", ".jpg", ".jpeg")) and "logo" in lower:
-            return filename
-    for filename in os.listdir("."):
-        lower = filename.lower()
-        if lower.endswith((".png", ".jpg", ".jpeg")):
-            return filename
+from pathlib import Path
+
+APP_DIR = Path(__file__).resolve().parent
+logo_path = APP_DIR / "logo.png"
+campus_path = APP_DIR / "uni pic.jpg"
+
+# Official VU logo fallback if the local copy does not render.
+OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2021/06/Header2.png"
+
+def local_image_data(path):
+    try:
+        if path.exists():
+            suffix = path.suffix.lower()
+            mime = "image/png" if suffix == ".png" else "image/jpeg"
+            encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+            return f"data:{mime};base64,{encoded}"
+    except Exception:
+        pass
     return None
 
-logo_path = find_logo()
+logo_src = local_image_data(logo_path) or OFFICIAL_LOGO_URL
+campus_src = local_image_data(campus_path)
 
-header_col1, header_col2 = st.columns([1, 7], vertical_alignment="center")
+logo_tag = (
+    f'<img class="vu-banner-logo" src="{html.escape(logo_src, quote=True)}" '
+    f'alt="Vidyashilp University logo" loading="eager" '
+    f'onerror="this.onerror=null;this.src=\'{OFFICIAL_LOGO_URL}\';">'
+)
 
-with header_col1:
-    if logo_path:
-        st.image(logo_path, width=90)
+campus_tag = ""
+if campus_src:
+    campus_tag = (
+        f'<img class="vu-banner-image" src="{campus_src}" '
+        f'alt="Vidyashilp University campus">'
+    )
 
-with header_col2:
-    st.markdown("## Vidyashilp University")
-    st.markdown("**AI Academic Advisor · Online**")
-
-st.divider()
-
+st.markdown(
+    f"""
+    <div class="vu-banner">
+        <div class="vu-banner-copy">
+            {logo_tag}
+            <div class="vu-banner-title">Academic Advisor</div>
+            <div class="vu-banner-subtitle">
+                <span class="vu-status-dot">●</span>
+                AI Academic Advisor · Online
+            </div>
+        </div>
+        <div class="vu-banner-image-wrap">
+            {campus_tag}
+        </div>
+        <div class="vu-banner-fade"></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ============================================================
-# SIDEBAR (OPTIONAL DEFAULTS)
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
-    st.markdown("### 🎓 Student Profile")
-    st.markdown("Enter your details to get personalized guidance (Optional).")
+    st.markdown("### Student Profile")
+    st.markdown("Enter your details to get personalised answers.")
     st.markdown("---")
 
     program = st.selectbox(
         "Program",
-        ["Not specified", "B.Tech", "BMS", "BA LLB", "BMS LLB", "B.A. Economics", "B.A. Psychology", "B.Des"],
-        index=0
+        ["B.Tech", "BMS", "BA LLB", "BMS LLB", "B.A. Economics", "B.A. Psychology", "B.Des"],
+        index=None,
+        placeholder="Select if needed"
     )
 
     semester = st.selectbox(
         "Current Semester",
-        ["Not specified", "1st Semester", "2nd Semester", "3rd Semester",
-         "4th Semester", "5th Semester", "6th Semester", "7th Semester",
-         "8th Semester", "9th Semester", "10th Semester"],
-        index=0
+        ["1st Semester", "2nd Semester", "3rd Semester", "4th Semester",
+         "5th Semester", "6th Semester", "7th Semester", "8th Semester",
+         "9th Semester", "10th Semester"],
+        index=None,
+        placeholder="Select if needed"
     )
 
     completed_credits = st.number_input(
-        "Completed Credits",
-        min_value=0, max_value=400,
-        value=None,
+        "Completed Credits", min_value=0, max_value=400, value=None, step=1,
         placeholder="Optional"
     )
-
     cgpa = st.number_input(
-        "CGPA",
-        min_value=0.0, max_value=10.0,
-        value=None, step=0.1,
-        placeholder="Optional"
+        "CGPA", min_value=0.0, max_value=10.0, value=None, step=0.1,
+        format="%.2f", placeholder="Optional"
     )
 
     st.markdown("---")
 
-    if st.button("🗑️ Clear Chat", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
 
 # ============================================================
-# API KEY & PROFILE FORMATTING
+# API KEY
 # ============================================================
 
 def get_api_key():
@@ -345,6 +683,11 @@ def get_api_key():
 
 api_key = get_api_key()
 
+
+# ============================================================
+# STUDENT PROFILE
+# ============================================================
+
 student_profile = {
     "program": program,
     "semester": semester,
@@ -352,22 +695,9 @@ student_profile = {
     "cgpa": cgpa
 }
 
-def profile_to_text():
-    details = []
-    if student_profile["program"] != "Not specified":
-        details.append(f"Program: {student_profile['program']}")
-    if student_profile["semester"] != "Not specified":
-        details.append(f"Current Semester: {student_profile['semester']}")
-    if student_profile["completed_credits"] is not None:
-        details.append(f"Completed Credits: {student_profile['completed_credits']}")
-    if student_profile["cgpa"] is not None:
-        details.append(f"CGPA: {student_profile['cgpa']}")
-
-    return "\n".join(details) if details else "No specific student profile provided."
-
 
 # ============================================================
-# TEXT EXTRACTION & CHUNKING
+# TEXT EXTRACTION
 # ============================================================
 
 def clean_text(text):
@@ -377,48 +707,87 @@ def clean_text(text):
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
-def extract_pdf_text(filepath):
+def guess_section(raw_text):
+    """Return only an explicit-looking heading; otherwise return blank."""
+    for line in raw_text.splitlines():
+        line = re.sub(r"\s+", " ", line).strip()
+        if not line or len(line) > 100:
+            continue
+        if re.match(r"^(?:\d+(?:\.\d+)*\s+.+|[A-Z][A-Z0-9 &:/()\-]{4,})$", line):
+            return line
+        words = line.split()
+        if 2 <= len(words) <= 10 and not re.search(r"[.!?]$", line):
+            title_case = sum(1 for w in words if w[:1].isupper())
+            if title_case >= max(2, len(words) // 2):
+                return line
+    return ""
+
+def extract_pdf_pages(filepath):
     pages = []
     try:
         reader = PdfReader(filepath)
-        for page in reader.pages:
+        for page_number, page in enumerate(reader.pages, start=1):
             try:
-                t = page.extract_text()
-                if t:
-                    pages.append(t)
+                raw = page.extract_text() or ""
+                text = clean_text(raw)
+                if text:
+                    pages.append({
+                        "text": text,
+                        "page": page_number,
+                        "section": guess_section(raw)
+                    })
             except Exception:
                 continue
     except Exception:
+        return []
+    return pages
+
+def extract_txt_text(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            return clean_text(f.read())
+    except Exception:
         return ""
-    return clean_text("\n".join(pages))
+
+def extract_csv_text(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            return clean_text(f.read())
+    except Exception:
+        return ""
+
+def extract_excel_sheets(filepath):
+    try:
+        from openpyxl import load_workbook
+        wb = load_workbook(filepath, read_only=True, data_only=True)
+        sheets = []
+        for sheet in wb.worksheets:
+            rows = []
+            for row in sheet.iter_rows(values_only=True):
+                values = [str(v) for v in row if v is not None]
+                if values:
+                    rows.append(" | ".join(values))
+            text = clean_text("\n".join(rows))
+            if text:
+                sheets.append({"sheet": sheet.title, "text": text})
+        return sheets
+    except Exception:
+        return []
 
 def extract_file_text(filepath):
     ext = os.path.splitext(filepath)[1].lower()
-    if ext == ".pdf":
-        return extract_pdf_text(filepath)
-    if ext in [".txt", ".csv"]:
-        try:
-            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                return clean_text(f.read())
-        except Exception:
-            return ""
-    if ext in [".xlsx", ".xls"]:
-        try:
-            from openpyxl import load_workbook
-            wb = load_workbook(filepath, read_only=True, data_only=True)
-            rows = []
-            for sheet in wb.worksheets:
-                rows.append(f"Sheet: {sheet.title}")
-                for row in sheet.iter_rows(values_only=True):
-                    values = [str(v) for v in row if v is not None]
-                    if values:
-                        rows.append(" | ".join(values))
-            return clean_text("\n".join(rows))
-        except Exception:
-            return ""
+    if ext == ".txt":
+        return extract_txt_text(filepath)
+    if ext == ".csv":
+        return extract_csv_text(filepath)
     return ""
 
-def chunk_text(text, chunk_size=280, overlap=50):
+
+# ============================================================
+# CHUNKING
+# ============================================================
+
+def chunk_text(text, chunk_size=150, overlap=30):
     words = text.split()
     if not words:
         return []
@@ -436,7 +805,7 @@ def chunk_text(text, chunk_size=280, overlap=50):
 
 
 # ============================================================
-# KNOWLEDGE BASE LOADING
+# LOAD ACADEMIC DOCUMENTS
 # ============================================================
 
 def load_academic_documents():
@@ -445,19 +814,55 @@ def load_academic_documents():
         if filename.startswith("."):
             continue
         lower = filename.lower()
-        if not lower.endswith(ACADEMIC_EXTENSIONS) or any(ex in lower for ex in EXCLUDED_FILES):
+        if not lower.endswith(ACADEMIC_EXTENSIONS):
             continue
-        text = extract_file_text(os.path.join(".", filename))
-        if not text:
+        if any(ex in lower for ex in EXCLUDED_FILES):
             continue
-        for i, chunk in enumerate(chunk_text(text)):
-            documents.append({
-                "text": chunk,
-                "source": filename,
-                "type": "academic",
-                "chunk": i + 1
-            })
+
+        filepath = os.path.join(".", filename)
+        ext = os.path.splitext(filename)[1].lower()
+
+        if ext == ".pdf":
+            for page_info in extract_pdf_pages(filepath):
+                chunks = chunk_text(page_info["text"])
+                for i, chunk in enumerate(chunks, start=1):
+                    documents.append({
+                        "text": chunk,
+                        "source": filename,
+                        "type": "academic",
+                        "chunk": i,
+                        "page": page_info.get("page"),
+                        "section": page_info.get("section", "")
+                    })
+
+        elif ext in (".xlsx", ".xls"):
+            for sheet_info in extract_excel_sheets(filepath):
+                chunks = chunk_text(sheet_info["text"])
+                for i, chunk in enumerate(chunks, start=1):
+                    documents.append({
+                        "text": chunk,
+                        "source": filename,
+                        "type": "academic",
+                        "chunk": i,
+                        "sheet": sheet_info.get("sheet", "")
+                    })
+
+        else:
+            text = extract_file_text(filepath)
+            for i, chunk in enumerate(chunk_text(text), start=1):
+                documents.append({
+                    "text": chunk,
+                    "source": filename,
+                    "type": "academic",
+                    "chunk": i
+                })
+
     return documents
+
+
+# ============================================================
+# WEBSITE SOURCES
+# ============================================================
 
 def load_website_sources():
     source_file = "website_sources.json"
@@ -474,44 +879,71 @@ def load_website_sources():
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_webpage(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        response = requests.get(url, headers=headers, timeout=15)
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        response = requests.get(url, headers=headers, timeout=20)
         response.raise_for_status()
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(response.text, "html.parser")
-        for tag in soup(["script", "style", "noscript", "svg", "iframe"]):
+        for tag in soup(["script", "style", "noscript", "svg", "iframe", "nav", "footer"]):
             tag.decompose()
-        return clean_text(soup.get_text(separator=" "))
+
+        title = clean_text(soup.title.get_text()) if soup.title else ""
+        sections = []
+        current_section = title or "VU Official Website"
+
+        for element in soup.find_all(["h1", "h2", "h3", "p", "li"]):
+            if element.name in ("h1", "h2", "h3"):
+                heading = clean_text(element.get_text(" "))
+                if heading:
+                    current_section = heading
+            else:
+                text = clean_text(element.get_text(" "))
+                if text:
+                    sections.append({"section": current_section, "text": text})
+
+        if sections:
+            return {"title": title, "sections": sections}
+
+        return {"title": title, "sections": [{"section": title or "VU Official Website", "text": clean_text(soup.get_text(separator=" "))}]}
     except Exception:
-        return ""
+        return {"title": "", "sections": []}
 
 def load_website_documents():
     documents = []
     for source in load_website_sources():
-        name = source.get("name", "VU Website")
+        name = source.get("name", "VU Official Website")
         url = source.get("url", "")
         if not url:
             continue
-        text = fetch_webpage(url)
-        if not text:
-            continue
-        for i, chunk in enumerate(chunk_text(text, chunk_size=250, overlap=40)):
-            documents.append({
-                "text": chunk,
-                "source": name,
-                "url": url,
-                "type": "website",
-                "chunk": i + 1
-            })
+        page = fetch_webpage(url)
+        for section_info in page.get("sections", []):
+            text = section_info.get("text", "")
+            if not text:
+                continue
+            for i, chunk in enumerate(chunk_text(text, chunk_size=180, overlap=40), start=1):
+                documents.append({
+                    "text": chunk,
+                    "source": name,
+                    "url": url,
+                    "title": page.get("title", ""),
+                    "section": section_info.get("section", ""),
+                    "type": "website",
+                    "chunk": i
+                })
     return documents
 
+
+# ============================================================
+# LOAD KNOWLEDGE BASE
+# ============================================================
+
 if not st.session_state.knowledge_loaded:
-    with st.spinner("Loading academic knowledge base..."):
+    with st.spinner("Loading academic documents..."):
         st.session_state.academic_kb = load_academic_documents()
         st.session_state.knowledge_loaded = True
 
 if not st.session_state.website_loaded:
-    with st.spinner("Loading website sources..."):
+    with st.spinner("Loading official VU information..."):
         st.session_state.website_kb = load_website_documents()
         st.session_state.website_loaded = True
 
@@ -520,64 +952,61 @@ website_kb = st.session_state.website_kb
 
 
 # ============================================================
-# TOKENIZATION & RETRIEVAL
+# TOKENIZER & RETRIEVAL
 # ============================================================
 
 STOPWORDS = {
     "the","a","an","is","are","am","i","me","my","to","of","in","on",
     "for","and","or","can","could","would","should","do","does","did",
     "be","it","this","that","with","from","at","as","what","which",
-    "how","where","when","why","you","your","please","tell"
+    "how","where","when","why","you","your"
 }
-
-def simple_stem(word):
-    for suffix in ["ing", "ed", "es", "s", "ment", "ability", "ible"]:
-        if len(word) > 5 and word.endswith(suffix):
-            return word[:-len(suffix)]
-    return word
 
 def tokenize(text):
     tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
-    return [simple_stem(t) for t in tokens if t not in STOPWORDS]
+    return [t for t in tokens if t not in STOPWORDS]
 
-def retrieve(query, documents, top_k=5, minimum_score=0.02):
+def retrieve(query, documents, top_k=5, minimum_score=0.05):
     if not documents:
         return []
     query_tokens = tokenize(query)
     if not query_tokens:
         return []
-    
     query_counter = Counter(query_tokens)
     doc_freq = Counter()
     tokenized_docs = []
-    
     for doc in documents:
         tokens = tokenize(doc["text"])
         for t in set(tokens):
             doc_freq[t] += 1
         tokenized_docs.append(tokens)
-        
     total = len(documents)
     scored = []
-    
     for i, doc in enumerate(documents):
         tokens = tokenized_docs[i]
         if not tokens:
             continue
         tc = Counter(tokens)
-        
         score = sum(
             (tc[t] / len(tokens)) *
             (math.log((total + 1) / (doc_freq.get(t, 0) + 1)) + 1) *
             qc
             for t, qc in query_counter.items() if t in tc
         )
-        
+        boost_phrases = [
+            "minimum cgpa", "attendance", "eligibility", "eligible",
+            "prerequisite", "minor", "semester", "admission", "course",
+            "credits", "programme", "program", "transfer", "law",
+            "summer", "summer term"
+        ]
+        ql = query.lower()
+        tl = doc["text"].lower()
+        for phrase in boost_phrases:
+            if phrase in ql and phrase in tl:
+                score += 0.15
         if score >= minimum_score:
             scored.append((score, doc))
-            
     scored.sort(key=lambda x: x[0], reverse=True)
-    
     results = []
     for score, doc in scored[:top_k]:
         r = dict(doc)
@@ -587,123 +1016,396 @@ def retrieve(query, documents, top_k=5, minimum_score=0.02):
 
 
 # ============================================================
-# CLASSIFY QUERY & SYSTEM PROMPT
+# CLASSIFY QUERY
 # ============================================================
 
 def classify_query(query):
     q = query.lower().strip()
-    website_keywords = [
-        "admission", "apply", "application", "contact", "phone number", "email",
-        "campus", "location", "address", "where is vu", "law programme", "phd"
+    website_patterns = [
+        "admission", "apply", "application", "how do i join", "join vu",
+        "contact", "phone number", "email", "address", "campus", "location",
+        "where is vu", "where is vidyashilp", "programmes offered",
+        "about vu", "vidyashilp university", "law programme"
     ]
-    for word in website_keywords:
-        if word in q:
+    for pattern in website_patterns:
+        if pattern in q:
             return "website"
     return "academic"
 
-def build_system_prompt():
-    return f"""You are the official AI Academic Advisor for Vidyashilp University (VU), Bengaluru, India.
 
-STUDENT PROFILE:
-{profile_to_text()}
+# ============================================================
+# PROFILE TEXT
+# ============================================================
 
-YOUR CORE DIRECTIVE:
-1. Always act as the VU AI Academic Advisor.
-2. For academic questions, answer directly using the provided retrieved context.
-3. If asked off-topic questions, respond politely, acknowledge briefly, and redirect to academic guidance.
-4. If exact requirements or rules are missing from context, state that clearly and advise contacting the Academic Office.
-5. Reference rules concisely."""
+def profile_to_text(effective_profile=None):
+    p = effective_profile or student_profile
+    lines = []
+    if p.get("program"):
+        lines.append(f"Program: {p['program']}")
+    if p.get("semester"):
+        lines.append(f"Semester: {p['semester']}")
+    if p.get("completed_credits") is not None:
+        lines.append(f"Completed credits: {p['completed_credits']}")
+    if p.get("cgpa") is not None:
+        lines.append(f"CGPA: {p['cgpa']}")
+    return "\n".join(lines) if lines else "No student profile information was provided."
 
 
-def create_context(academic_results, website_results):
+# ============================================================
+# SYSTEM PROMPT
+# ============================================================
+
+def build_system_prompt(effective_profile=None):
+    return f"""You are the AI Academic Advisor for Vidyashilp University (VU), Bengaluru, India.
+
+Student profile for this question:
+{profile_to_text(effective_profile)}
+
+YOUR ROLE:
+Help students with VU undergraduate academic questions — courses, credits, prerequisites,
+attendance, progression, graduation requirements, semester planning, admissions and programmes.
+
+RESPONSE STYLE:
+- Keep responses short, clear and conversational.
+- No tables and no long report-style answers.
+- Use at most 4-5 bullets when useful.
+- Friendly and warm, but accurate.
+- Never guess a rule, number, course, eligibility condition or programme structure.
+
+IMPORTANT PROFILE RULES:
+- Sidebar profile values are optional. Blank means unknown; never assume a value.
+- If the student's current message explicitly gives a different programme/semester/credit/CGPA,
+  use that information for that question and do not pretend the sidebar has changed.
+- If a programme is not represented by the sidebar options, use the student's stated programme
+  as question-specific context rather than inventing a match.
+
+CONVERSATION RULES:
+- A short follow-up such as "which one?", "what about that?", "what are the prerequisites?"
+  may refer to the immediately preceding academic topic. Use that context only when it is clearly
+  connected.
+- If the student starts a new topic, ignore the old topic.
+- Do not carry an old topic into an unrelated question.
+
+BEHAVIOUR RULES:
+1. Greetings and casual openers should receive a friendly response without retrieval.
+2. Personal questions about the AI should be answered briefly and redirected to academics.
+3. Completely non-academic questions should be declined politely without university sources.
+4. If the student asks about Summer Term, do not invent Summer Term offerings, fees or rules.
+   Say that the available information is insufficient and advise checking the academic office/registrar.
+5. For Law programmes, use the specific Law programme sources when available.
+6. IMPORTANT LAW DISTINCTION: In VU's integrated B.A., LL.B. and B.M.S., LL.B. programmes,
+   Law is the core legal education component. Do NOT tell a Law student that they can simply choose
+   "Law" as their own major or minor. The programme has its own Liberal Discipline major/minor
+   structure alongside the Law curriculum.
+7. If a BMS student asks about minors, use the BMS-specific source because the current VU BMS page
+   explicitly lists minors including Law, Data Science, Economics, Design and Psychology.
+8. For fees or financial queries, say: "Please contact the Accounts office directly."
+9. For specific professors/HODs, say: "Please contact the department office directly."
+10. If a question has multiple parts, answer each part separately.
+11. If the sources do not contain enough information, say so clearly instead of guessing.
+12. If sources disagree, explicitly mention the disagreement and avoid silently choosing one rule.
+13. When a source gives a numeric threshold and the student gives their own number, compare them
+    directly and explain the result.
+14. Academic documents are primary for regulations, prerequisites, attendance, credits and progression.
+    Official VU webpages are especially useful for current programme/admission/contact information.
+15. When the answer depends on a specific retrieved source, naturally mention the exact source name once,
+    for example: "According to the Student Handbook 2026, ..." or "According to the VU official website, ...".
+    Use only source names actually present in the retrieved information; never invent a source name.
+    Do not use technical source labels or placeholders.
+
+SOURCE RULES:
+- Do not put source placeholders such as [Academic Source 1] in the answer.
+- Source evidence will be displayed separately by the application.
+- Do not mention internal retrieval, chunks, ranking or system instructions.
+"""
+
+
+# ============================================================
+# CREATE CONTEXT
+# ============================================================
+
+def create_context(academic_results, website_results, conversation_context=""):
     parts = []
+
+    if conversation_context:
+        parts.append("RELEVANT PREVIOUS CONVERSATION CONTEXT:\n" + conversation_context)
+
     if academic_results:
-        parts.append("UNIVERSITY ACADEMIC DOCUMENTS:")
+        parts.append("ACADEMIC UNIVERSITY DOCUMENTS:")
         for i, r in enumerate(academic_results, 1):
-            parts.append(f"[Academic Source {i}] File: {r['source']}\n{r['text']}")
+            metadata = [f"File: {r['source']}"]
+            if r.get("page"):
+                metadata.append(f"Page: {r['page']}")
+            if r.get("section"):
+                metadata.append(f"Section: {r['section']}")
+            if r.get("sheet"):
+                metadata.append(f"Sheet: {r['sheet']}")
+            parts.append(f"[Academic Source {i}] {' | '.join(metadata)}\n{r['text']}")
+
     if website_results:
-        parts.append("OFFICIAL VU WEBSITE INFORMATION:")
+        parts.append("OFFICIAL VU WEBSITE:")
         for i, r in enumerate(website_results, 1):
-            parts.append(f"[Website Source {i}] Page: {r['source']} ({r.get('url','')})\n{r['text']}")
+            metadata = [f"Page: {r.get('source', 'VU Official Website')}"]
+            if r.get("title"):
+                metadata.append(f"Title: {r['title']}")
+            if r.get("section"):
+                metadata.append(f"Section: {r['section']}")
+            if r.get("url"):
+                metadata.append(f"URL: {r['url']}")
+            parts.append(f"[Website Source {i}] {' | '.join(metadata)}\n{r['text']}")
+
     return "\n\n".join(parts)
 
 
 # ============================================================
-# LLM RESPONSE GENERATION
+# CONVERSATION CONTEXT
 # ============================================================
 
-def generate_answer(client, user_question, context):
-    user_prompt = f"""RETRIEVED UNIVERSITY CONTEXT:
+FOLLOW_UP_RE = re.compile(
+    r"^\s*(which one|which ones|what about (that|this|it)|and what about|what about it|"
+    r"what are the prerequisites|what is the prerequisite|what about prerequisites|"
+    r"how about (that|this|it)|tell me more|more details|what does (it|that|this) include|"
+    r"what (courses|subjects|classes) does (it|that|this) include|why|how|where|when|which)\b",
+    re.I
+)
+
+NEW_TOPIC_TERMS = {
+    "attendance", "credits", "credit", "prerequisite", "prerequisites", "registration",
+    "admission", "apply", "application", "fees", "fee", "programme", "program",
+    "minor", "minors", "major", "majors", "semester", "course", "courses",
+    "grading", "cgpa", "backlog", "progression", "graduation", "contact", "address",
+    "weather", "cricket", "football", "movie", "restaurant", "law", "bms", "btech",
+    "psychology", "economics", "design"
+}
+
+def get_last_user_question(skip_current=False):
+    found = 0
+    for msg in reversed(st.session_state.messages):
+        if msg.get("role") == "user":
+            if skip_current and found == 0:
+                found += 1
+                continue
+            return msg.get("content", "")
+    return ""
+
+def is_follow_up_question(question, previous_question):
+    if not previous_question:
+        return False
+    q = question.lower().strip()
+    if len(q.split()) <= 5 and not any(term in q for term in NEW_TOPIC_TERMS):
+        return True
+    if FOLLOW_UP_RE.search(q):
+        return True
+    return False
+
+def conversation_context_for(question):
+    previous = get_last_user_question(skip_current=True)
+    if not is_follow_up_question(question, previous):
+        return ""
+    previous_answer = ""
+    for msg in reversed(st.session_state.messages):
+        if msg.get("role") == "assistant":
+            previous_answer = msg.get("content", "")
+            break
+    return (
+        f"Previous student question: {previous}\n"
+        f"Previous advisor answer: {previous_answer[:1800]}"
+    )
+
+
+def effective_profile_for_question(question):
+    profile = dict(student_profile)
+    q = question.lower()
+
+    aliases = {
+        "b.tech": "B.Tech", "btech": "B.Tech", "bms": "BMS",
+        "ba llb": "BA LLB", "b.a. llb": "BA LLB", "bms llb": "BMS LLB",
+        "b.a. economics": "B.A. Economics", "ba economics": "B.A. Economics",
+        "b.a. psychology": "B.A. Psychology", "ba psychology": "B.A. Psychology",
+        "b.des": "B.Des", "bdes": "B.Des"
+    }
+
+    for alias, label in aliases.items():
+        if re.search(r"\b" + re.escape(alias) + r"\b", q):
+            profile["program"] = label
+            break
+
+    # Preserve explicitly stated programme names outside the sidebar choices.
+    extra_program = re.search(
+        r"\b(\d+(?:st|nd|rd|th)?[- ]year|\d+(?:st|nd|rd|th)?[- ]semester)?\s*"
+        r"(bba|b.arch|barch|mba|mca|bca)\b", q, re.I
+    )
+    if extra_program:
+        profile["program"] = extra_program.group(2).upper().replace("BARCH", "B.Arch")
+
+    cgpa_match = re.search(r"\b(?:cgpa|gpa)\s*(?:is|=|:)?\s*(\d+(?:\.\d+)?)", q, re.I)
+    if cgpa_match:
+        try:
+            profile["cgpa"] = float(cgpa_match.group(1))
+        except ValueError:
+            pass
+
+    credit_match = re.search(r"\b(?:completed\s+)?credits?\s*(?:is|are|=|:)?\s*(\d+)\b", q, re.I)
+    if credit_match:
+        try:
+            profile["completed_credits"] = int(credit_match.group(1))
+        except ValueError:
+            pass
+
+    sem_match = re.search(r"\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th)\s+semester\b", q, re.I)
+    if sem_match:
+        profile["semester"] = sem_match.group(1).lower() + " Semester"
+
+    return profile
+
+
+# ============================================================
+# GENERATE ANSWER
+# ============================================================
+
+def generate_answer(client, user_question, context, category, effective_profile, conversation_context=""):
+    if category == "website":
+        priority = "Prioritize the relevant official VU webpage information for this question."
+    else:
+        priority = "Prioritize VU academic documents for regulations and student eligibility."
+
+    user_prompt = f"""{priority}
+
+RETRIEVED INFORMATION:
 {context}
+
+{conversation_context}
 
 STUDENT QUESTION:
 {user_question}
 
-Answer concisely as the VU AI Academic Advisor."""
+Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions.
+Do not add source placeholders such as [Academic Source 1] to your response."""
 
+    models_to_try = [MODEL, "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
     last_error = None
-    for model in GROQ_MODELS:
+    for m in models_to_try:
         try:
             response = client.chat.completions.create(
-                model=model,
+                model=m,
                 messages=[
-                    {"role": "system", "content": build_system_prompt()},
+                    {"role": "system", "content": build_system_prompt(effective_profile)},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0.2,
-                max_tokens=650
+                temperature=0.1,
+                max_tokens=800
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
             last_error = e
             continue
-    return f"I am unable to answer right now due to a network connection issue. Please try again shortly. (Error: {last_error})"
+    return "I couldn't get a response right now. Please try again."
 
 
 # ============================================================
-# UI HELPERS
+# SOURCE DISPLAY
 # ============================================================
 
-def display_sources(academic_results):
-    names = list({r["source"] for r in academic_results if "source" in r})
-    if names:
-        st.caption("📄 **Sources:** " + " · ".join(names))
+def display_sources(academic_results, website_results):
+    unique = []
+    seen = set()
 
-def show_user_bubble(text):
-    st.markdown(
-        f'<div class="bubble-user"><div class="bubble-user-inner">{text}</div></div>',
-        unsafe_allow_html=True
-    )
+    for r in academic_results or []:
+        key = ("academic", r.get("source", ""), r.get("page"), r.get("section"), r.get("sheet"))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(r)
 
-def show_bot_bubble(text):
-    st.markdown(
-        f'<div class="bubble-bot"><div class="bubble-bot-inner">{text}</div></div>',
-        unsafe_allow_html=True
-    )
+    for r in website_results or []:
+        key = ("website", r.get("source", ""), r.get("title", ""), r.get("section", ""), r.get("url", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(r)
+
+    if not unique:
+        return
+
+    with st.expander("Sources", expanded=False):
+        st.markdown('<div class="source-panel">', unsafe_allow_html=True)
+        for r in unique:
+            if r.get("type") == "website":
+                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
+                if r.get("title"):
+                    st.caption(r["title"])
+                if r.get("section") and r.get("section") != r.get("title"):
+                    st.caption(f"Section: {r['section']}")
+                if r.get("url"):
+                    st.markdown(f"[View webpage →]({r['url']})")
+            else:
+                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
+                if r.get("section"):
+                    st.caption(f"Section: {r['section']}")
+                if r.get("page"):
+                    st.caption(f"Page: {r['page']}")
+                if r.get("sheet"):
+                    st.caption(f"Sheet: {r['sheet']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
-# FAQ SUGGESTIONS & CHAT HISTORY
+# SUGGESTIONS
 # ============================================================
 
 SUGGESTIONS = [
     "What programmes does VU offer?",
-    "How do I apply for admission?",
-    "What is the minimum CGPA requirement?",
-    "What are the attendance regulations?",
-    "Which minor courses are available?",
-    "How are credits calculated?"
+    "How do I apply to VU?",
+    "What is the minimum CGPA to progress?",
+    "What are the attendance requirements?",
+    "Which minors are available for B.Tech?",
+    "What courses are offered next semester?"
 ]
+
+
+# ============================================================
+# BUBBLE HELPERS
+# ============================================================
+
+def render_bubble_text(text):
+    """Safely render the small subset of Markdown used by the advisor in HTML bubbles."""
+    safe = html.escape(str(text)).replace("\r\n", "\n").replace("\r", "\n")
+    safe = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe)
+    safe = safe.replace("\n", "<br>")
+    return safe
+
+
+def show_user_bubble(text):
+    rendered = render_bubble_text(text)
+    st.markdown(
+        f'<div class="bubble-user">'
+        f'<div class="bubble-user-inner">{rendered}</div></div>',
+        unsafe_allow_html=True
+    )
+
+def show_bot_bubble(text):
+    rendered = render_bubble_text(text)
+    st.markdown(
+        f'<div class="bubble-bot">'
+        f'<div class="bubble-bot-inner">{rendered}</div></div>',
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# INTRO / SUGGESTIONS (shown when chat is empty)
+# ============================================================
 
 if not st.session_state.messages:
     st.markdown("""
     <div class="info-box">
-    <h3>Welcome! Ask your academic questions below</h3>
-    <p>I can assist with course regulations, credit transfers, attendance rules, prerequisites, and general university information.</p>
+    <h3>Ask your academic question</h3>
+    <p>I can help with VU courses, programmes, prerequisites, eligibility,
+    credits, semesters, admissions and related university information.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 💡 Frequently Asked Questions")
+    st.markdown("<div class=\"try-title\">Try asking</div>", unsafe_allow_html=True)
     cols = st.columns(3)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 3]:
@@ -711,80 +1413,136 @@ if not st.session_state.messages:
                 st.session_state.pending_question = suggestion
                 st.rerun()
 
+
+# ============================================================
+# DISPLAY CHAT HISTORY
+# ============================================================
+
 for msg in st.session_state.messages:
-    if msg.get("role") == "user":
-        show_user_bubble(msg.get("content", ""))
+    role = msg.get("role")
+    content = msg.get("content", "")
+    if role == "user":
+        show_user_bubble(content)
     else:
-        show_bot_bubble(msg.get("content", ""))
-        if msg.get("academic_sources"):
-            display_sources(msg.get("academic_sources"))
+        show_bot_bubble(content)
+        ac = msg.get("academic_sources", [])
+        wc = msg.get("website_sources", [])
+        if ac or wc:
+            display_sources(ac, wc)
 
 
 # ============================================================
-# PROCESS USER INPUT
+# GET QUESTION
 # ============================================================
 
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
-user_question = pending or st.chat_input("Ask an academic question...")
+
+user_question = pending or st.chat_input("Ask your academic question...")
+
+
+# ============================================================
+# PROCESS QUESTION
+# ============================================================
 
 if user_question:
+
     st.session_state.messages.append({"role": "user", "content": user_question})
     show_user_bubble(user_question)
 
-    q_clean = user_question.strip()
+    is_thanks = re.search(r"\b(thank(s|\s*you|u)|thx|ty)\b", user_question, re.I)
 
-    # 1. Direct Regex Small Talk / Greetings
-    if GREETING_PATTERNS.match(q_clean):
-        show_bot_bubble(GREETING_REPLY)
+    # ---- Social / greeting shortcut ----
+    if SOCIAL_RE.match(user_question.strip()):
+        answer = THANKS_REPLY if is_thanks else GREETING_REPLY
+        show_bot_bubble(answer)
         st.session_state.messages.append({
-            "role": "assistant", "content": GREETING_REPLY,
+            "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
         })
         st.stop()
 
-    if THANKS_PATTERNS.match(q_clean):
-        show_bot_bubble(THANKS_REPLY)
+    # ---- Personal / out-of-scope shortcut ----
+    if PERSONAL_RE.search(user_question):
+        answer = PERSONAL_REPLY
+        show_bot_bubble(answer)
         st.session_state.messages.append({
-            "role": "assistant", "content": THANKS_REPLY,
+            "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
         })
         st.stop()
 
-    # 2. RAG & LLM Response
+    if OUT_OF_SCOPE_RE.search(user_question):
+        answer = OUT_OF_SCOPE_REPLY
+        show_bot_bubble(answer)
+        st.session_state.messages.append({
+            "role": "assistant", "content": answer,
+            "academic_sources": [], "website_sources": []
+        })
+        st.stop()
+
+    # ---- Academic question ----
+    category = classify_query(user_question)
+    effective_profile = effective_profile_for_question(user_question)
+    conversation_context = conversation_context_for(user_question)
+
+    # Use the previous topic only for a genuine follow-up. Otherwise retrieve using the new topic.
+    retrieval_query = user_question
+    if conversation_context:
+        previous = get_last_user_question(skip_current=True)
+        retrieval_query = f"{previous} {user_question}"
+
     if not api_key:
-        answer = "Groq API key missing. Please set GROQ_API_KEY in Streamlit Secrets or environment variables."
+        answer = "The advisor is not configured yet. Please contact the administrator."
         show_bot_bubble(answer)
         st.session_state.messages.append({
             "role": "assistant", "content": answer,
             "academic_sources": [], "website_sources": []
         })
     else:
-        category = classify_query(user_question)
-        client = Groq(api_key=api_key)
+        try:
+            client = Groq(api_key=api_key)
 
-        if category == "website":
-            website_results = retrieve(user_question, website_kb, top_k=5)
-            academic_results = retrieve(user_question, academic_kb, top_k=2)
-        else:
-            academic_results = retrieve(user_question, academic_kb, top_k=5)
-            website_results = retrieve(user_question, website_kb, top_k=2)
+            # Website-heavy questions use website retrieval first; academic rules use documents first.
+            if category == "website":
+                website_results = retrieve(retrieval_query, website_kb, top_k=6, minimum_score=0.035)
+                academic_results = retrieve(retrieval_query, academic_kb, top_k=4, minimum_score=0.045)
+            else:
+                academic_results = retrieve(retrieval_query, academic_kb, top_k=6, minimum_score=0.045)
+                website_results = retrieve(retrieval_query, website_kb, top_k=4, minimum_score=0.035)
 
-        context = create_context(academic_results, website_results)
+            # If nothing relevant was retrieved, do not let the model hallucinate from unrelated chunks.
+            if not academic_results and not website_results:
+                answer = (
+                    "I don't have enough information in the available VU sources to answer that accurately. "
+                    "Please check with the relevant academic office or programme office for the current rule."
+                )
+            else:
+                context = create_context(academic_results, website_results, conversation_context)
+                with st.spinner("Thinking..."):
+                    answer = generate_answer(
+                        client, user_question, context, category, effective_profile, conversation_context
+                    )
 
-        with st.spinner("Thinking..."):
-            answer = generate_answer(client, user_question, context)
+            show_bot_bubble(answer)
 
-        show_bot_bubble(answer)
-        if category == "academic" and academic_results:
-            display_sources(academic_results)
+            if academic_results or website_results:
+                display_sources(academic_results, website_results)
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": answer,
-            "academic_sources": academic_results if category == "academic" else [],
-            "website_sources": []
-        })
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": answer,
+                "academic_sources": academic_results,
+                "website_sources": website_results
+            })
+
+        except Exception:
+            answer = "I couldn't process that request right now. Please try again."
+            show_bot_bubble(answer)
+            st.session_state.messages.append({
+                "role": "assistant", "content": answer,
+                "academic_sources": [], "website_sources": []
+            })
 
 
 # ============================================================
