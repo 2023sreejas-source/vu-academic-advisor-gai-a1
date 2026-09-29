@@ -147,20 +147,44 @@ section[data-testid="stSidebar"] {
     color: #4a5568;
 }
 
-/* ---- Input: force dark text ---- */
-.stChatInput > div {
-    border-radius: 10px !important;
-    border: 1.5px solid #eaecf0 !important;
-    background: #f7f8fa !important;
+/* ---- Force entire app white (override Streamlit dark theme) ---- */
+.stApp, .stApp > div, .main, .main > div,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="block-container"] {
+    background-color: #ffffff !important;
+    color: #1a1a2e !important;
 }
 
-.stChatInput textarea,
-.stChatInput input,
-[data-testid="stChatInput"] textarea,
-[data-testid="stChatInputContainer"] textarea {
-    color: #1a1a2e !important;
+/* ---- Bottom chat bar — the dark band ---- */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div,
+.stBottom, .stBottom > div {
+    background-color: #ffffff !important;
+    border-top: 1px solid #eaecf0 !important;
+}
+
+/* ---- Chat input box ---- */
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div,
+.stChatInput, .stChatInput > div {
     background: #f7f8fa !important;
+    border: 1.5px solid #eaecf0 !important;
+    border-radius: 10px !important;
+    color: #1a1a2e !important;
+}
+
+/* ---- Input text itself ---- */
+[data-testid="stChatInputContainer"] textarea,
+.stChatInput textarea {
+    color: #1a1a2e !important;
+    background: transparent !important;
     caret-color: #c0182a !important;
+}
+
+/* ---- Placeholder text ---- */
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #9aa3af !important;
 }
 
 /* ---- Suggested question buttons ---- */
@@ -208,7 +232,9 @@ div[data-testid="stButton"] > button:hover {
 # MODEL
 # ============================================================
 
-MODEL = "llama-3.3-70b-versatile"
+# llama-3.1-8b-instant is the safest free-tier Groq model (always available)
+# llama-3.3-70b-versatile is better quality but needs a valid key with 70B access
+MODEL = "llama-3.1-8b-instant"
 
 # ============================================================
 # LOGO HELPER
