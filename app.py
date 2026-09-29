@@ -72,45 +72,25 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 [data-testid="stChatInputContainer"] textarea::placeholder { color: #adb5bd !important; }
 
-/* User message bubble — right, red-navy gradient */
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    justify-content: flex-end !important;
-    background: transparent !important;
-}
-
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) .stMarkdown {
-    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%) !important;
-    color: #ffffff !important;
-    border-radius: 18px 18px 4px 18px !important;
-    padding: 10px 15px !important;
-    max-width: 70% !important;
-    margin-left: auto !important;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    box-shadow: 0 2px 8px rgba(192,24,42,0.2) !important;
-}
-
-/* Bot message bubble — left, white */
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
-    background: transparent !important;
-}
-
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) .stMarkdown {
-    background: #ffffff !important;
-    color: #1a1a2e !important;
-    border-radius: 18px 18px 18px 4px !important;
-    padding: 10px 15px !important;
-    max-width: 75% !important;
-    font-size: 14px !important;
-    line-height: 1.6 !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07) !important;
-}
-
-/* Remove default avatar background */
-[data-testid="stChatMessageAvatarUser"],
-[data-testid="stChatMessageAvatarAssistant"] {
+/* Chat message containers */
+[data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
+    padding: 4px 0 !important;
+}
+
+/* User bubble */
+[data-testid="stChatMessage"][data-testid*="user"] .stChatMessageContent,
+div[class*="stChatMessage"] + div .stMarkdown {
+    background: transparent !important;
+}
+
+/* All chat content divs */
+.stChatMessage .stMarkdown p,
+.stChatMessage .stMarkdown {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
 }
 
 /* Suggestion buttons */
@@ -795,8 +775,24 @@ if not st.session_state.messages:
 for msg in st.session_state.messages:
     role = msg.get("role")
     content = msg.get("content", "")
-    with st.chat_message(role):
-        st.markdown(content)
+    if role == "user":
+        st.markdown(
+            f'<div style="display:flex;justify-content:flex-end;margin:6px 0;">'
+            f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
+            f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
+            f'max-width:70%;font-size:14px;line-height:1.55;'
+            f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{content}</div></div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+            f'<div style="background:#ffffff;color:#1a1a2e;'
+            f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
+            f'max-width:75%;font-size:14px;line-height:1.65;'
+            f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{content}</div></div>',
+            unsafe_allow_html=True
+        )
         if role == "assistant":
             ac = msg.get("academic_sources", [])
             wc = msg.get("website_sources", [])
@@ -821,8 +817,14 @@ if user_question:
 
     st.session_state.messages.append({"role": "user", "content": user_question})
 
-    with st.chat_message("user"):
-        st.markdown(user_question)
+    st.markdown(
+        f'<div style="display:flex;justify-content:flex-end;margin:6px 0;">'
+        f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
+        f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
+        f'max-width:70%;font-size:14px;line-height:1.55;'
+        f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{user_question}</div></div>',
+        unsafe_allow_html=True
+    )
 
     category = classify_query(user_question)
 
@@ -848,16 +850,19 @@ if user_question:
 
             context = create_context(academic_results, website_results)
 
-            if not context.strip():
-                answer = "I don't have enough information in the available VU documents or website to answer that accurately."
-            else:
-                with st.spinner("Thinking..."):
-                    answer = generate_answer(client, contextual_question, context, category)
+            with st.spinner("Thinking..."):
+                answer = generate_answer(client, contextual_question, context, category)
 
-            with st.chat_message("assistant"):
-                st.markdown(answer)
-                if academic_results or website_results:
-                    display_sources(academic_results, website_results)
+            st.markdown(
+                f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+                f'<div style="background:#ffffff;color:#1a1a2e;'
+                f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
+                f'max-width:75%;font-size:14px;line-height:1.65;'
+                f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{answer}</div></div>',
+                unsafe_allow_html=True
+            )
+            if academic_results or website_results:
+                display_sources(academic_results, website_results)
 
             st.session_state.messages.append({
                 "role": "assistant",
@@ -868,10 +873,13 @@ if user_question:
 
         except Exception as error:
             answer = "I couldn't process that request right now. Please try again."
-            with st.chat_message("assistant"):
-                st.error(answer)
-                with st.expander("Technical details"):
-                    st.code(str(error))
+            st.markdown(
+                f'<div style="display:flex;justify-content:flex-start;margin:6px 0;">'
+                f'<div style="background:#fff0f1;color:#c0182a;'
+                f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
+                f'max-width:75%;font-size:14px;">{answer}</div></div>',
+                unsafe_allow_html=True
+            )
             st.session_state.messages.append({
                 "role": "assistant", "content": answer,
                 "academic_sources": [], "website_sources": []
