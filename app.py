@@ -30,7 +30,7 @@ st.set_page_config(
 
 
 # ============================================================
-# CSS
+# CSS (UNIFIED VU BRANDING & MODERN UI)
 # ============================================================
 
 st.markdown("""
@@ -38,13 +38,13 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .stApp, [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
 [data-testid="block-container"] {
-    background: #F5F7FA !important;
+    background: #F8FAFC !important;
 }
 [data-testid="stHeader"] { background: transparent !important; }
 
@@ -53,36 +53,45 @@ html, body, [class*="css"] {
 [data-testid="stSidebar"] > div:first-child {
     background: #0B5394 !important;
 }
-[data-testid="stSidebar"] * { color: #FFFFFF !important; }
+[data-testid="stSidebar"] * { 
+    color: #FFFFFF !important; 
+}
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    color: #D9ECFA !important;
+    color: #E2E8F0 !important;
+    font-size: 13px;
 }
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.24) !important;
-    margin: 12px 0 !important;
+    border-color: rgba(255,255,255,0.18) !important;
+    margin: 16px 0 !important;
 }
 
+/* Sidebar Selectboxes */
 [data-testid="stSidebar"] [data-baseweb="select"] > div {
-    background: #22252A !important;
-    border-color: #22252A !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     color: #FFFFFF !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
 }
 [data-testid="stSidebar"] [data-baseweb="select"] input,
 [data-testid="stSidebar"] [data-baseweb="select"] span {
     color: #FFFFFF !important;
 }
+[data-testid="stSidebar"] [data-baseweb="popover"] {
+    background-color: #0B5394 !important;
+}
 
+/* Sidebar Inputs */
 [data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
     background: #FFFFFF !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
+    border: 1px solid #CBD5E1 !important;
 }
 [data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-    color: #22252A !important;
+    color: #0F172A !important;
     background: #FFFFFF !important;
 }
 [data-testid="stSidebar"] [data-testid="stNumberInput"] input::placeholder {
-    color: #6B7280 !important;
+    color: #64748B !important;
     opacity: 1 !important;
 }
 [data-testid="stSidebar"] [data-testid="stNumberInput"] button {
@@ -90,150 +99,206 @@ html, body, [class*="css"] {
     color: #0B5394 !important;
 }
 
+/* Clear Chat Button */
 [data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    background: transparent !important;
+    background: rgba(255,255,255,0.08) !important;
     color: #FFFFFF !important;
-    border: 1px solid rgba(255,255,255,0.85) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
     border-radius: 8px !important;
     box-shadow: none !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease;
+}
+[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    background: rgba(255,255,255,0.2) !important;
+    border-color: #FFFFFF !important;
 }
 
 .vu-sidebar-group-divider {
     height: 1px;
-    background: rgba(255,255,255,0.22);
-    margin: 14px 0 12px;
+    background: rgba(255,255,255,0.18);
+    margin: 16px 0;
 }
 
-/* ========================= MAIN ========================= */
-.vu-card {
+/* ========================= HEADER & CARDS ========================= */
+.vu-header-card {
     background: #FFFFFF;
-    border: 1px solid #E2E7ED;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
-    padding: 18px 20px;
-    margin: 0 0 12px 0;
-    box-shadow: 0 1px 3px rgba(16,24,40,0.04);
+    padding: 18px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
-.vu-top-card {
-    padding: 14px 18px 13px;
+.vu-header-info {
+    display: flex;
+    flex-direction: column;
+}
+.vu-sub-title {
+    color: #64748B;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
 }
 .vu-heading {
-    color: #123B63;
-    font-size: 26px;
+    color: #0B5394;
+    font-size: 24px;
     line-height: 1.2;
     font-weight: 700;
     margin: 0;
 }
 .vu-status {
-    color: #66717D;
-    font-size: 12px;
-    margin-top: 5px;
+    color: #64748B;
+    font-size: 13px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
-.vu-status-dot { color: #28A745; font-size: 10px; }
+.vu-status-dot { 
+    color: #22C55E; 
+    font-size: 10px; 
+}
 
+.vu-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+}
 .vu-prompt-title {
-    color: #27364A;
+    color: #0F172A;
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 .vu-prompt-text {
-    color: #66717D;
+    color: #475569;
     font-size: 14px;
-    line-height: 1.55;
+    line-height: 1.5;
     margin: 0;
 }
 .vu-try {
-    color: #4E5965;
+    color: #334155;
     font-size: 13px;
     font-weight: 600;
-    margin: 8px 0 6px;
+    margin: 16px 0 10px;
 }
 
-/* Light suggestion cards. */
+/* Light Suggestion Buttons */
 main div[data-testid="stButton"] > button {
     background: #FFFFFF !important;
-    border: 1px solid #D9E2EC !important;
+    border: 1px solid #CBD5E1 !important;
     border-radius: 10px !important;
     color: #0B5394 !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     min-height: 48px !important;
-    box-shadow: 0 1px 2px rgba(16,24,40,0.04) !important;
-    padding: 8px 11px !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important;
 }
 main div[data-testid="stButton"] > button:hover {
-    background: #F8FBFF !important;
+    background: #F0F9FF !important;
     border-color: #0B5394 !important;
     color: #0B5394 !important;
+    transform: translateY(-1px);
 }
 
-/* ========================= CHAT ========================= */
-.bubble-user { display: flex; justify-content: flex-end; margin: 10px 0 12px; }
+/* ========================= CHAT BUBBLES ========================= */
+.bubble-user { 
+    display: flex; 
+    justify-content: flex-end; 
+    margin: 12px 0; 
+}
 .bubble-user-inner {
-    background: #0B5394; color: #FFFFFF;
+    background: #0B5394; 
+    color: #FFFFFF;
     border-radius: 16px 16px 4px 16px;
-    padding: 10px 15px; max-width: 68%;
-    font-size: 15px; line-height: 1.6;
+    padding: 12px 18px; 
+    max-width: 72%;
+    font-size: 14px; 
+    line-height: 1.6;
+    box-shadow: 0 2px 4px rgba(11,83,148,0.12);
 }
-.bubble-bot { display: flex; justify-content: flex-start; margin: 10px 0 12px; }
+.bubble-bot { 
+    display: flex; 
+    justify-content: flex-start; 
+    margin: 12px 0; 
+}
 .bubble-bot-inner {
-    background: #FFFFFF; color: #1F2933;
-    border: 1px solid #E2E7ED;
+    background: #FFFFFF; 
+    color: #1E293B;
+    border: 1px solid #E2E8F0;
     border-radius: 16px 16px 16px 4px;
-    padding: 11px 16px; max-width: 76%;
-    font-size: 15px; line-height: 1.65;
+    padding: 14px 20px; 
+    max-width: 80%;
+    font-size: 14.5px; 
+    line-height: 1.65;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.03);
 }
 
-.source-panel, .source-panel * { color: #7A858F !important; }
+.source-panel, .source-panel * { color: #64748B !important; }
 .source-panel .source-label { color: #0B5394 !important; font-weight: 600; }
-[data-testid="stExpander"] summary { color: #7A858F !important; font-size: 12px !important; }
+[data-testid="stExpander"] {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 10px !important;
+    margin-top: 6px !important;
+}
+[data-testid="stExpander"] summary { color: #64748B !important; font-size: 12px !important; }
 
-/* Only the actual composer is dark. The fixed bottom area stays transparent. */
+/* Dynamic Floating Composer */
 [data-testid="stBottom"] {
     background: transparent !important;
     border-top: none !important;
-    padding: 5px 18px 8px !important;
+    padding: 10px 0 16px !important;
 }
 [data-testid="stChatInputContainer"] {
-    background: #22252A !important;
-    border: 1px solid #22252A !important;
-    border-radius: 11px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(15,23,42,0.06) !important;
 }
 [data-testid="stChatInputContainer"] > div {
     background: transparent !important;
     border: none !important;
-    box-shadow: none !important;
 }
 [data-testid="stChatInputContainer"] textarea {
-    color: #FFFFFF !important;
-    caret-color: #FFFFFF !important;
+    color: #0F172A !important;
+    caret-color: #0B5394 !important;
     background: transparent !important;
 }
 [data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #C2C7CD !important;
+    color: #94A3B8 !important;
     opacity: 1 !important;
 }
 [data-testid="stChatInputContainer"] button {
     color: #FFFFFF !important;
-    background: #17191C !important;
-    border-radius: 7px !important;
+    background: #0B5394 !important;
+    border-radius: 8px !important;
 }
 
 .ai-disclaimer {
-    position: fixed; left: 20%; right: 0; bottom: 2px;
+    position: fixed; left: 0; right: 0; bottom: 2px;
     z-index: 999999; text-align: center;
-    color: #9AA2AA; font-size: 10px; pointer-events: none;
+    color: #94A3B8; font-size: 10.5px; pointer-events: none;
 }
 .footer-text {
-    text-align: center; color: #A0A7AF;
-    font-size: 11px; padding: 5px 0 18px;
+    text-align: center; color: #94A3B8;
+    font-size: 12px; padding: 12px 0 24px;
 }
 #MainMenu, footer { visibility: hidden; }
 
 @media (max-width: 900px) {
-    .ai-disclaimer { left: 0; }
-    .vu-heading { font-size: 24px; }
+    .vu-header-card { flex-direction: column; align-items: flex-start; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -258,7 +323,7 @@ DEFAULT_WEBSITE_SOURCES = [
     {"name": "VU B.A., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/ba-llb/"},
     {"name": "VU B.M.S., LL.B. (Hons.)", "url": "https://vidyashilp.edu.in/schools/bachelor-of-management-studies-bachelor-of-laws-hons/"},
 ]
-# Greetings and social messages — handled without any document retrieval
+
 SOCIAL_RE = re.compile(
     r"^\s*(h+i+|h+e+l+o+|hey+|hola|yo+|sup|bro|wsp|wsup|what'?s\s*up|wassup|"
     r"good\s*(morning|afternoon|evening|night)|namaste|namaskaram|"
@@ -320,31 +385,35 @@ if "pending_question" not in st.session_state:
 
 
 # ============================================================
-# LOGO & HEADER
+# LOGO & INTEGRATED HEADER (FIXED CASE SENSITIVITY)
+# ============================================================
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(APP_DIR, "logo.png")
-campus_path = os.path.join(APP_DIR, "uni pic.jpg")
 
-header_left, header_right = st.columns([2.2, 1.0], gap="medium", vertical_alignment="center")
+# Case-insensitive logo check (fixes Linux / Streamlit Cloud path bug)
+logo_path = os.path.join(APP_DIR, "Logo.png")
+if not os.path.isfile(logo_path):
+    logo_path = os.path.join(APP_DIR, "logo.png")
 
-with header_left:
-    # Render the local PNG directly. Do not put st.image inside raw HTML;
-    # Streamlit renders it as a separate component and that can create a blank placeholder.
-    if os.path.isfile(logo_path):
-        st.image(logo_path, width=135)
-    st.markdown(
-        '<div class="vu-card vu-top-card">'
-        '<div class="vu-heading">Academic Advisor</div>'
-        '<div class="vu-status"><span class="vu-status-dot">●</span> AI Academic Advisor · Online</div>'
-        '</div>',
-        unsafe_allow_html=True
-    )
+logo_html = ""
+if os.path.isfile(logo_path):
+    with open(logo_path, "rb") as f:
+        logo_b64 = base64.b64encode(f.read()).decode("utf-8")
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 48px; width: auto; object-fit: contain;" alt="VU Logo" />'
 
-with header_right:
-    if os.path.isfile(campus_path):
-        # Local JPEG, deliberately compact and never cropped.
-        st.image(campus_path, width=250)
+st.markdown(
+    f'''
+    <div class="vu-header-card">
+        {logo_html}
+        <div class="vu-header-info">
+            <div class="vu-sub-title">Vidyashilp University</div>
+            <div class="vu-heading">AI Academic Advisor</div>
+            <div class="vu-status"><span class="vu-status-dot">●</span> Online · Student Assistant</div>
+        </div>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
@@ -430,7 +499,6 @@ def clean_text(text):
     return text.strip()
 
 def guess_section(raw_text):
-    """Return only an explicit-looking heading; otherwise return blank."""
     for line in raw_text.splitlines():
         line = re.sub(r"\s+", " ", line).strip()
         if not line or len(line) > 100:
@@ -952,7 +1020,6 @@ def effective_profile_for_question(question):
             profile["program"] = label
             break
 
-    # Preserve explicitly stated programme names outside the sidebar choices.
     extra_program = re.search(
         r"\b(\d+(?:st|nd|rd|th)?[- ]year|\d+(?:st|nd|rd|th)?[- ]semester)?\s*"
         r"(bba|b.arch|barch|mba|mca|bca)\b", q, re.I
@@ -1049,7 +1116,7 @@ def display_sources(academic_results, website_results):
     if not unique:
         return
 
-    with st.expander("Sources", expanded=False):
+    with st.expander("Academic Sources Referenced", expanded=False):
         st.markdown('<div class="source-panel">', unsafe_allow_html=True)
         for r in unique:
             if r.get("type") == "website":
@@ -1090,7 +1157,6 @@ SUGGESTIONS = [
 # ============================================================
 
 def render_bubble_text(text):
-    """Safely render the small subset of Markdown used by the advisor in HTML bubbles."""
     safe = html.escape(str(text)).replace("\r\n", "\n").replace("\r", "\n")
     safe = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe)
     safe = safe.replace("\n", "<br>")
@@ -1140,7 +1206,6 @@ if not st.session_state.messages:
     )
 
 
-
 # ============================================================
 # DISPLAY CHAT HISTORY
 # ============================================================
@@ -1165,7 +1230,6 @@ for msg in st.session_state.messages:
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
 
-# Always instantiate Streamlit's real chat input, even when a suggested question was clicked.
 typed_question = st.chat_input("Ask your academic question...")
 user_question = pending or typed_question
 
@@ -1220,7 +1284,6 @@ if user_question:
     effective_profile = effective_profile_for_question(user_question)
     conversation_context = conversation_context_for(user_question)
 
-    # Use the previous topic only for a genuine follow-up. Otherwise retrieve using the new topic.
     retrieval_query = user_question
     if conversation_context:
         previous = get_last_user_question(skip_current=True)
@@ -1237,7 +1300,6 @@ if user_question:
         try:
             client = Groq(api_key=api_key)
 
-            # Website-heavy questions use website retrieval first; academic rules use documents first.
             if category == "website":
                 website_results = retrieve(retrieval_query, website_kb, top_k=6, minimum_score=0.035)
                 academic_results = retrieve(retrieval_query, academic_kb, top_k=4, minimum_score=0.045)
@@ -1245,7 +1307,6 @@ if user_question:
                 academic_results = retrieve(retrieval_query, academic_kb, top_k=6, minimum_score=0.045)
                 website_results = retrieve(retrieval_query, website_kb, top_k=4, minimum_score=0.035)
 
-            # If nothing relevant was retrieved, do not let the model hallucinate from unrelated chunks.
             if not academic_results and not website_results:
                 answer = (
                     "I don't have enough information in the available VU sources to answer that accurately. "
@@ -1277,4 +1338,3 @@ if user_question:
                 "role": "assistant", "content": answer,
                 "academic_sources": [], "website_sources": []
             })
-
