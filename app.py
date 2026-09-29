@@ -30,6 +30,23 @@ st.set_page_config(
 
 
 # ============================================================
+# ASSET PATHS / BACKGROUND IMAGE
+# ============================================================
+
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+logo_path = os.path.join(APP_DIR, "logo.png")
+campus_path = os.path.join(APP_DIR, "uni pic.jpg")
+
+bg_data_uri = ""
+if os.path.isfile(campus_path):
+    try:
+        with open(campus_path, "rb") as _bg_file:
+            _bg_b64 = base64.b64encode(_bg_file.read()).decode("utf-8")
+        bg_data_uri = f"data:image/jpeg;base64,{_bg_b64}"
+    except Exception:
+        bg_data_uri = ""
+
+# ============================================================
 # CSS
 # ============================================================
 
@@ -52,7 +69,7 @@ html, body, [class*="css"] {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: linear-gradient(rgba(245,247,250,0.80), rgba(245,247,250,0.80)), url('uni%20pic.jpg');
+    background-image: linear-gradient(rgba(245,247,250,0.80), rgba(245,247,250,0.80)), url('__VU_BG_DATA__');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
@@ -333,10 +350,6 @@ if "pending_question" not in st.session_state:
 
 # ============================================================
 # LOGO & HEADER
-
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(APP_DIR, "logo.png")
-campus_path = os.path.join(APP_DIR, "uni pic.jpg")
 
 header_left, header_right = st.columns([2.2, 1.0], gap="medium", vertical_alignment="center")
 
