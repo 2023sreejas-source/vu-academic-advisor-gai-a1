@@ -37,7 +37,10 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+/* Gemini-inspired typography: use Google Sans when available, with safe fallbacks. */
+html, body, [class*="css"] {
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Inter', Arial, sans-serif;
+}
 
 .stApp, [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
@@ -78,16 +81,16 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 .stChatMessage .stMarkdown p,
 .stChatMessage .stMarkdown {
-    font-size: 14px !important;
-    line-height: 1.6 !important;
+    font-size: 15px !important;
+    line-height: 1.7 !important;
 }
 
 div[data-testid="stButton"] > button {
     background: #ffffff !important;
-    border: 1px solid #eaecf0 !important;
+    border: 1px solid #dce3eb !important;
     border-radius: 20px !important;
-    color: #0a2240 !important;
-    font-size: 13px !important;
+    color: #0b4f8a !important;
+    font-size: 14px !important;
     font-weight: 400 !important;
     padding: 9px 14px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
@@ -95,16 +98,16 @@ div[data-testid="stButton"] > button {
 }
 
 div[data-testid="stButton"] > button:hover {
-    border-color: #c0182a !important;
-    color: #c0182a !important;
-    background: #fff0f1 !important;
+    border-color: #0b4f8a !important;
+    color: #0b4f8a !important;
+    background: #f1f6fb !important;
 }
 
 .info-box {
     background-color: white;
     padding: 16px 18px;
     border-radius: 14px;
-    border-left: 4px solid #c0182a;
+    border-left: 4px solid #0b4f8a;
     margin-bottom: 18px;
     box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
@@ -118,10 +121,20 @@ div[data-testid="stButton"] > button:hover {
 
 #MainMenu, footer { visibility: hidden; }
 
+/* VU-style blue accents and softer source text */
+.vu-title { color: #0b4f8a !important; }
+.vu-subtitle { color: #0b4f8a !important; font-size: 14px; }
+.source-panel, .source-panel * { color: #6b7280 !important; }
+.source-panel .source-label { color: #0b4f8a !important; font-weight: 600; }
+[data-testid="stExpander"] summary { color: #6b7280 !important; font-size: 13px !important; }
+[data-testid="stExpander"] a { color: #0b4f8a !important; }
+[data-testid="stExpander"] { border-color: #e1e6ec !important; }
+
+
 .bubble-user {
     display: flex;
     justify-content: flex-end;
-    margin: 6px 0;
+    margin: 10px 0 12px;
 }
 .bubble-user-inner {
     background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%);
@@ -129,15 +142,15 @@ div[data-testid="stButton"] > button:hover {
     border-radius: 18px 18px 4px 18px;
     padding: 10px 16px;
     max-width: 68%;
-    font-size: 14px;
-    line-height: 1.55;
+    font-size: 15px;
+    line-height: 1.65;
     box-shadow: 0 2px 8px rgba(192,24,42,0.18);
     word-wrap: break-word;
 }
 .bubble-bot {
     display: flex;
     justify-content: flex-start;
-    margin: 6px 0;
+    margin: 10px 0 12px;
 }
 .bubble-bot-inner {
     background: #ffffff;
@@ -145,8 +158,8 @@ div[data-testid="stButton"] > button:hover {
     border-radius: 18px 18px 18px 4px;
     padding: 10px 16px;
     max-width: 72%;
-    font-size: 14px;
-    line-height: 1.65;
+    font-size: 15px;
+    line-height: 1.7;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     word-wrap: break-word;
 }
@@ -262,8 +275,8 @@ with header_col1:
         st.markdown("🎓")
 
 with header_col2:
-    st.markdown("## Vidyashilp University")
-    st.markdown("🟢 **AI Academic Advisor · Online**")
+    st.markdown('<h2 class="vu-title">Vidyashilp University</h2>', unsafe_allow_html=True)
+    st.markdown('<div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>', unsafe_allow_html=True)
 
 st.divider()
 
@@ -749,6 +762,10 @@ BEHAVIOUR RULES:
     directly and explain the result.
 14. Academic documents are primary for regulations, prerequisites, attendance, credits and progression.
     Official VU webpages are especially useful for current programme/admission/contact information.
+15. When the answer depends on a specific retrieved source, naturally mention the exact source name once,
+    for example: "According to the Student Handbook 2026, ..." or "According to the VU official website, ...".
+    Use only source names actually present in the retrieved information; never invent a source name.
+    Do not use technical source labels or placeholders.
 
 SOURCE RULES:
 - Do not put source placeholders such as [Academic Source 1] in the answer.
@@ -801,7 +818,8 @@ def create_context(academic_results, website_results, conversation_context=""):
 FOLLOW_UP_RE = re.compile(
     r"^\s*(which one|which ones|what about (that|this|it)|and what about|what about it|"
     r"what are the prerequisites|what is the prerequisite|what about prerequisites|"
-    r"how about (that|this|it)|tell me more|more details|why|how|where|when|which)\b",
+    r"how about (that|this|it)|tell me more|more details|what does (it|that|this) include|"
+    r"what (courses|subjects|classes) does (it|that|this) include|why|how|where|when|which)\b",
     re.I
 )
 
@@ -964,9 +982,10 @@ def display_sources(academic_results, website_results):
         return
 
     with st.expander("📚 Sources", expanded=False):
+        st.markdown('<div class="source-panel">', unsafe_allow_html=True)
         for r in unique:
             if r.get("type") == "website":
-                st.markdown(f"**🌐 {html.escape(r.get('source', 'VU Official Website'))}**")
+                st.markdown(f"<span class='source-label'>🌐 {html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
                 if r.get("title"):
                     st.caption(r["title"])
                 if r.get("section") and r.get("section") != r.get("title"):
@@ -974,13 +993,14 @@ def display_sources(academic_results, website_results):
                 if r.get("url"):
                     st.markdown(f"[View webpage →]({r['url']})")
             else:
-                st.markdown(f"**📄 {html.escape(r.get('source', 'Academic document'))}**")
+                st.markdown(f"<span class='source-label'>📄 {html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
                 if r.get("section"):
                     st.caption(f"Section: {r['section']}")
                 if r.get("page"):
                     st.caption(f"Page: {r['page']}")
                 if r.get("sheet"):
                     st.caption(f"Sheet: {r['sheet']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -1001,23 +1021,27 @@ SUGGESTIONS = [
 # BUBBLE HELPERS
 # ============================================================
 
+def render_bubble_text(text):
+    """Safely render the small subset of Markdown used by the advisor in HTML bubbles."""
+    safe = html.escape(str(text)).replace("\r\n", "\n").replace("\r", "\n")
+    safe = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", safe)
+    safe = safe.replace("\n", "<br>")
+    return safe
+
+
 def show_user_bubble(text):
+    rendered = render_bubble_text(text)
     st.markdown(
         f'<div class="bubble-user">'
-        f'<div style="background:linear-gradient(135deg,#c0182a 0%,#0a2240 100%);'
-        f'color:#fff;border-radius:18px 18px 4px 18px;padding:10px 16px;'
-        f'max-width:70%;font-size:14px;line-height:1.55;'
-        f'box-shadow:0 2px 8px rgba(192,24,42,0.18);">{text}</div></div>',
+        f'<div class="bubble-user-inner">{rendered}</div></div>',
         unsafe_allow_html=True
     )
 
 def show_bot_bubble(text):
+    rendered = render_bubble_text(text)
     st.markdown(
         f'<div class="bubble-bot">'
-        f'<div style="background:#ffffff;color:#1a1a2e;'
-        f'border-radius:18px 18px 18px 4px;padding:10px 16px;'
-        f'max-width:75%;font-size:14px;line-height:1.65;'
-        f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">{text}</div></div>',
+        f'<div class="bubble-bot-inner">{rendered}</div></div>',
         unsafe_allow_html=True
     )
 
