@@ -234,7 +234,7 @@ div[data-testid="stButton"] > button:hover {
 
 # llama-3.1-8b-instant is the safest free-tier Groq model (always available)
 # llama-3.3-70b-versatile is better quality but needs a valid key with 70B access
-MODEL = "llama-3.1-8b-instant"
+MODEL = "llama-3.3-70b-versatile"
 
 # ============================================================
 # LOGO HELPER
@@ -546,18 +546,25 @@ Answer using only the excerpts above. Cite sources. If the answer is not in the 
 
     try:
         client = Groq(api_key=api_key)
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.0,
-            max_tokens=800
-        )
-        answer = response.choices[0].message.content
-        return answer if answer else "The model returned an empty response. Please try again."
-
+        models_to_try = [MODEL, "llama-3.1-8b-instant", "openai/gpt-oss-20b"]
+        last_error = None
+        for m in models_to_try:
+            try:
+                response = client.chat.completions.create(
+                    model=m,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    temperature=0.0,
+                    max_tokens=800
+                )
+                answer = response.choices[0].message.content
+                return answer if answer else "The model returned an empty response. Please try again."
+            except Exception as e:
+                last_error = e
+                continue
+        return f"Error connecting to the AI service: {str(last_error)}"
     except Exception as e:
         return f"Error connecting to the AI service: {str(e)}"
 
