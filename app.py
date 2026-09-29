@@ -375,7 +375,7 @@ if "pending_question" not in st.session_state:
 
 
 # ============================================================
-# LOGO & HEADER
+# HEADER & LOGO
 # ============================================================
 
 def find_logo():
@@ -392,65 +392,55 @@ def find_logo():
     return None
 
 logo_path = find_logo()
-CAMPUS_IMAGE_URL = "https://vidyashilp.edu.in/wp-content/uploads/2023/04/slide_banner1.jpg"
-OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2020/12/Logo.png"
 
-# Use the repository logo when it exists; otherwise use VU's official hosted logo.
-# This prevents a broken image if logo.png is not included in the deployment build.
-logo_src = logo_path if logo_path else OFFICIAL_LOGO_URL
-logo_html = f'<img src="{logo_src}" alt="Vidyashilp University logo">'
+header_col1, header_col2 = st.columns([1, 7], vertical_alignment="center")
 
-st.markdown(
-    f"""
-    <div class="vu-header">
-        <div class="vu-header-brand">
-            {logo_html}
-            <div class="vu-header-copy">
-                <h2>Vidyashilp University</h2>
-                <div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>
-            </div>
-        </div>
-        <div class="vu-campus-photo">
-            <img src="{CAMPUS_IMAGE_URL}" alt="Vidyashilp University campus">
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+with header_col1:
+    if logo_path:
+        st.image(logo_path, width=90)
+
+with header_col2:
+    st.markdown("## Vidyashilp University")
+    st.markdown("**AI Academic Advisor · Online**")
+
+st.divider()
 
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR (OPTIONAL DEFAULTS)
 # ============================================================
 
 with st.sidebar:
     st.markdown("### 🎓 Student Profile")
-    st.markdown("Enter your details to get personalised answers.")
+    st.markdown("Enter your details to get personalized guidance (Optional).")
     st.markdown("---")
 
     program = st.selectbox(
         "Program",
-        ["B.Tech", "BMS", "BA LLB", "BMS LLB", "B.A. Economics", "B.A. Psychology", "B.Des"],
-        index=None,
-        placeholder="Select if needed"
+        ["Not specified", "B.Tech", "BMS", "BA LLB", "BMS LLB", "B.A. Economics", "B.A. Psychology", "B.Des"],
+        index=0
     )
 
     semester = st.selectbox(
         "Current Semester",
-        ["1st Semester", "2nd Semester", "3rd Semester", "4th Semester",
-         "5th Semester", "6th Semester", "7th Semester", "8th Semester",
-         "9th Semester", "10th Semester"],
-        index=None,
-        placeholder="Select if needed"
+        ["Not specified", "1st Semester", "2nd Semester", "3rd Semester",
+         "4th Semester", "5th Semester", "6th Semester", "7th Semester",
+         "8th Semester", "9th Semester", "10th Semester"],
+        index=0
     )
 
     completed_credits = st.number_input(
-        "Completed Credits", min_value=0, max_value=400, value=None, step=1,
+        "Completed Credits",
+        min_value=0, max_value=400,
+        value=None,
         placeholder="Optional"
     )
+
     cgpa = st.number_input(
-        "CGPA", min_value=0.0, max_value=10.0, value=None, step=0.1,
-        format="%.2f", placeholder="Optional"
+        "CGPA",
+        min_value=0.0, max_value=10.0,
+        value=None, step=0.1,
+        placeholder="Optional"
     )
 
     st.markdown("---")
@@ -458,6 +448,8 @@ with st.sidebar:
     if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
+
+
 
 
 # ============================================================
