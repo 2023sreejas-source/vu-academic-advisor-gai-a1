@@ -342,16 +342,13 @@ with header_col1:
 
 with header_col2:
     st.markdown("""
-        <div style="font-size: 28px; font-weight: 700; color: #0b4f8a !important; line-height: 1.2;">
-            Vidyashilp University
-        </div>
-        <div style="font-size: 15px; font-weight: 600; color: #475569 !important; margin-top: 4px;">
-            AI Academic Advisor · Online
+        <div style="padding: 5px 0;">
+            <span style="font-size: 28px; font-weight: 700; color: #0b4f8a !important; display: block; line-height: 1.2;">Vidyashilp University</span>
+            <span style="font-size: 15px; font-weight: 600; color: #475569 !important; display: block; margin-top: 4px;">AI Academic Advisor · Online</span>
         </div>
     """, unsafe_allow_html=True)
-    
-st.divider()
 
+st.divider()
 
 # ============================================================
 # SIDEBAR (OPTIONAL DEFAULTS)
