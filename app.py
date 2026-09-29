@@ -23,7 +23,7 @@ from collections import Counter
 
 st.set_page_config(
     page_title="Academic Advisor — Vidyashilp University",
-    page_icon="VU",
+    page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -38,451 +38,258 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Google Sans', 'Google Sans Text', 'Inter', Arial, sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Inter', Arial, sans-serif;
 }
 
-:root {
-    --vu-blue: #0B4F8A;
-    --vu-blue-dark: #083B68;
-    --vu-red: #C0182A;
-    --vu-ink: #18324A;
-    --vu-muted: #66788A;
-    --vu-line: #DCE5EE;
-    --vu-bg: #F7F9FC;
-}
-
-/* Clean VU light canvas */
-.stApp,
-[data-testid="stAppViewContainer"],
+.stApp, [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
 [data-testid="block-container"] {
-    background: var(--vu-bg) !important;
-}
-
-/* Remove Streamlit's dark top chrome/footer */
-header[data-testid="stHeader"] {
     background: #ffffff !important;
-    border-bottom: 1px solid var(--vu-line) !important;
 }
-#MainMenu, footer { visibility: hidden; }
 
-/* Sidebar */
+/* -------------------- Sidebar -------------------- */
 [data-testid="stSidebar"] {
-    background: var(--vu-blue) !important;
-    border-right: none !important;
+    background: #082f5b !important;
+    border-right: 1px solid #dbe4ee !important;
 }
 [data-testid="stSidebar"] > div:first-child {
-    background: var(--vu-blue) !important;
+    background: #082f5b !important;
 }
 [data-testid="stSidebar"] * {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.22) !important;
+    border-color: rgba(255,255,255,0.20) !important;
 }
 [data-testid="stSidebar"] label {
     color: #ffffff !important;
     font-weight: 500 !important;
 }
-
-/* Sidebar controls */
-[data-testid="stSidebar"] [data-baseweb="select"] > div {
-    background: #ffffff !important;
-    border: 1px solid #D5E0EA !important;
-    border-radius: 9px !important;
-    color: var(--vu-ink) !important;
-}
-[data-testid="stSidebar"] [data-baseweb="select"] span {
-    color: var(--vu-ink) !important;
-}
-[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
-    background: #ffffff !important;
-    border: 1px solid #D5E0EA !important;
-    border-radius: 9px !important;
-}
-[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-    color: var(--vu-ink) !important;
+[data-testid="stSidebar"] input {
+    color: #172033 !important;
     background: #ffffff !important;
 }
-/* Remove Streamlit +/- boxes from numeric fields */
-[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
-    display: none !important;
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] [data-baseweb="input"] > div {
+    background: #ffffff !important;
+    border-color: #d9e2ec !important;
+    color: #172033 !important;
 }
-[data-testid="stSidebar"] [data-testid="stNumberInput"] input[type="number"]::-webkit-inner-spin-button,
-[data-testid="stSidebar"] [data-testid="stNumberInput"] input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+[data-testid="stSidebar"] [data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-baseweb="input"] input {
+    color: #172033 !important;
 }
-[data-testid="stSidebar"] input::placeholder {
-    color: #8A99A8 !important;
+[data-testid="stSidebar"] [data-baseweb="select"] svg {
+    fill: #34516d !important;
 }
-
-/* Sidebar Clear Chat */
 [data-testid="stSidebar"] div[data-testid="stButton"] > button {
     background: transparent !important;
-    border: 1px solid rgba(255,255,255,0.65) !important;
+    border: 1px solid rgba(255,255,255,0.70) !important;
     color: #ffffff !important;
-    border-radius: 9px !important;
     box-shadow: none !important;
 }
 [data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
     background: rgba(255,255,255,0.10) !important;
     border-color: #ffffff !important;
+    color: #ffffff !important;
 }
 
-/* Header */
-.vu-header-title {
-    color: var(--vu-blue) !important;
-    font-size: 25px !important;
-    font-weight: 700 !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
-}
-.vu-header-subtitle {
-    color: var(--vu-muted) !important;
-    font-size: 13px !important;
-    margin-top: 5px !important;
-}
-.vu-status-dot {
-    color: #1FA971 !important;
-}
-.vu-campus img {
-    border-radius: 10px !important;
-    object-fit: cover !important;
-}
-
-/* Welcome card */
-.info-box {
+/* -------------------- Bottom chat input -------------------- */
+[data-testid="stBottom"], [data-testid="stBottom"] > div {
     background: #ffffff !important;
-    padding: 22px 24px !important;
-    border-radius: 13px !important;
-    border: 1px solid var(--vu-line) !important;
-    border-left: 4px solid var(--vu-blue) !important;
-    margin: 12px 0 20px !important;
-    box-shadow: 0 2px 8px rgba(20,55,85,0.05) !important;
+    border-top: 1px solid #e7ebf0 !important;
+    padding: 10px 16px !important;
 }
-.info-box h3 {
-    color: #132B40 !important;
-    margin: 0 0 9px !important;
-    font-size: 18px !important;
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div {
+    background: #ffffff !important;
+    border: 1.5px solid #d9e1ea !important;
+    border-radius: 26px !important;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.07) !important;
 }
-.info-box p {
-    color: #587086 !important;
-    margin: 0 !important;
-    line-height: 1.6 !important;
+[data-testid="stChatInputContainer"] textarea {
+    color: #172033 !important;
+    caret-color: #0b4f8a !important;
+    background: transparent !important;
+    font-size: 15px !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #9aa7b5 !important;
 }
 
-/* Suggestions */
-.try-title {
-    color: #18324A !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    margin: 4px 0 10px !important;
-}
+/* -------------------- General buttons -------------------- */
 div[data-testid="stButton"] > button {
     background: #ffffff !important;
-    border: 1px solid #D9E3EC !important;
-    border-radius: 11px !important;
-    color: var(--vu-blue) !important;
-    font-size: 13px !important;
+    border: 1px solid #d9e2ec !important;
+    border-radius: 20px !important;
+    color: #0b4f8a !important;
+    font-size: 14px !important;
     font-weight: 500 !important;
-    min-height: 42px !important;
-    padding: 8px 12px !important;
-    box-shadow: none !important;
+    padding: 9px 14px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    transition: all 0.15s !important;
 }
 div[data-testid="stButton"] > button:hover {
-    border-color: var(--vu-blue) !important;
-    background: #F3F8FC !important;
+    border-color: #0b4f8a !important;
+    color: #0b4f8a !important;
+    background: #f3f7fb !important;
 }
 
-/* Chat bubbles */
+/* -------------------- Header -------------------- */
+.vu-header {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 100%;
+    height: 176px;
+    background: #ffffff;
+    border-bottom: 1px solid #dfe5eb;
+    overflow: hidden;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 18px;
+}
+.vu-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 28px 18px 8px;
+    min-width: 52%;
+    background: #ffffff;
+}
+.vu-header-brand img {
+    width: 128px;
+    height: 104px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+.vu-header-copy h2 {
+    margin: 0 0 8px 0;
+    color: #0b4f8a;
+    font-size: 29px;
+    line-height: 1.15;
+    font-weight: 650;
+}
+.vu-subtitle {
+    color: #0b4f8a !important;
+    font-size: 14px;
+    font-weight: 500;
+}
+.vu-campus-photo {
+    flex: 0 0 38%;
+    height: 176px;
+    overflow: hidden;
+    position: relative;
+}
+.vu-campus-photo img {
+    width: 100%;
+    height: 176px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* -------------------- Welcome card -------------------- */
+.info-box {
+    background: #ffffff;
+    padding: 17px 20px;
+    border-radius: 14px;
+    border: 1px solid #e1e7ee;
+    border-left: 4px solid #0b4f8a;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.05);
+}
+.info-box h3 {
+    color: #172033 !important;
+    margin-bottom: 8px !important;
+}
+.info-box p {
+    color: #334155 !important;
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+}
+
+/* -------------------- Chat -------------------- */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 0 !important;
+}
+.stChatMessage .stMarkdown p,
+.stChatMessage .stMarkdown {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+}
 .bubble-user {
     display: flex;
     justify-content: flex-end;
-    margin: 12px 0;
+    margin: 11px 0 14px;
 }
 .bubble-user-inner {
-    background: var(--vu-blue);
+    background: #0b4f8a;
     color: #ffffff;
-    border-radius: 16px 16px 4px 16px;
-    padding: 10px 15px;
+    border-radius: 18px 18px 5px 18px;
+    padding: 11px 17px;
     max-width: 68%;
     font-size: 15px;
-    line-height: 1.6;
-    box-shadow: 0 2px 7px rgba(11,79,138,0.12);
+    line-height: 1.65;
+    box-shadow: 0 2px 8px rgba(8,47,91,0.14);
+    word-wrap: break-word;
 }
 .bubble-bot {
     display: flex;
     justify-content: flex-start;
-    margin: 12px 0;
+    margin: 11px 0 14px;
 }
 .bubble-bot-inner {
-    background: #ffffff;
-    color: #18324A;
-    border: 1px solid var(--vu-line);
-    border-radius: 16px 16px 16px 4px;
-    padding: 11px 16px;
-    max-width: 74%;
+    background: #f7f9fc;
+    color: #172033;
+    border: 1px solid #dfe6ee;
+    border-radius: 18px 18px 18px 5px;
+    padding: 12px 17px;
+    max-width: 76%;
     font-size: 15px;
     line-height: 1.7;
-    box-shadow: 0 1px 4px rgba(20,55,85,0.05);
+    box-shadow: 0 2px 7px rgba(8,47,91,0.05);
+    word-wrap: break-word;
 }
 
-/* Sources */
-.source-panel, .source-panel * {
-    color: #6B7D8E !important;
-}
-.source-panel .source-label {
-    color: var(--vu-blue) !important;
-    font-weight: 600;
-}
-[data-testid="stExpander"] {
-    border-color: var(--vu-line) !important;
-    background: #ffffff !important;
-}
-[data-testid="stExpander"] summary {
-    color: #607487 !important;
-    font-size: 13px !important;
-}
-[data-testid="stExpander"] a {
-    color: var(--vu-blue) !important;
-}
+/* -------------------- Sources -------------------- */
+.vu-title { color: #0b4f8a !important; }
+.source-panel, .source-panel * { color: #6b7280 !important; }
+.source-panel .source-label { color: #0b4f8a !important; font-weight: 600; }
+[data-testid="stExpander"] summary { color: #6b7280 !important; font-size: 13px !important; }
+[data-testid="stExpander"] a { color: #0b4f8a !important; }
+[data-testid="stExpander"] { border-color: #e1e6ec !important; }
 
-/* Chat input: white, VU blue accent — never dark */
-[data-testid="stBottom"],
-[data-testid="stBottom"] > div {
-    background: #ffffff !important;
-    border-top: 1px solid var(--vu-line) !important;
-    box-shadow: none !important;
-    padding: 12px 16px !important;
-}
-[data-testid="stChatInputContainer"] {
-    background: #ffffff !important;
-    border: 1.5px solid #C9D8E6 !important;
-    border-radius: 15px !important;
-    box-shadow: 0 2px 8px rgba(20,55,85,0.06) !important;
-}
-[data-testid="stChatInputContainer"] > div {
-    background: #ffffff !important;
-}
-[data-testid="stChatInputContainer"] textarea {
-    color: #18324A !important;
-    background: transparent !important;
-    caret-color: var(--vu-blue) !important;
-}
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #8999A8 !important;
-}
-[data-testid="stChatInputContainer"] button {
-    background: var(--vu-blue) !important;
-    color: #ffffff !important;
-    border-radius: 9px !important;
-}
-
-/* Footer */
 .footer-text {
     text-align: center;
-    color: #94A4B3;
-    font-size: 10px;
-    padding: 14px 0 18px;
+    color: #a1aab5;
+    font-size: 11px;
+    padding-top: 20px;
 }
 
-/* Main spacing */
-[data-testid="block-container"] {
-    padding-top: 1.5rem !important;
-    padding-bottom: 5.5rem !important;
-    max-width: 1280px !important;
-}
+#MainMenu, footer { visibility: hidden; }
 
-/* ===== FINAL VU POLISH OVERRIDES ===== */
-html, body, [class*="css"] {
-    font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif !important;
-}
-header[data-testid="stHeader"] {
-    visibility: hidden !important;
-    height: 0 !important;
-}
-/* Keep platform-only Streamlit chrome out of the submitted product UI. */
-#MainMenu, footer, div[data-testid="stToolbar"],
-div[data-testid="stStatusWidget"], div[data-testid="stDecoration"] {
-    display: none !important;
-    visibility: hidden !important;
-}
-[data-testid="block-container"] {
-    padding-top: 0.7rem !important;
-    padding-bottom: 6.5rem !important;
-    max-width: 1280px !important;
-}
-section[data-testid="stSidebar"] {
-    background: #0B5A9A !important;
-}
-section[data-testid="stSidebar"] > div:first-child {
-    background: #0B5A9A !important;
-}
-section[data-testid="stSidebar"] div[data-baseweb="select"],
-section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
-section[data-testid="stSidebar"] div[data-baseweb="select"] > div > div {
-    background: #FFFFFF !important;
-    color: #18324A !important;
-}
-section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-    border: 1px solid #D3E0EA !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
-}
-section[data-testid="stSidebar"] div[data-baseweb="select"] span {
-    color: #18324A !important;
-}
-section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
-    fill: #0B5A9A !important;
-}
-section[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
-    background: #FFFFFF !important;
-    border: 1px solid #D3E0EA !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
-}
-section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-    color: #18324A !important;
-    background: #FFFFFF !important;
-}
-section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
-    display: none !important;
-}
-section[data-testid="stSidebar"] input::placeholder {
-    color: #8A99A8 !important;
-}
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    background: transparent !important;
-    border: 1px solid rgba(255,255,255,0.70) !important;
-    color: #FFFFFF !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
-}
-.vu-banner {
-    position: relative;
-    min-height: 184px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    background: #FFFFFF;
-    border: 1px solid #D9E4EE;
-    border-radius: 16px;
-    margin: 0 0 22px 0;
-    box-shadow: 0 3px 12px rgba(20,55,85,0.045);
-}
-.vu-banner-copy {
-    position: relative;
-    z-index: 4;
-    width: 61%;
-    padding: 25px 34px 24px 34px;
-}
-.vu-banner-logo {
-    height: 48px;
-    width: auto;
-    max-width: 285px;
-    object-fit: contain;
-    object-position: left center;
-    display: block;
-    margin-bottom: 12px;
-}
-.vu-banner-title {
-    color: #0B5A9A !important;
-    font-size: 25px !important;
-    font-weight: 700 !important;
-    line-height: 1.15 !important;
-    margin: 0 !important;
-}
-.vu-banner-subtitle {
-    color: #60758A !important;
-    font-size: 13px !important;
-    margin-top: 6px !important;
-}
-.vu-status-dot {
-    color: #20A96B !important;
-}
-.vu-banner-image-wrap {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 58%;
-    height: 100%;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-.vu-banner-image {
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-    max-width: 100%;
-    object-position: right center;
-    display: block;
-}
-.vu-banner-fade {
-    position: absolute;
-    left: 28%;
-    top: 0;
-    width: 48%;
-    height: 100%;
-    z-index: 3;
-    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.99) 18%, rgba(255,255,255,0.86) 38%, rgba(255,255,255,0.42) 68%, rgba(255,255,255,0) 100%);
-    pointer-events: none;
-}
-[data-testid="stBottom"],
-[data-testid="stBottom"] > div {
-    background: #FFFFFF !important;
-    border-top: 1px solid #D9E4EE !important;
-    box-shadow: none !important;
-}
-[data-testid="stBottom"] {
-    padding: 9px 16px 8px !important;
-}
-[data-testid="stBottom"]::after {
-    content: "AI-generated responses can make mistakes. Please verify important academic information with official VU sources.";
-    display: block;
-    text-align: center;
-    color: #8798A8 !important;
-    font-size: 10px !important;
-    line-height: 1.35 !important;
-    margin: 5px auto 0 !important;
-    max-width: 900px;
-}
-[data-testid="stChatInputContainer"],
-[data-testid="stChatInputContainer"] > div,
-[data-testid="stChatInputContainer"] > div > div {
-    background: #FFFFFF !important;
-}
-[data-testid="stChatInputContainer"] {
-    border: 1.5px solid #BFD3E3 !important;
-    border-radius: 13px !important;
-    box-shadow: 0 2px 8px rgba(20,55,85,0.045) !important;
-}
-[data-testid="stChatInputContainer"] textarea,
-[data-testid="stChatInputContainer"] textarea:focus {
-    color: #18324A !important;
-    background: #FFFFFF !important;
-    caret-color: #0B5A9A !important;
-}
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #8798A8 !important;
-}
-[data-testid="stChatInputContainer"] button {
-    background: #0B5A9A !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-radius: 8px !important;
-}
+/* -------------------- Responsive layout -------------------- */
 @media (max-width: 900px) {
-    .vu-banner { min-height: 154px; }
-    .vu-banner-copy { width: 69%; padding: 22px; }
-    .vu-banner-image-wrap { width: 58%; }
-    .vu-banner-title { font-size: 21px !important; }
-    .vu-banner-logo { height: 38px; max-width: 205px; }
-    .vu-banner-fade { left: 24%; width: 50%; }
+    .vu-header { height: 140px; }
+    .vu-header-brand { min-width: 60%; padding-left: 4px; gap: 12px; }
+    .vu-header-brand img { width: 105px; height: 88px; }
+    .vu-header-copy h2 { font-size: 22px; }
+    .vu-campus-photo { flex-basis: 34%; height: 140px; }
+    .vu-campus-photo img { height: 140px; }
+    .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
 }
-
+@media (max-width: 640px) {
+    .vu-header { height: 112px; }
+    .vu-header-brand { padding: 10px 8px 10px 0; gap: 8px; }
+    .vu-header-brand img { width: 82px; height: 72px; }
+    .vu-header-copy h2 { font-size: 18px; }
+    .vu-subtitle { font-size: 12px !important; }
+    .vu-campus-photo { display: none; }
+    .bubble-user-inner, .bubble-bot-inner { max-width: 94%; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -531,21 +338,10 @@ OUT_OF_SCOPE_RE = re.compile(
     re.I
 )
 
-# Personal / casual questions about the assistant are handled locally so they
-# never get sent to the academic retrieval system.
 PERSONAL_RE = re.compile(
     r"\b(your mom|your mother|your dad|your father|your family|your girlfriend|"
     r"your boyfriend|are you dumb|are u dumb|are you stupid|are u stupid|"
-    r"who are you|what are you|what is your name|what's your name|"
-    r"how old are you|what is your age|what's your age|your age|"
-    r"are you a human|are you human|are you real|where are you from)\b",
-    re.I
-)
-
-CASUAL_RE = re.compile(
-    r"^\s*(how are you|how r you|how're you|how are u|how r u|"
-    r"how have you been|how's it going|hows it going|"
-    r"how is it going|hows everything|how is everything)\s*[!.?]*\s*$",
+    r"who are you|what are you)\b",
     re.I
 )
 
@@ -555,13 +351,8 @@ OUT_OF_SCOPE_REPLY = (
 )
 
 PERSONAL_REPLY = (
-    "I’m an AI academic advisor, so I don’t have a personal age or personal life. "
-    "But I’m here and ready to help with your VU academic questions. 😊"
-)
-
-CASUAL_REPLY = (
-    "I’m doing well, thanks for asking! 😊 I’m here to help with your "
-    "Vidyashilp University academic questions."
+    "I’m an AI academic advisor, so I don’t have a personal family or personal life. "
+    "But I can definitely help with your VU academic questions. 😊"
 )
 
 
@@ -587,68 +378,53 @@ if "pending_question" not in st.session_state:
 # LOGO & HEADER
 # ============================================================
 
-from pathlib import Path
-
-APP_DIR = Path(__file__).resolve().parent
-logo_path = APP_DIR / "Logo.png"
-campus_path = APP_DIR / "campus.jpg"
-
-# Official VU logo fallback if the local copy does not render.
-OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2021/06/Header2.png"
-
-def local_image_data(path):
-    try:
-        if path.exists():
-            suffix = path.suffix.lower()
-            mime = "image/png" if suffix == ".png" else "image/jpeg"
-            encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-            return f"data:{mime};base64,{encoded}"
-    except Exception:
-        pass
+def find_logo():
+    for filename in os.listdir("."):
+        if filename.startswith("."):
+            continue
+        lower = filename.lower()
+        if lower.endswith((".png", ".jpg", ".jpeg")) and "logo" in lower:
+            return filename
+    for filename in os.listdir("."):
+        lower = filename.lower()
+        if lower.endswith((".png", ".jpg", ".jpeg")):
+            return filename
     return None
 
-logo_src = local_image_data(logo_path) or OFFICIAL_LOGO_URL
-campus_src = local_image_data(campus_path)
+logo_path = find_logo()
+CAMPUS_IMAGE_URL = "https://vidyashilp.edu.in/wp-content/uploads/2023/04/slide_banner1.jpg"
+OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2020/12/Logo.png"
 
-logo_tag = (
-    f'<img class="vu-banner-logo" src="{html.escape(logo_src, quote=True)}" '
-    f'alt="Vidyashilp University logo" loading="eager" '
-    f'onerror="this.onerror=null;this.src=\'{OFFICIAL_LOGO_URL}\';">'
-)
-
-campus_tag = ""
-if campus_src:
-    campus_tag = (
-        f'<img class="vu-banner-image" src="{campus_src}" '
-        f'alt="Vidyashilp University campus">'
-    )
+# Use the repository logo when it exists; otherwise use VU's official hosted logo.
+# This prevents a broken image if logo.png is not included in the deployment build.
+logo_src = logo_path if logo_path else OFFICIAL_LOGO_URL
+logo_html = f'<img src="{logo_src}" alt="Vidyashilp University logo">'
 
 st.markdown(
     f"""
-    <div class="vu-banner">
-        <div class="vu-banner-copy">
-            {logo_tag}
-            <div class="vu-banner-title">Academic Advisor</div>
-            <div class="vu-banner-subtitle">
-                <span class="vu-status-dot">●</span>
-                AI Academic Advisor · Online
+    <div class="vu-header">
+        <div class="vu-header-brand">
+            {logo_html}
+            <div class="vu-header-copy">
+                <h2>Vidyashilp University</h2>
+                <div class="vu-subtitle">🟢 AI Academic Advisor · Online</div>
             </div>
         </div>
-        <div class="vu-banner-image-wrap">
-            {campus_tag}
+        <div class="vu-campus-photo">
+            <img src="{CAMPUS_IMAGE_URL}" alt="Vidyashilp University campus">
         </div>
-        <div class="vu-banner-fade"></div>
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 # ============================================================
 # SIDEBAR
 # ============================================================
 
 with st.sidebar:
-    st.markdown("### Student Profile")
+    st.markdown("### 🎓 Student Profile")
     st.markdown("Enter your details to get personalised answers.")
     st.markdown("---")
 
@@ -679,7 +455,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if st.button("Clear Chat", use_container_width=True):
+    if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -1120,12 +896,6 @@ BEHAVIOUR RULES:
 10. If a question has multiple parts, answer each part separately.
 11. If the sources do not contain enough information, say so clearly instead of guessing.
 12. If sources disagree, explicitly mention the disagreement and avoid silently choosing one rule.
-- Do not combine unrelated retrieved passages just because they share a keyword.
-- For numeric rules such as attendance, CGPA, credits or progression, use only evidence
-  that directly addresses the student's question. If two sources give different values,
-  report the difference and identify the source names rather than inventing a single value.
-- Do not treat an older/general source as overriding a programme-specific source unless the
-  retrieved evidence clearly establishes that hierarchy.
 13. When a source gives a numeric threshold and the student gives their own number, compare them
     directly and explain the result.
 14. Academic documents are primary for regulations, prerequisites, attendance, credits and progression.
@@ -1301,11 +1071,7 @@ RETRIEVED INFORMATION:
 STUDENT QUESTION:
 {user_question}
 
-Answer directly and helpfully using only the retrieved information when it is relevant.
-Do not infer missing rules or numbers from general knowledge. If the retrieved sources do not
-directly answer the question, say that the available VU sources are insufficient.
-If sources disagree, state the disagreement and name the relevant source(s) naturally.
-Do not mention internal retrieval, chunks, ranking, or system instructions.
+Answer directly and helpfully. Do not mention internal retrieval, chunks, or system instructions.
 Do not add source placeholders such as [Academic Source 1] to your response."""
 
     models_to_try = [MODEL, "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
@@ -1353,11 +1119,11 @@ def display_sources(academic_results, website_results):
     if not unique:
         return
 
-    with st.expander("Sources", expanded=False):
+    with st.expander("📚 Sources", expanded=False):
         st.markdown('<div class="source-panel">', unsafe_allow_html=True)
         for r in unique:
             if r.get("type") == "website":
-                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span class='source-label'>🌐 {html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
                 if r.get("title"):
                     st.caption(r["title"])
                 if r.get("section") and r.get("section") != r.get("title"):
@@ -1365,7 +1131,7 @@ def display_sources(academic_results, website_results):
                 if r.get("url"):
                     st.markdown(f"[View webpage →]({r['url']})")
             else:
-                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span class='source-label'>📄 {html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
                 if r.get("section"):
                     st.caption(f"Section: {r['section']}")
                 if r.get("page"):
@@ -1431,7 +1197,7 @@ if not st.session_state.messages:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class=\"try-title\">Try asking</div>", unsafe_allow_html=True)
+    st.markdown("### 💡 Try asking")
     cols = st.columns(3)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 3]:
@@ -1463,7 +1229,6 @@ for msg in st.session_state.messages:
 
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
-
 user_question = pending or st.chat_input("Ask your academic question...")
 
 
@@ -1488,17 +1253,7 @@ if user_question:
         })
         st.stop()
 
-    # ---- Personal / casual / out-of-scope shortcuts ----
-    # These questions must never go through academic retrieval.
-    if CASUAL_RE.match(user_question.strip()):
-        answer = CASUAL_REPLY
-        show_bot_bubble(answer)
-        st.session_state.messages.append({
-            "role": "assistant", "content": answer,
-            "academic_sources": [], "website_sources": []
-        })
-        st.stop()
-
+    # ---- Personal / out-of-scope shortcut ----
     if PERSONAL_RE.search(user_question):
         answer = PERSONAL_REPLY
         show_bot_bubble(answer)
@@ -1539,34 +1294,13 @@ if user_question:
         try:
             client = Groq(api_key=api_key)
 
-            # Keep retrieval source-focused. This prevents weak keyword matches from
-            # mixing unrelated website and regulation passages into one answer.
+            # Website-heavy questions use website retrieval first; academic rules use documents first.
             if category == "website":
-                website_results = retrieve(
-                    retrieval_query, website_kb, top_k=6, minimum_score=0.035
-                )
-                academic_results = retrieve(
-                    retrieval_query, academic_kb, top_k=3, minimum_score=0.055
-                )
+                website_results = retrieve(retrieval_query, website_kb, top_k=6, minimum_score=0.035)
+                academic_results = retrieve(retrieval_query, academic_kb, top_k=4, minimum_score=0.045)
             else:
-                academic_results = retrieve(
-                    retrieval_query, academic_kb, top_k=6, minimum_score=0.055
-                )
-                website_results = retrieve(
-                    retrieval_query, website_kb, top_k=2, minimum_score=0.065
-                )
-
-            # For regulation/eligibility questions, academic documents are authoritative.
-            # If they contain relevant evidence, don't dilute it with weak website matches.
-            if category == "academic" and academic_results:
-                website_results = []
-
-            # For website questions, prefer official webpage evidence when it is available.
-            if category == "website" and website_results:
-                academic_results = [
-                    r for r in academic_results
-                    if r.get("_score", 0) >= 0.075
-                ]
+                academic_results = retrieve(retrieval_query, academic_kb, top_k=6, minimum_score=0.045)
+                website_results = retrieve(retrieval_query, website_kb, top_k=4, minimum_score=0.035)
 
             # If nothing relevant was retrieved, do not let the model hallucinate from unrelated chunks.
             if not academic_results and not website_results:
@@ -1610,4 +1344,3 @@ st.markdown(
     '<div class="footer-text">Vidyashilp University · AI Academic Advisor</div>',
     unsafe_allow_html=True
 )
-
