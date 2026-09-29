@@ -234,7 +234,7 @@ div[data-testid="stButton"] > button:hover {
 
 # llama-3.1-8b-instant is the safest free-tier Groq model (always available)
 # llama-3.3-70b-versatile is better quality but needs a valid key with 70B access
-MODEL = "llama-3.1-8b-instant"
+MODEL = "llama-3.3-70b-versatile"
 
 # ============================================================
 # LOGO HELPER
