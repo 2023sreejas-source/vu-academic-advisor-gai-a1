@@ -1,1 +1,42 @@
-
+[
+    {
+        "name": "VU Official Website",
+        "url": "https://vidyashilp.edu.in/"
+    },
+    {
+        "name": "VU Admissions",
+        "url": "https://vidyashilp.edu.in/admissions/"
+    },
+    {
+        "name": "VU Contact",
+        "url": "https://vidyashilp.edu.in/contact/"
+    },
+    {
+        "name": "VU Programs",
+        "url": "https://vidyashilp.edu.in/test-page-new/"
+    },
+    {
+        "name": "BMS Digital Business",
+        "url": "https://vidyashilp.edu.in/schools/b-m-s-hons-hons-with-research-in-digital-business/"
+    },
+    {
+        "name": "BA Economics",
+        "url": "https://vidyashilp.edu.in/schools/bachelor-of-arts-hons/"
+    },
+    {
+        "name": "BTech Data Science",
+        "url": "https://vidyashilp.edu.in/data-science/"
+    },
+    {
+        "name": "BTech AI and Machine Learning",
+        "url": "https://vidyashilp.edu.in/schools/b_tech_ai_ml/"
+    },
+    {
+        "name": "VU Schools and Centres",
+        "url": "https://vidyashilp.edu.in/schools-centres/"
+    },
+    {
+        "name": "VU Campus",
+        "url": "https://vidyashilp.edu.in/vu-campus/"
+    }
+]
