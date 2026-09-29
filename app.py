@@ -402,9 +402,15 @@ with header_col1:
         st.image(logo_path, width=90)
 
 with header_col2:
-    st.markdown("<h2 style='color: #0b4f8a !important; margin: 0;'>Vidyashilp University</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #475569 !important; font-weight: bold; margin: 0;'>AI Academic Advisor · Online</p>", unsafe_allow_html=True)
-
+    st.markdown("""
+        <div style="font-size: 28px; font-weight: 700; color: #0b4f8a !important; line-height: 1.2;">
+            Vidyashilp University
+        </div>
+        <div style="font-size: 15px; font-weight: 600; color: #475569 !important; margin-top: 4px;">
+            AI Academic Advisor · Online
+        </div>
+    """, unsafe_allow_html=True)
+    
 st.divider()
 
 
