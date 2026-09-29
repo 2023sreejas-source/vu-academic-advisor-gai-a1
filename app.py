@@ -49,391 +49,158 @@ st.markdown("""
     --page: #f7f9fc;
 }
 
-/* ------------------------------------------------------------
-   Base
------------------------------------------------------------- */
 html, body, [class*="css"] {
     font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif;
 }
 
-.stApp,
-[data-testid="stAppViewContainer"],
-[data-testid="stAppViewBlockContainer"],
-[data-testid="stMain"],
-[data-testid="block-container"] {
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], [data-testid="block-container"] {
     background: var(--page) !important;
 }
 
 [data-testid="block-container"] {
-    max-width: 1240px !important;
-    padding-top: 1.2rem !important;
-    padding-left: 2.0rem !important;
-    padding-right: 2.0rem !important;
+    max-width: 1280px !important;
+    padding-top: 1.0rem !important;
+    padding-left: 1.6rem !important;
+    padding-right: 1.6rem !important;
     padding-bottom: 5rem !important;
 }
 
-/* Remove Streamlit chrome that makes the page feel like a raw prototype. */
 #MainMenu, footer { visibility: hidden; }
-[data-testid="stToolbar"] { visibility: hidden; }
-[data-testid="stDecoration"] { display: none; }
 
-/* ------------------------------------------------------------
-   Sidebar — calm VU blue, clean controls
------------------------------------------------------------- */
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, var(--vu-blue-dark) 0%, var(--vu-blue) 100%) !important;
+    background: var(--vu-blue-dark) !important;
     border-right: 1px solid rgba(255,255,255,0.10) !important;
 }
-
 [data-testid="stSidebar"] > div:first-child {
-    padding: 1.5rem 1.1rem 1.2rem 1.1rem !important;
+    padding: 1.35rem 1.0rem 1.0rem 1.0rem !important;
 }
-
-[data-testid="stSidebar"] * {
-    color: #ffffff;
-}
-
+[data-testid="stSidebar"] * { color: #ffffff; }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    color: rgba(255,255,255,0.78) !important;
-    line-height: 1.55 !important;
+    color: rgba(255,255,255,0.82) !important;
+    line-height: 1.5 !important;
 }
-
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
     color: #ffffff !important;
-    font-size: 1.18rem !important;
-    font-weight: 650 !important;
-    letter-spacing: -0.01em !important;
-    margin-bottom: 0.35rem !important;
+    font-size: 1.12rem !important;
+    margin-bottom: .35rem !important;
 }
-
 [data-testid="stSidebar"] hr {
     border-color: rgba(255,255,255,0.18) !important;
-    margin: 1.1rem 0 1.25rem 0 !important;
+    margin: 1.0rem 0 1.15rem !important;
 }
-
 [data-testid="stSidebar"] label {
     color: rgba(255,255,255,0.92) !important;
     font-weight: 550 !important;
-    font-size: 0.86rem !important;
+    font-size: .84rem !important;
 }
-
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-baseweb="input"] > div {
     background: #ffffff !important;
     border: 1px solid #d7e0ea !important;
-    border-radius: 10px !important;
-    min-height: 42px !important;
+    border-radius: 9px !important;
+    min-height: 40px !important;
     box-shadow: none !important;
 }
-
 [data-testid="stSidebar"] [data-baseweb="select"] *,
-[data-testid="stSidebar"] [data-baseweb="input"] * {
-    color: #243447 !important;
-}
-
-[data-testid="stSidebar"] input::placeholder {
-    color: #98a2b3 !important;
-}
-
+[data-testid="stSidebar"] [data-baseweb="input"] * { color: #243447 !important; }
+[data-testid="stSidebar"] input::placeholder { color: #98a2b3 !important; }
 [data-testid="stSidebar"] [data-testid="stNumberInput"] button {
     background: #f1f5f9 !important;
     color: var(--vu-blue) !important;
     border: none !important;
 }
-
 [data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    margin-top: 0.2rem !important;
     background: transparent !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255,255,255,0.55) !important;
-    border-radius: 11px !important;
+    border: 1px solid rgba(255,255,255,.55) !important;
+    border-radius: 10px !important;
     font-weight: 600 !important;
-    height: 42px !important;
-    box-shadow: none !important;
+    height: 40px !important;
 }
 
-[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: rgba(255,255,255,0.10) !important;
-    border-color: #ffffff !important;
+/* Header */
+.vu-title {
+    color: var(--vu-blue) !important;
+    font-size: 1.45rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -.02em !important;
+    margin: 0 !important;
 }
-
-/* ------------------------------------------------------------
-   Header
------------------------------------------------------------- */
-.vu-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    background: var(--surface);
+.vu-subtitle {
+    color: #53657a !important;
+    font-size: .88rem !important;
+    margin-top: .2rem !important;
+}
+.vu-header-row {
+    background: #ffffff;
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 14px 18px;
-    margin: 0 0 20px 0;
-    box-shadow: 0 2px 10px rgba(16,24,40,0.04);
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(16,24,40,.04);
+    margin-bottom: 18px;
 }
-
-.vu-brand {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-width: 0;
-}
-
-.vu-brand-logo {
-    width: 112px;
-    height: 58px;
-    object-fit: contain;
-    object-position: left center;
-}
-
-.vu-brand-divider {
-    width: 1px;
-    height: 44px;
-    background: #dfe5ec;
-}
-
-.vu-brand-title {
-    color: var(--ink);
-    font-size: 1.35rem;
-    line-height: 1.2;
-    font-weight: 650;
-    letter-spacing: -0.025em;
-    margin: 0;
-}
-
-.vu-brand-subtitle {
-    color: var(--vu-blue);
-    font-size: 0.86rem;
-    font-weight: 500;
-    margin-top: 5px;
-}
-
 .vu-status-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #20b26b;
-    margin-right: 6px;
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: #20b26b; margin-right: 6px;
 }
 
-.vu-campus {
-    width: 176px;
-    height: 76px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 1px solid #e1e7ee;
-}
-
-/* ------------------------------------------------------------
-   Welcome card
------------------------------------------------------------- */
+/* Main intro */
 .info-box {
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--line);
     border-left: 4px solid var(--vu-blue);
     border-radius: 14px;
-    padding: 20px 22px 18px 22px;
-    margin: 0 0 22px 0;
-    box-shadow: 0 2px 10px rgba(16,24,40,0.04);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(16,24,40,.04);
 }
-
 .info-box h3 {
-    color: var(--ink);
-    font-size: 1.18rem;
-    font-weight: 650;
-    letter-spacing: -0.015em;
-    margin: 0 0 7px 0;
+    color: var(--ink); font-size: 1.16rem; font-weight: 650; margin: 0 0 7px;
 }
-
 .info-box p {
-    color: #5f6b7a;
-    font-size: 0.92rem;
-    line-height: 1.6;
-    margin: 0;
+    color: #5f6b7a; font-size: .91rem; line-height: 1.55; margin: 0;
 }
 
-.suggestion-heading {
-    color: #344054;
-    font-size: 0.91rem;
-    font-weight: 600;
-    margin: 0 0 10px 2px;
-}
-
-/* ------------------------------------------------------------
-   Suggestion buttons
------------------------------------------------------------- */
 div[data-testid="stButton"] > button {
     background: #ffffff !important;
-    border: 1px solid #dbe3ec !important;
-    border-radius: 12px !important;
+    border: 1px solid #dce3eb !important;
+    border-radius: 18px !important;
     color: var(--vu-blue) !important;
-    font-size: 0.84rem !important;
+    font-size: .84rem !important;
     font-weight: 500 !important;
-    min-height: 42px !important;
     padding: 8px 12px !important;
-    box-shadow: 0 1px 3px rgba(16,24,40,0.03) !important;
-    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.035) !important;
 }
-
 div[data-testid="stButton"] > button:hover {
-    border-color: #8bb7dc !important;
+    border-color: var(--vu-blue) !important;
     background: var(--vu-blue-soft) !important;
-    color: var(--vu-blue-dark) !important;
 }
 
-/* ------------------------------------------------------------
-   Chat
------------------------------------------------------------- */
-.bubble-user {
-    display: flex;
-    justify-content: flex-end;
-    margin: 16px 0 8px;
-}
-
+/* Chat bubbles */
+.bubble-user { display:flex; justify-content:flex-end; margin:10px 0 12px; }
 .bubble-user-inner {
-    background: var(--vu-blue);
-    color: #ffffff;
-    border-radius: 16px 16px 4px 16px;
-    padding: 11px 15px;
-    max-width: 72%;
-    font-size: 0.93rem;
-    line-height: 1.6;
-    box-shadow: 0 2px 6px rgba(11,79,138,0.14);
-    word-wrap: break-word;
+    background: var(--vu-blue); color:#fff; border-radius:16px 16px 4px 16px;
+    padding:10px 15px; max-width:68%; font-size:15px; line-height:1.6;
+    box-shadow:0 2px 6px rgba(11,79,138,.14); word-wrap:break-word;
 }
-
-.bubble-bot {
-    display: flex;
-    justify-content: flex-start;
-    margin: 16px 0 8px;
-}
-
+.bubble-bot { display:flex; justify-content:flex-start; margin:10px 0 12px; }
 .bubble-bot-inner {
-    background: #ffffff;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 16px 16px 16px 4px;
-    padding: 12px 16px;
-    max-width: 78%;
-    font-size: 0.94rem;
-    line-height: 1.7;
-    box-shadow: 0 2px 7px rgba(16,24,40,0.045);
-    word-wrap: break-word;
+    background:#fff; color:#1a2738; border:1px solid var(--line);
+    border-radius:16px 16px 16px 4px; padding:10px 15px; max-width:74%;
+    font-size:15px; line-height:1.65; box-shadow:0 1px 4px rgba(0,0,0,.045); word-wrap:break-word;
 }
 
-.bubble-bot-inner strong {
-    font-weight: 650;
-    color: #102a43;
-}
+.source-panel, .source-panel * { color:#667085 !important; }
+.source-panel .source-label { color:var(--vu-blue) !important; font-weight:600; }
+[data-testid="stExpander"] { border-color:#e1e6ec !important; }
+[data-testid="stExpander"] summary { color:#667085 !important; font-size:13px !important; }
+[data-testid="stExpander"] a { color:var(--vu-blue) !important; }
+.footer-text { text-align:center; color:#98a2b3; font-size:11px; padding-top:16px; }
 
-/* ------------------------------------------------------------
-   Sources
------------------------------------------------------------- */
-.source-panel {
-    margin: 2px 0 6px 0;
-}
-
-.source-panel,
-.source-panel * {
-    color: #667085 !important;
-}
-
-.source-panel .source-label {
-    color: var(--vu-blue) !important;
-    font-weight: 600;
-    font-size: 0.82rem;
-}
-
-[data-testid="stExpander"] {
-    background: #fbfcfe !important;
-    border: 1px solid #e5e9ef !important;
-    border-radius: 10px !important;
-    margin: 3px 0 10px 0 !important;
-}
-
-[data-testid="stExpander"] summary {
-    color: #667085 !important;
-    font-size: 0.82rem !important;
-}
-
-/* ------------------------------------------------------------
-   Chat input
------------------------------------------------------------- */
-[data-testid="stBottom"] {
-    background: rgba(247,249,252,0.96) !important;
-    border-top: 1px solid #e7ebf0 !important;
-    padding: 10px 0 12px 0 !important;
-}
-
-[data-testid="stChatInputContainer"] {
-    max-width: 860px !important;
-    margin: 0 auto !important;
-}
-
-[data-testid="stChatInputContainer"] > div {
-    background: #ffffff !important;
-    border: 1px solid #d7dee8 !important;
-    border-radius: 15px !important;
-    box-shadow: 0 3px 14px rgba(16,24,40,0.07) !important;
-}
-
-[data-testid="stChatInputContainer"]:focus-within > div {
-    border-color: #8bb7dc !important;
-    box-shadow: 0 3px 16px rgba(11,79,138,0.10) !important;
-}
-
-[data-testid="stChatInputContainer"] textarea {
-    color: var(--ink) !important;
-    caret-color: var(--vu-blue) !important;
-    background: transparent !important;
-}
-
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: #98a2b3 !important;
-}
-
-/* Footer */
-.footer-text {
-    text-align: center;
-    color: #98a2b3;
-    font-size: 0.70rem;
-    padding: 20px 0 6px;
-}
-
-/* Mobile */
-@media (max-width: 800px) {
-    [data-testid="block-container"] {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    .vu-header {
-        padding: 12px 14px;
-    }
-
-    .vu-brand-logo {
-        width: 88px;
-        height: 48px;
-    }
-
-    .vu-brand-title {
-        font-size: 1.05rem;
-    }
-
-    .vu-brand-divider {
-        display: none;
-    }
-
-    .vu-campus {
-        display: none;
-    }
-
-    .bubble-user-inner,
-    .bubble-bot-inner {
-        max-width: 90%;
-    }
+@media (max-width: 900px) {
+    [data-testid="block-container"] { padding-left: .9rem !important; padding-right: .9rem !important; }
+    .bubble-user-inner, .bubble-bot-inner { max-width: 88%; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -529,44 +296,22 @@ APP_DIR = Path(__file__).resolve().parent
 LOGO_PATH = APP_DIR / "logo.png"
 CAMPUS_PATH = APP_DIR / "uni pic.jpg"
 
-st.markdown('<div class="vu-header">', unsafe_allow_html=True)
+header_col1, header_col2, header_col3 = st.columns([1.15, 5.8, 1.8], vertical_alignment="center")
 
-brand_col, campus_col = st.columns([5.8, 1.5], vertical_alignment="center")
-
-with brand_col:
-    logo_html = ""
+with header_col1:
     if LOGO_PATH.exists():
-        try:
-            logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
-            logo_html = (
-                f'<img class="vu-brand-logo" '
-                f'src="data:image/png;base64,{logo_b64}" '
-                f'alt="Vidyashilp University logo">'
-            )
-        except Exception:
-            logo_html = ""
+        st.image(str(LOGO_PATH), width=100)
+    else:
+        st.markdown("🎓")
 
-    st.markdown(
-        f"""
-        <div class="vu-brand">
-            {logo_html}
-            <div class="vu-brand-divider"></div>
-            <div>
-                <div class="vu-brand-title">Academic Advisor</div>
-                <div class="vu-brand-subtitle">
-                    <span class="vu-status-dot"></span>AI Academic Advisor · Online
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+with header_col2:
+    st.markdown('<div class="vu-header-row"><div class="vu-title">Vidyashilp University</div><div class="vu-subtitle"><span class="vu-status-dot"></span>AI Academic Advisor · Online</div></div>', unsafe_allow_html=True)
 
-with campus_col:
+with header_col3:
     if CAMPUS_PATH.exists():
         st.image(str(CAMPUS_PATH), use_container_width=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div style="height:1px"></div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -605,7 +350,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if st.button("Clear Chat", use_container_width=True):
+    if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -1347,7 +1092,7 @@ if not st.session_state.messages:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="suggestion-heading">Try asking</div>', unsafe_allow_html=True)
+    st.markdown("### 💡 Try asking")
     cols = st.columns(3)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 3]:
