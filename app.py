@@ -293,6 +293,176 @@ div[data-testid="stButton"] > button:hover {
     padding-bottom: 5.5rem !important;
     max-width: 1280px !important;
 }
+
+/* ===== FINAL VU POLISH OVERRIDES ===== */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Google Sans', 'Google Sans Text', Arial, sans-serif !important;
+}
+header[data-testid="stHeader"] {
+    visibility: hidden !important;
+    height: 0 !important;
+}
+[data-testid="block-container"] {
+    padding-top: 0.7rem !important;
+    padding-bottom: 6.5rem !important;
+    max-width: 1280px !important;
+}
+section[data-testid="stSidebar"] {
+    background: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    background: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"],
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div > div {
+    background: #FFFFFF !important;
+    color: #18324A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+    border: 1px solid #D3E0EA !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+    color: #18324A !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+    fill: #0B5A9A !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] > div {
+    background: #FFFFFF !important;
+    border: 1px solid #D3E0EA !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    color: #18324A !important;
+    background: #FFFFFF !important;
+}
+section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    display: none !important;
+}
+section[data-testid="stSidebar"] input::placeholder {
+    color: #8A99A8 !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.70) !important;
+    color: #FFFFFF !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+.vu-banner {
+    position: relative;
+    min-height: 176px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid #D9E4EE;
+    border-radius: 16px;
+    margin: 0 0 22px 0;
+    box-shadow: 0 3px 12px rgba(20,55,85,0.045);
+}
+.vu-banner-copy {
+    position: relative;
+    z-index: 3;
+    width: 58%;
+    padding: 27px 34px;
+}
+.vu-banner-logo {
+    height: 42px;
+    width: auto;
+    max-width: 235px;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+    margin-bottom: 12px;
+}
+.vu-banner-title {
+    color: #0B5A9A !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+}
+.vu-banner-subtitle {
+    color: #60758A !important;
+    font-size: 13px !important;
+    margin-top: 6px !important;
+}
+.vu-status-dot {
+    color: #20A96B !important;
+}
+.vu-banner-image-wrap {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 54%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.vu-banner-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    object-position: right center;
+    display: block;
+}
+.vu-banner-fade {
+    position: absolute;
+    left: 35%;
+    top: 0;
+    width: 36%;
+    height: 100%;
+    z-index: 2;
+    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.96) 22%, rgba(255,255,255,0.45) 68%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+.ai-disclaimer {
+    text-align: center;
+    color: #8798A8 !important;
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+    margin: 15px 0 4px !important;
+}
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div {
+    background: #FFFFFF !important;
+    border-top: 1px solid #D9E4EE !important;
+    box-shadow: none !important;
+}
+[data-testid="stChatInputContainer"] {
+    background: #FFFFFF !important;
+    border: 1px solid #C8D9E7 !important;
+    border-radius: 13px !important;
+    box-shadow: 0 2px 8px rgba(20,55,85,0.045) !important;
+}
+[data-testid="stChatInputContainer"] > div {
+    background: #FFFFFF !important;
+}
+[data-testid="stChatInputContainer"] textarea {
+    color: #18324A !important;
+    background: transparent !important;
+}
+[data-testid="stChatInputContainer"] button {
+    background: #0B5A9A !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+}
+@media (max-width: 900px) {
+    .vu-banner { min-height: 150px; }
+    .vu-banner-copy { width: 68%; padding: 23px; }
+    .vu-banner-image-wrap { width: 55%; }
+    .vu-banner-title { font-size: 21px !important; }
+    .vu-banner-logo { height: 34px; max-width: 185px; }
+    .vu-banner-fade { left: 30%; width: 42%; }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -387,25 +557,54 @@ APP_DIR = Path(__file__).resolve().parent
 logo_path = APP_DIR / "logo.png"
 campus_path = APP_DIR / "uni pic.jpg"
 
-header_logo, header_main, header_campus = st.columns([1.25, 5.75, 1.9], vertical_alignment="center")
+# Official VU logo fallback if the local copy does not render.
+OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2021/06/Header2.png"
 
-with header_logo:
-    if logo_path.exists():
-        st.image(str(logo_path), width=115)
+def local_image_data(path):
+    try:
+        if path.exists():
+            suffix = path.suffix.lower()
+            mime = "image/png" if suffix == ".png" else "image/jpeg"
+            encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+            return f"data:{mime};base64,{encoded}"
+    except Exception:
+        pass
+    return None
 
-with header_main:
-    st.markdown(
-        '<div class="vu-header-title">Vidyashilp University</div>'
-        '<div class="vu-header-subtitle"><span class="vu-status-dot">●</span> AI Academic Advisor · Online</div>',
-        unsafe_allow_html=True
+logo_src = local_image_data(logo_path) or OFFICIAL_LOGO_URL
+campus_src = local_image_data(campus_path)
+
+logo_tag = (
+    f'<img class="vu-banner-logo" src="{html.escape(logo_src, quote=True)}" '
+    f'alt="Vidyashilp University logo">'
+)
+
+campus_tag = ""
+if campus_src:
+    campus_tag = (
+        f'<img class="vu-banner-image" src="{campus_src}" '
+        f'alt="Vidyashilp University campus">'
     )
 
-with header_campus:
-    if campus_path.exists():
-        st.image(str(campus_path), width=220)
-
-st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
+st.markdown(
+    f"""
+    <div class="vu-banner">
+        <div class="vu-banner-copy">
+            {logo_tag}
+            <div class="vu-banner-title">Academic Advisor</div>
+            <div class="vu-banner-subtitle">
+                <span class="vu-status-dot">●</span>
+                AI Academic Advisor · Online
+            </div>
+        </div>
+        <div class="vu-banner-image-wrap">
+            {campus_tag}
+        </div>
+        <div class="vu-banner-fade"></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ============================================================
 # SIDEBAR
@@ -1107,11 +1306,11 @@ def display_sources(academic_results, website_results):
     if not unique:
         return
 
-    with st.expander("📚 Sources", expanded=False):
+    with st.expander("Sources", expanded=False):
         st.markdown('<div class="source-panel">', unsafe_allow_html=True)
         for r in unique:
             if r.get("type") == "website":
-                st.markdown(f"<span class='source-label'>🌐 {html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'VU Official Website'))}</span>", unsafe_allow_html=True)
                 if r.get("title"):
                     st.caption(r["title"])
                 if r.get("section") and r.get("section") != r.get("title"):
@@ -1119,7 +1318,7 @@ def display_sources(academic_results, website_results):
                 if r.get("url"):
                     st.markdown(f"[View webpage →]({r['url']})")
             else:
-                st.markdown(f"<span class='source-label'>📄 {html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span class='source-label'>{html.escape(r.get('source', 'Academic document'))}</span>", unsafe_allow_html=True)
                 if r.get("section"):
                     st.caption(f"Section: {r['section']}")
                 if r.get("page"):
@@ -1217,6 +1416,13 @@ for msg in st.session_state.messages:
 
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
+
+st.markdown(
+    '<div class="ai-disclaimer">AI-generated responses can make mistakes. '
+    'Please verify important academic information with official VU sources.</div>',
+    unsafe_allow_html=True
+)
+
 user_question = pending or st.chat_input("Ask your academic question...")
 
 
