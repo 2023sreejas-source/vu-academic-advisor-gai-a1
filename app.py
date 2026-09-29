@@ -38,42 +38,114 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-.stApp, [data-testid="stAppViewContainer"] { background-color: #f0f2f5; }
+/* Background */
+.stApp, [data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="block-container"] {
+    background-color: #f0f2f5 !important;
+}
 
-[data-testid="stSidebar"] { background-color: #ffffff; }
+/* Sidebar */
+[data-testid="stSidebar"] { background-color: #ffffff !important; }
 
+/* Bottom bar */
 [data-testid="stBottom"], [data-testid="stBottom"] > div {
     background-color: #ffffff !important;
     border-top: 1px solid #eaecf0 !important;
+    padding: 10px 16px !important;
 }
 
-[data-testid="stChatInputContainer"], [data-testid="stChatInputContainer"] > div {
-    background: #f0f2f5 !important;
-    border: 1.5px solid #eaecf0 !important;
-    border-radius: 24px !important;
+/* Chat input pill shape */
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div {
+    background: #ffffff !important;
+    border: 1.5px solid #dde0e6 !important;
+    border-radius: 26px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
 }
 
 [data-testid="stChatInputContainer"] textarea {
     color: #1a1a2e !important;
-    caret-color: #8b0000 !important;
+    caret-color: #c0182a !important;
+    background: transparent !important;
 }
 
-[data-testid="stChatInputContainer"] textarea::placeholder { color: #9aa3af !important; }
+[data-testid="stChatInputContainer"] textarea::placeholder { color: #adb5bd !important; }
+
+/* User message bubble — right, red-navy gradient */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    justify-content: flex-end !important;
+    background: transparent !important;
+}
+
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) .stMarkdown {
+    background: linear-gradient(135deg, #c0182a 0%, #0a2240 100%) !important;
+    color: #ffffff !important;
+    border-radius: 18px 18px 4px 18px !important;
+    padding: 10px 15px !important;
+    max-width: 70% !important;
+    margin-left: auto !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    box-shadow: 0 2px 8px rgba(192,24,42,0.2) !important;
+}
+
+/* Bot message bubble — left, white */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
+    background: transparent !important;
+}
+
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) .stMarkdown {
+    background: #ffffff !important;
+    color: #1a1a2e !important;
+    border-radius: 18px 18px 18px 4px !important;
+    padding: 10px 15px !important;
+    max-width: 75% !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07) !important;
+}
+
+/* Remove default avatar background */
+[data-testid="stChatMessageAvatarUser"],
+[data-testid="stChatMessageAvatarAssistant"] {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Suggestion buttons */
+div[data-testid="stButton"] > button {
+    background: #ffffff !important;
+    border: 1px solid #eaecf0 !important;
+    border-radius: 20px !important;
+    color: #0a2240 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    padding: 9px 14px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    transition: all 0.15s !important;
+}
+
+div[data-testid="stButton"] > button:hover {
+    border-color: #c0182a !important;
+    color: #c0182a !important;
+    background: #fff0f1 !important;
+}
 
 .info-box {
     background-color: white;
-    padding: 18px 20px;
+    padding: 16px 18px;
     border-radius: 14px;
-    border-left: 5px solid #8b0000;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 4px solid #c0182a;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
 
 .footer-text {
     text-align: center;
-    color: #777777;
-    font-size: 12px;
-    padding-top: 25px;
+    color: #adb5bd;
+    font-size: 11px;
+    padding-top: 20px;
 }
 
 #MainMenu, footer { visibility: hidden; }
@@ -560,6 +632,15 @@ Student profile:
 YOUR ROLE:
 Help students with academic questions — courses, credits, prerequisites, attendance,
 progression rules, graduation requirements, semester planning, admissions, and programmes.
+
+RESPONSE STYLE:
+- Keep responses SHORT and conversational — like texting, not writing a report.
+- NO tables, NO numbered section headers with emoji, NO "What to do next" sections.
+- Max 4-5 bullet points if needed. If it can be said in 2 sentences, say it in 2 sentences.
+- Friendly and warm tone always. Match the student's casual or formal style.
+- NEVER guess or assume CGPA thresholds, credit requirements, or rules not explicitly
+  in the documents. If the exact number isn't in the retrieved text, say you don't have
+  that specific figure and ask them to verify with the academic office.
 
 BEHAVIOUR RULES:
 1. If the message is a greeting or casual opener (hi, hey, hello, bro, hiii, wsp, sup,
