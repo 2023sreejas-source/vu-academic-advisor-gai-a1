@@ -27,162 +27,176 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* ---- Base ---- */
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
 .stApp {
-    background-color: #f5f6fa;
+    background-color: #ffffff;
 }
 
-/* ---- Top header bar ---- */
+/* ---- Header: just a thin top bar with a red underline ---- */
 .vu-header {
-    background: #0a2240;
-    padding: 18px 28px;
-    border-radius: 12px;
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid #c0182a;
+    margin-bottom: 28px;
 }
 
 .vu-header-logo {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
-    background: white;
-    border-radius: 8px;
-    padding: 5px;
     flex-shrink: 0;
 }
 
-.vu-header-text {}
-
 .vu-header-title {
-    color: #ffffff;
-    font-size: 20px;
+    color: #0a2240;
+    font-size: 18px;
     font-weight: 700;
     line-height: 1.2;
     margin: 0;
 }
 
 .vu-header-sub {
-    color: #94b8d6;
-    font-size: 13px;
-    margin: 3px 0 0 0;
+    color: #6b7a8d;
+    font-size: 12.5px;
+    margin: 2px 0 0 0;
 }
 
 /* ---- Chat messages ---- */
 .vu-msg-user {
     background: #0a2240;
     color: #ffffff;
-    border-radius: 14px 14px 4px 14px;
-    padding: 12px 16px;
-    max-width: 78%;
+    border-radius: 16px 16px 4px 16px;
+    padding: 11px 16px;
+    max-width: 72%;
     margin-left: auto;
-    font-size: 14.5px;
+    font-size: 14px;
     line-height: 1.55;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .vu-msg-bot {
-    background: #ffffff;
+    background: #f7f8fa;
     color: #1a1a2e;
-    border-radius: 14px 14px 14px 4px;
-    padding: 14px 18px;
-    max-width: 82%;
-    font-size: 14.5px;
-    line-height: 1.6;
-    margin-bottom: 14px;
-    border: 1px solid #e4e8f0;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border-radius: 16px 16px 16px 4px;
+    padding: 13px 17px;
+    max-width: 78%;
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 16px;
+    border: 1px solid #eaecf0;
 }
 
-.vu-msg-bot strong {
-    color: #0a2240;
-}
+.vu-msg-bot strong { color: #0a2240; }
 
 /* ---- Source chip ---- */
 .vu-source-chip {
     display: inline-block;
-    background: #eef3fb;
-    color: #1e4a8a;
-    font-size: 11.5px;
-    padding: 3px 9px;
+    background: #fff0f1;
+    color: #c0182a;
+    font-size: 11px;
+    padding: 2px 8px;
     border-radius: 20px;
     margin: 2px 3px 2px 0;
-    border: 1px solid #c8d9f5;
+    border: 1px solid #f5c0c5;
     font-weight: 500;
 }
 
 /* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
-    background-color: #ffffff;
-    border-right: 1px solid #e4e8f0;
+    background-color: #fafafa;
+    border-right: 1px solid #eaecf0;
 }
 
 .vu-sidebar-section {
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
-    color: #8492a6;
-    letter-spacing: 0.08em;
+    color: #9aa3af;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    margin: 18px 0 8px 0;
+    margin: 20px 0 8px 0;
 }
 
 .vu-profile-badge {
-    background: #f0f4ff;
-    border: 1px solid #c8d9f5;
-    border-radius: 8px;
-    padding: 10px 12px;
+    background: #f7f8fa;
+    border: 1px solid #eaecf0;
+    border-left: 3px solid #c0182a;
+    border-radius: 6px;
+    padding: 9px 12px;
     font-size: 13px;
     color: #2c3e50;
     margin-bottom: 10px;
 }
 
 .vu-profile-badge span {
-    color: #1e4a8a;
+    color: #c0182a;
     font-weight: 600;
 }
 
 .vu-status {
-    background: #f0faf4;
-    border: 1px solid #b8dfc8;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12.5px;
-    color: #2d6a4f;
+    background: #f7f8fa;
+    border: 1px solid #eaecf0;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 12px;
+    color: #4a5568;
 }
 
-/* ---- Input area ---- */
+/* ---- Input: force dark text ---- */
 .stChatInput > div {
-    border-radius: 12px !important;
-    border: 1.5px solid #c8d9f5 !important;
-    background: #ffffff !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #eaecf0 !important;
+    background: #f7f8fa !important;
 }
 
-/* ---- Suggested questions ---- */
-.vu-suggestion {
-    background: #ffffff;
-    border: 1px solid #dde4f0;
-    border-radius: 8px;
-    padding: 9px 13px;
-    font-size: 13px;
-    color: #1e4a8a;
-    cursor: pointer;
-    margin-bottom: 6px;
-    transition: background 0.15s;
+.stChatInput textarea,
+.stChatInput input,
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInputContainer"] textarea {
+    color: #1a1a2e !important;
+    background: #f7f8fa !important;
+    caret-color: #c0182a !important;
 }
 
-.vu-suggestion:hover {
-    background: #eef3fb;
+/* ---- Suggested question buttons ---- */
+div[data-testid="stButton"] > button {
+    background: #f7f8fa !important;
+    border: 1px solid #eaecf0 !important;
+    border-radius: 8px !important;
+    color: #0a2240 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+    padding: 10px 14px !important;
+    transition: border-color 0.15s, color 0.15s !important;
+}
+
+div[data-testid="stButton"] > button:hover {
+    border-color: #c0182a !important;
+    color: #c0182a !important;
+    background: #fff0f1 !important;
 }
 
 /* ---- Divider ---- */
 .vu-divider {
     border: none;
-    border-top: 1px solid #e4e8f0;
-    margin: 16px 0;
+    border-top: 1px solid #eaecf0;
+    margin: 14px 0;
+}
+
+/* ---- Suggestion label ---- */
+.vu-suggest-label {
+    font-size: 12px;
+    color: #9aa3af;
+    font-weight: 500;
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 /* hide streamlit branding */
@@ -230,9 +244,9 @@ if logo_file:
 st.markdown(f"""
 <div class="vu-header">
     {logo_html}
-    <div class="vu-header-text">
-        <p class="vu-header-title">AI Academic Advisor</p>
-        <p class="vu-header-sub">Vidyashilp University &nbsp;·&nbsp; Powered by Retrieval-Augmented Generation</p>
+    <div>
+        <p class="vu-header-title">AI Academic Advisor &nbsp;<span style="color:#c0182a;">|</span>&nbsp; Vidyashilp University</p>
+        <p class="vu-header-sub">Retrieval-Augmented Generation &nbsp;·&nbsp; Grounded in official university documents</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -419,7 +433,7 @@ with st.sidebar:
     if include_profile:
         st.markdown(f"""
         <div class="vu-profile-badge">
-            <span>{credits} credits</span> completed &nbsp;·&nbsp; CGPA <span>{cgpa}</span>
+            <span>{credits}</span> credits &nbsp;·&nbsp; CGPA <span>{cgpa}</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -439,8 +453,7 @@ with st.sidebar:
 
     st.markdown(f"""
     <div class="vu-status">
-        ✅ &nbsp;<strong>{N_CHUNKS}</strong> document chunks indexed<br>
-        <span style="font-size:11px; color:#555;">Student Handbook · Course Plans · SOP · Programme Structure</span>
+        <strong>{N_CHUNKS}</strong> chunks indexed &nbsp;·&nbsp; Handbook · SOP · Courses
     </div>
     """, unsafe_allow_html=True)
 
@@ -535,7 +548,7 @@ SUGGESTIONS = [
 ]
 
 if not st.session_state.messages:
-    st.markdown("**Suggested questions — click to ask:**")
+    st.markdown('<p class="vu-suggest-label">Try asking</p>', unsafe_allow_html=True)
     cols = st.columns(2)
     for i, suggestion in enumerate(SUGGESTIONS):
         with cols[i % 2]:
