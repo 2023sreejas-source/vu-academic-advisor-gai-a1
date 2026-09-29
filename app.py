@@ -574,8 +574,8 @@ if "pending_question" not in st.session_state:
 from pathlib import Path
 
 APP_DIR = Path(__file__).resolve().parent
-logo_path = APP_DIR / "logo.png"
-campus_path = APP_DIR / "uni pic.jpg"
+logo_path = APP_DIR / "Logo.png"
+campus_path = APP_DIR / "campus.jpg"
 
 # Official VU logo fallback if the local copy does not render.
 OFFICIAL_LOGO_URL = "https://vidyashilp.edu.in/wp-content/uploads/2021/06/Header2.png"
