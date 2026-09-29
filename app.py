@@ -402,8 +402,8 @@ with header_col1:
         st.image(logo_path, width=90)
 
 with header_col2:
-    st.markdown("## Vidyashilp University")
-    st.markdown("**AI Academic Advisor · Online**")
+    st.markdown("<h2 style='color: #0b4f8a !important; margin: 0;'>Vidyashilp University</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #475569 !important; font-weight: bold; margin: 0;'>AI Academic Advisor · Online</p>", unsafe_allow_html=True)
 
 st.divider()
 
