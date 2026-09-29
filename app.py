@@ -284,7 +284,7 @@ div[data-testid="stButton"] > button:hover {
     text-align: center;
     color: #94A4B3;
     font-size: 10px;
-    padding: 18px 0 4px;
+    padding: 14px 0 18px;
 }
 
 /* Main spacing */
@@ -301,6 +301,12 @@ html, body, [class*="css"] {
 header[data-testid="stHeader"] {
     visibility: hidden !important;
     height: 0 !important;
+}
+/* Keep platform-only Streamlit chrome out of the submitted product UI. */
+#MainMenu, footer, div[data-testid="stToolbar"],
+div[data-testid="stStatusWidget"], div[data-testid="stDecoration"] {
+    display: none !important;
+    visibility: hidden !important;
 }
 [data-testid="block-container"] {
     padding-top: 0.7rem !important;
@@ -355,7 +361,7 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
 }
 .vu-banner {
     position: relative;
-    min-height: 176px;
+    min-height: 184px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -367,14 +373,14 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
 }
 .vu-banner-copy {
     position: relative;
-    z-index: 3;
-    width: 58%;
-    padding: 27px 34px;
+    z-index: 4;
+    width: 61%;
+    padding: 25px 34px 24px 34px;
 }
 .vu-banner-logo {
-    height: 42px;
+    height: 48px;
     width: auto;
-    max-width: 235px;
+    max-width: 285px;
     object-fit: contain;
     object-position: left center;
     display: block;
@@ -382,7 +388,7 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
 }
 .vu-banner-title {
     color: #0B5A9A !important;
-    font-size: 24px !important;
+    font-size: 25px !important;
     font-weight: 700 !important;
     line-height: 1.15 !important;
     margin: 0 !important;
@@ -399,7 +405,7 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     position: absolute;
     right: 0;
     top: 0;
-    width: 54%;
+    width: 58%;
     height: 100%;
     z-index: 1;
     display: flex;
@@ -410,25 +416,19 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     height: 100%;
     width: 100%;
     object-fit: contain;
+    max-width: 100%;
     object-position: right center;
     display: block;
 }
 .vu-banner-fade {
     position: absolute;
-    left: 35%;
+    left: 28%;
     top: 0;
-    width: 36%;
+    width: 48%;
     height: 100%;
-    z-index: 2;
-    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.96) 22%, rgba(255,255,255,0.45) 68%, rgba(255,255,255,0) 100%);
+    z-index: 3;
+    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.99) 18%, rgba(255,255,255,0.86) 38%, rgba(255,255,255,0.42) 68%, rgba(255,255,255,0) 100%);
     pointer-events: none;
-}
-.ai-disclaimer {
-    text-align: center;
-    color: #8798A8 !important;
-    font-size: 11px !important;
-    line-height: 1.45 !important;
-    margin: 15px 0 4px !important;
 }
 [data-testid="stBottom"],
 [data-testid="stBottom"] > div {
@@ -436,31 +436,51 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     border-top: 1px solid #D9E4EE !important;
     box-shadow: none !important;
 }
-[data-testid="stChatInputContainer"] {
+[data-testid="stBottom"] {
+    padding: 9px 16px 8px !important;
+}
+[data-testid="stBottom"]::after {
+    content: "AI-generated responses can make mistakes. Please verify important academic information with official VU sources.";
+    display: block;
+    text-align: center;
+    color: #8798A8 !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    margin: 5px auto 0 !important;
+    max-width: 900px;
+}
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div,
+[data-testid="stChatInputContainer"] > div > div {
     background: #FFFFFF !important;
-    border: 1px solid #C8D9E7 !important;
+}
+[data-testid="stChatInputContainer"] {
+    border: 1.5px solid #BFD3E3 !important;
     border-radius: 13px !important;
     box-shadow: 0 2px 8px rgba(20,55,85,0.045) !important;
 }
-[data-testid="stChatInputContainer"] > div {
-    background: #FFFFFF !important;
-}
-[data-testid="stChatInputContainer"] textarea {
+[data-testid="stChatInputContainer"] textarea,
+[data-testid="stChatInputContainer"] textarea:focus {
     color: #18324A !important;
-    background: transparent !important;
+    background: #FFFFFF !important;
+    caret-color: #0B5A9A !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #8798A8 !important;
 }
 [data-testid="stChatInputContainer"] button {
     background: #0B5A9A !important;
     color: #FFFFFF !important;
+    border: none !important;
     border-radius: 8px !important;
 }
 @media (max-width: 900px) {
-    .vu-banner { min-height: 150px; }
-    .vu-banner-copy { width: 68%; padding: 23px; }
-    .vu-banner-image-wrap { width: 55%; }
+    .vu-banner { min-height: 154px; }
+    .vu-banner-copy { width: 69%; padding: 22px; }
+    .vu-banner-image-wrap { width: 58%; }
     .vu-banner-title { font-size: 21px !important; }
-    .vu-banner-logo { height: 34px; max-width: 185px; }
-    .vu-banner-fade { left: 30%; width: 42%; }
+    .vu-banner-logo { height: 38px; max-width: 205px; }
+    .vu-banner-fade { left: 24%; width: 50%; }
 }
 
 </style>
@@ -576,7 +596,8 @@ campus_src = local_image_data(campus_path)
 
 logo_tag = (
     f'<img class="vu-banner-logo" src="{html.escape(logo_src, quote=True)}" '
-    f'alt="Vidyashilp University logo">'
+    f'alt="Vidyashilp University logo" loading="eager" '
+    f'onerror="this.onerror=null;this.src=\'{OFFICIAL_LOGO_URL}\';">'
 )
 
 campus_tag = ""
@@ -1416,12 +1437,6 @@ for msg in st.session_state.messages:
 
 pending = st.session_state.pending_question
 st.session_state.pending_question = None
-
-st.markdown(
-    '<div class="ai-disclaimer">AI-generated responses can make mistakes. '
-    'Please verify important academic information with official VU sources.</div>',
-    unsafe_allow_html=True
-)
 
 user_question = pending or st.chat_input("Ask your academic question...")
 
