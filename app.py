@@ -248,7 +248,7 @@ div[data-testid="stButton"] > button:hover {
 # CONSTANTS
 # ============================================================
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-3.1-70b-versatile"
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
 STUDENT_DATABASE_FILE = "synthetic_students.json"
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
