@@ -245,15 +245,18 @@ div[data-testid="stButton"] > button:hover {
 
 
 # ============================================================
-# CONSTANTS
+# CONSTANTS & MODEL DEFINITION
 # ============================================================
 
 MODEL_CANDIDATES = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
-    "openai/gpt-oss-20b",
+    "llama3-70b-8192",
+    "llama3-8b-8192",
     "mixtral-8x7b-32768"
 ]
+MODEL = MODEL_CANDIDATES[0]
+
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
 STUDENT_DATABASE_FILE = "synthetic_students.json"
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
@@ -849,13 +852,21 @@ def generate_response(user_query, active_profile):
             messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": query_text})
 
-        completion = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            temperature=0.3,
-            max_tokens=1024
-        )
-        return completion.choices[0].message.content
+        last_error = None
+        for model_id in MODEL_CANDIDATES:
+            try:
+                completion = client.chat.completions.create(
+                    model=model_id,
+                    messages=messages,
+                    temperature=0.3,
+                    max_tokens=1024
+                )
+                return completion.choices[0].message.content
+            except Exception as model_err:
+                last_error = model_err
+                continue
+
+        return f"An error occurred while connecting to the advisory model: {str(last_error)}"
     except Exception as e:
         return f"An error occurred while connecting to the advisory model: {str(e)}"
 
