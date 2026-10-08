@@ -248,7 +248,12 @@ div[data-testid="stButton"] > button:hover {
 # CONSTANTS
 # ============================================================
 
-MODEL = "openai/gpt-oss-20b "#"llama-3.3-70b-versatile"  # or ""
+MODEL_CANDIDATES = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "openai/gpt-oss-20b",
+    "mixtral-8x7b-32768"
+]
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
 STUDENT_DATABASE_FILE = "synthetic_students.json"
 EXCLUDED_FILES = ("advisor_eval", "eval_results", "phase4", "summary_metrics", "website_sources")
