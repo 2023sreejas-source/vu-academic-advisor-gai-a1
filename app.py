@@ -245,17 +245,15 @@ div[data-testid="stButton"] > button:hover {
 
 
 # ============================================================
-# CONSTANTS & MODEL DEFINITION
+# CONSTANTS & ACTIVE MODEL FALLBACKS
 # ============================================================
 
-MODEL_CANDIDATES = [
+FALLBACK_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
-    "llama3-70b-8192",
-    "llama3-8b-8192",
-    "mixtral-8x7b-32768"
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b"
 ]
-MODEL = MODEL_CANDIDATES[0]
 
 ACADEMIC_EXTENSIONS = (".pdf", ".txt", ".csv", ".xlsx", ".xls")
 STUDENT_DATABASE_FILE = "synthetic_students.json"
@@ -847,13 +845,24 @@ def generate_response(user_query, active_profile):
 
     try:
         client = Groq(api_key=api_key)
+
+        # Query live active models directly from Groq to avoid decommissioned models
+        try:
+            live_models = [
+                m.id for m in client.models.list().data
+                if not any(x in m.id for x in ["whisper", "guard", "compound", "orpheus", "tts", "safeguard", "prompt"])
+            ]
+            candidates = live_models if live_models else FALLBACK_MODELS
+        except Exception:
+            candidates = FALLBACK_MODELS
+
         messages = [{"role": "system", "content": system_prompt}]
         for msg in st.session_state.messages[-6:]:
             messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": query_text})
 
         last_error = None
-        for model_id in MODEL_CANDIDATES:
+        for model_id in candidates:
             try:
                 completion = client.chat.completions.create(
                     model=model_id,
