@@ -181,40 +181,36 @@ div[data-testid="stButton"] > button:hover {
     margin-bottom: 0;
 }
 
-/* Chat Bubbles */
-.bubble-user {
-    display: flex;
-    justify-content: flex-end;
-    margin: 11px 0 14px;
+/* Tables inside chatbot responses */
+.bubble-bot-inner table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+    display: block;
+    overflow-x: auto;
 }
 
-.bubble-user-inner {
-    background: #0b4f8a;
-    color: #ffffff !important;
-    border-radius: 18px 18px 5px 18px;
-    padding: 11px 17px;
-    max-width: 68%;
-    font-size: 15px;
-    line-height: 1.65;
-    word-wrap: break-word;
+.bubble-bot-inner th,
+.bubble-bot-inner td {
+    border: 1px solid #d9e2ec;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
 }
 
-.bubble-bot {
-    display: flex;
-    justify-content: flex-start;
-    margin: 11px 0 14px;
+.bubble-bot-inner th {
+    background: #eaf2f8;
+    color: #0b4f8a;
+    font-weight: 700;
 }
 
-.bubble-bot-inner {
-    background: #f7f9fc;
+.bubble-bot-inner td {
     color: #172033;
-    border: 1px solid #dfe6ee;
-    border-radius: 18px 18px 18px 5px;
-    padding: 12px 17px;
-    max-width: 76%;
-    font-size: 15px;
-    line-height: 1.7;
-    word-wrap: break-word;
+}
+
+.bubble-bot-inner tr:nth-child(even) {
+    background: #f7f9fc;
 }
 
 /* Profile Card */
@@ -922,7 +918,7 @@ for msg in st.session_state.messages:
     else:
         formatted_content = markdown.markdown(
             msg["content"],
-            extensions=["nl2br"]
+            extensions=["nl2br", "tables"]
         )
 
         render_html(f"""
