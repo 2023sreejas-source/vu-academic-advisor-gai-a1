@@ -869,7 +869,7 @@ def generate_response(user_query, active_profile):
                     model=model_id,
                     messages=messages,
                     temperature=0.3,
-                    max_tokens=500
+                    max_tokens=1024
                 )
                 return completion.choices[0].message.content
             except Exception as model_err:
