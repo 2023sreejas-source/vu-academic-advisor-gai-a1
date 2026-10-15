@@ -985,124 +985,13 @@ def generate_response(user_query, active_profile):
 
         last_error = None
         for model_id in candidates:
-            try:
-                
-# Define the academic tools the AI can call
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "student_profile",
-            "description": "Retrieve the active student's academic profile.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "credit_checker",
-            "description": "Check completed credits against a specified requirement.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "required_credits": {"type": "number"}
-                },
-                "required": ["required_credits"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "prerequisite_checker",
-            "description": "Check specified prerequisites against completed courses.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "required_courses": {
-                        "type": "array",
-                        "items": {"type": "string"}
-                    }
-                },
-                "required": ["required_courses"]
-            }
-        }
-    }
-]
-
-# Ask the AI whether a tool is needed
-completion = client.chat.completions.create(
-    model=model_id,
-    messages=messages,
-    tools=tools,
-    tool_choice="auto",
-    temperature=0.3,
-    max_tokens=1024
+            try: 
+                completion = client.chat.completions.create(
+                    model=model_id,
+                    messages=messages,
+                    temperature=0.3,
+                    max_tokens=1024
 )
-
-assistant_message = completion.choices[0].message
-tool_calls = assistant_message.tool_calls
-
-# Run the selected tool and collect its result
-if tool_calls:
-    messages.append({
-        "role": "assistant",
-        "content": assistant_message.content,
-        "tool_calls": [
-            call.model_dump(exclude_none=True)
-            for call in tool_calls
-        ]
-    })
-
-    for call in tool_calls:
-        tool_name = call.function.name
-        arguments = json.loads(call.function.arguments)
-
-        if tool_name == "student_profile":
-            result = student_profile_tool(active_profile)
-
-        elif tool_name == "credit_checker":
-            result = credit_checker_tool(
-                active_profile,
-                arguments["required_credits"]
-            )
-
-        elif tool_name == "prerequisite_checker":
-            result = prerequisite_checker_tool(
-                active_profile,
-                arguments["required_courses"]
-            )
-
-        else:
-            result = "Unknown tool."
-
-        messages.append({
-            "role": "tool",
-            "tool_call_id": call.id,
-            "content": str(result)
-        })
-
-    # Ask the AI to explain the tool results to the student
-    completion = client.chat.completions.create(
-        model=model_id,
-        messages=messages,
-        temperature=0.3,
-        max_tokens=1024
-    )
-
-                return completion.choices[0].message.content
-            except Exception as model_err:
-                last_error = model_err
-                continue
-
-        return f"An error occurred while connecting to the advisory model: {str(last_error)}"
-    except Exception as e:
-        return f"An error occurred while connecting to the advisory model: {str(e)}"
-
 
 # ============================================================
 # MAIN APPLICATION INTERFACE
