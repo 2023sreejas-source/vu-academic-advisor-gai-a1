@@ -69,7 +69,7 @@ html, body, [class*="css"] {
     content: "";
     position: fixed;
     inset: -12px;
-    background-image: url("campus_background.jpg");
+    background-image: url("background.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
