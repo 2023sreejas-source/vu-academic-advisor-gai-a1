@@ -13,6 +13,7 @@ import math
 import json
 import requests
 import html
+import markdown
 
 from collections import Counter
 
@@ -868,7 +869,7 @@ def generate_response(user_query, active_profile):
                     model=model_id,
                     messages=messages,
                     temperature=0.3,
-                    max_tokens=1024
+                    max_tokens=500
                 )
                 return completion.choices[0].message.content
             except Exception as model_err:
@@ -918,8 +919,12 @@ for msg in st.session_state.messages:
             <div class="bubble-user-inner">{html.escape(msg["content"])}</div>
         </div>
         """)
-    else:
-        formatted_content = html.escape(msg["content"]).replace("\n", "<br>")
+else:
+    formatted_content = markdown.markdown(
+        msg["content"],
+        extensions=["nl2br"]
+    )
+
         render_html(f"""
         <div class="bubble-bot">
             <div class="bubble-bot-inner">{formatted_content}</div>
