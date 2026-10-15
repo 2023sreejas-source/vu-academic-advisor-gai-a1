@@ -603,6 +603,102 @@ def profile_retrieval_terms(profile):
             terms.append(val)
     return " ".join(terms)
 
+# ============================================================
+# AGENTIC AI — ACADEMIC TOOLS
+# ============================================================
+
+def student_profile_tool(profile):
+    """Return the available academic details of the active student."""
+    if not profile:
+        return "No student profile is available."
+
+    fields = [
+        "student_id", "program", "programme", "semester",
+        "completed_credits", "credits", "cgpa",
+        "passed_courses", "completed_courses",
+        "failed_courses", "current_courses"
+    ]
+
+    details = {
+        key: profile[key]
+        for key in fields
+        if key in profile
+    }
+
+    if not details:
+        return "No academic details are available."
+
+    return json.dumps(details, indent=2, ensure_ascii=False)
+
+
+def credit_checker_tool(profile, required_credits):
+    """Compare recorded credits with a specified credit requirement."""
+    credits = profile.get("completed_credits", profile.get("credits"))
+
+    try:
+        credits = float(credits)
+        required_credits = float(required_credits)
+    except (TypeError, ValueError):
+        return "Credit information is unavailable. Please verify the student profile."
+
+    if credits < 0 or required_credits < 0:
+        return "Credit values cannot be negative."
+
+    if credits >= required_credits:
+        return (
+            f"Recorded credits: {credits:g}. "
+            f"Specified requirement: {required_credits:g}. "
+            "The recorded credits meet this specified requirement."
+        )
+
+    return (
+        f"Recorded credits: {credits:g}. "
+        f"Specified requirement: {required_credits:g}. "
+        f"The student needs {required_credits - credits:g} more credits "
+        "to meet this specified requirement."
+    )
+
+
+def prerequisite_checker_tool(profile, required_courses):
+    """Check whether specified prerequisite courses are completed."""
+    completed = (
+        profile.get("passed_courses")
+        or profile.get("completed_courses")
+        or []
+    )
+
+    if isinstance(completed, str):
+        completed = [completed]
+
+    completed_normalized = {
+        str(course).strip().casefold()
+        for course in completed
+    }
+
+    if not required_courses:
+        return "No prerequisite courses were provided for checking."
+
+    missing = [
+        course for course in required_courses
+        if str(course).strip().casefold() not in completed_normalized
+    ]
+
+    if not missing:
+        return "All specified prerequisite courses appear in the completed-course record."
+
+    return (
+        "These specified prerequisites were not found in the completed-course record: "
+        + ", ".join(missing)
+        + ". Verify course records before making an eligibility decision."
+    )
+
+
+# Tools available to the academic advisor
+ACADEMIC_TOOLS = {
+    "student_profile": student_profile_tool,
+    "credit_checker": credit_checker_tool,
+    "prerequisite_checker": prerequisite_checker_tool
+}
 
 # ============================================================
 # TEXT EXTRACTION & CHUNKING
