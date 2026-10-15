@@ -13,7 +13,6 @@ import math
 import json
 import requests
 import html
-import markdown
 
 from collections import Counter
 
@@ -919,12 +918,8 @@ for msg in st.session_state.messages:
             <div class="bubble-user-inner">{html.escape(msg["content"])}</div>
         </div>
         """)
-        else:
-        formatted_content = markdown.markdown(
-            msg["content"],
-            extensions=["nl2br"]
-        )
-
+    else:
+        formatted_content = html.escape(msg["content"]).replace("\n", "<br>")
         render_html(f"""
         <div class="bubble-bot">
             <div class="bubble-bot-inner">{formatted_content}</div>
