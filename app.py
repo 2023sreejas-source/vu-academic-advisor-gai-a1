@@ -73,7 +73,7 @@ html, body, [class*="css"] {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: blur(7px);
+    filter: blur(5px);
     opacity: 0.28;
     z-index: -1;
     pointer-events: none;
