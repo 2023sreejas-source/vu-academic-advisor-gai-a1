@@ -68,13 +68,13 @@ html, body, [class*="css"] {
 [data-testid="stAppViewContainer"]::before {
     content: "";
     position: fixed;
-    inset: -12px;
-    background-image: url("background.jpg");
+    inset: 0;
+    background-image: url("YOUR_RAW_IMAGE_URL");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: blur(10px);
-    opacity: 0.15;
+    filter: blur(6px);
+    opacity: 0.25;
     z-index: -1;
     pointer-events: none;
 }
