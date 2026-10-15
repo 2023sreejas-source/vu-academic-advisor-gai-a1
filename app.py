@@ -13,7 +13,7 @@ import math
 import json
 import requests
 import html
-import markdown
+
 from collections import Counter
 
 
@@ -829,19 +829,19 @@ def generate_response(user_query, active_profile):
         page = f" (Page {chunk.get('page')})" if chunk.get("page") else ""
         context_str += f"[{idx}] Source: {source_info} {sec}{page}\n{chunk.get('text')}\n\n"
 
-system_prompt = (
-    "You are Vidyashilp University's AI Academic Advisor.\n"
-    "Provide accurate, empathetic, and structured guidance to students.\n\n"
-    f"STUDENT PROFILE:\n{profile_text}\n\n"
-    f"RETRIEVED ACADEMIC CONTEXT:\n{context_str if context_str else 'No specific context retrieved.'}\n\n"
-    "INSTRUCTIONS:\n"
-    "- Answer based on the retrieved context and academic regulations.\n"
-    "- Tailor your response to the student's active profile.\n"
-    "- If information is unavailable, advise contacting university administration."
-)
-+
+    system_prompt = (
+        "You are Vidyashilp University's AI Academic Advisor.\n"
+        "Provide accurate, empathetic, and structured guidance to students.\n\n"
+        f"STUDENT PROFILE:\n{profile_text}\n\n"
+        f"RETRIEVED ACADEMIC CONTEXT:\n{context_str if context_str else 'No specific context retrieved.'}\n\n"
+        "INSTRUCTIONS:\n"
+        "- Answer based on the retrieved context and academic regulations.\n"
+        "- Tailor your response to the student's active profile.\n"
+        "- If information is unavailable, advise contacting university administration."
+    )
+
     if not api_key:
-        return "⚠️ Groq API Key is missing. Please configure `GROQ_API_KEY` in environment variables or Streamlit secrets."
+        return "⚠️ Groq API Key is missing. Please configure GROQ_API_KEY in environment variables or Streamlit secrets."
 
     try:
         client = Groq(api_key=api_key)
@@ -868,7 +868,7 @@ system_prompt = (
                     model=model_id,
                     messages=messages,
                     temperature=0.3,
-                    max_tokens=500
+                    max_tokens=1024
                 )
                 return completion.choices[0].message.content
             except Exception as model_err:
@@ -919,11 +919,7 @@ for msg in st.session_state.messages:
         </div>
         """)
     else:
-        formatted_content = markdown.markdown(
-            msg["content"],
-            extensions=["nl2br"]
-        )
-
+        formatted_content = html.escape(msg["content"]).replace("\n", "<br>")
         render_html(f"""
         <div class="bubble-bot">
             <div class="bubble-bot-inner">{formatted_content}</div>
