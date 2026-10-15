@@ -55,11 +55,34 @@ html, body, [class*="css"] {
     font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Inter', Arial, sans-serif;
 }
 
-.stApp,
-[data-testid="stAppViewContainer"],
+.stApp {
+    background: transparent !important;
+}
+
+[data-testid="stAppViewContainer"] {
+    background: transparent !important;
+    position: relative;
+    isolation: isolate;
+}
+
+[data-testid="stAppViewContainer"]::before {
+    content: "";
+    position: fixed;
+    inset: -12px;
+    background-image: url("campus_background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(7px);
+    opacity: 0.28;
+    z-index: -1;
+    pointer-events: none;
+}
+
 [data-testid="stAppViewBlockContainer"],
+[data-testid="stMainBlockContainer"],
 [data-testid="block-container"] {
-    background: #ffffff !important;
+    background: transparent !important;
 }
 
 [data-testid="stMainBlockContainer"] h1,
