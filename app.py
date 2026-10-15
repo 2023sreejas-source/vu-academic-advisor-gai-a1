@@ -919,11 +919,11 @@ for msg in st.session_state.messages:
             <div class="bubble-user-inner">{html.escape(msg["content"])}</div>
         </div>
         """)
-else:
-    formatted_content = markdown.markdown(
-        msg["content"],
-        extensions=["nl2br"]
-    )
+        else:
+        formatted_content = markdown.markdown(
+            msg["content"],
+            extensions=["nl2br"]
+        )
 
         render_html(f"""
         <div class="bubble-bot">
