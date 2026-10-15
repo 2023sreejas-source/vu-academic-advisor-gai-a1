@@ -69,7 +69,7 @@ html, body, [class*="css"] {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: url("YOUR_RAW_IMAGE_URL");
+    background-image: url("https://raw.githubusercontent.com/2023sreejas-source/vu-academic-advisor-gai-a1/main/background.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
