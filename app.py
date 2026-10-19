@@ -1065,6 +1065,14 @@ def generate_response(user_query, active_profile):
         "- Format inline mathematical expressions using $...$ and "
         "standalone equations using $$...$$.\n"
         "- Do not put mathematical formulas inside plain square brackets.\n"
+        "- Answer based on the retrieved context and academic regulations.\n"
+        "- Tailor your response to the student's active profile.\n"
+        "- If information is unavailable, advise contacting university administration.\n"
+        "- Write mathematical calculations using plain text, not LaTeX.\n"
+        "- Never use \\[, \\], \\(, \\), \\text{}, \\frac{}, or raw LaTeX commands.\n"
+        "- Never put mathematical calculations inside square brackets as equation delimiters.\n"
+        "- For calculations, write simple expressions such as: 80 - 45 = 35 credits.\n"
+        "- Explain the result clearly in ordinary text."
     )
 
     try:
@@ -1296,10 +1304,24 @@ for msg in st.session_state.messages:
         </div>
         """)
     else:
-        formatted_content = markdown.markdown(
-            msg["content"],
-            extensions=["nl2br", "tables"]
-        )
+        content = msg["content"]
+
+# Convert common LaTeX delimiters to plain text
+content = re.sub(r"\\\[([\s\S]*?)\\\]", r"\1", content)
+content = re.sub(r"\\\(([\s\S]*?)\\\)", r"\1", content)
+content = re.sub(r"\$\$([\s\S]*?)\$\$", r"\1", content)
+content = re.sub(r"\$([^$]+)\$", r"\1", content)
+
+# Remove common LaTeX formatting commands
+content = re.sub(r"\\text\{([^{}]*)\}", r"\1", content)
+content = re.sub(r"\\mathrm\{([^{}]*)\}", r"\1", content)
+content = re.sub(r"\\;|\\,|\\quad|\\qquad", " ", content)
+content = content.replace("\\\\", "\n")
+
+formatted_content = markdown.markdown(
+    content,
+    extensions=["nl2br", "tables"]
+)
 
         render_html(f"""
         <div class="bubble-bot">
