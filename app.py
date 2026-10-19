@@ -537,6 +537,46 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
+# ============================================================
+# STUDENT DOCUMENT UPLOAD
+# ============================================================
+
+with st.sidebar:
+    st.markdown("### 📄 Student Documents")
+
+    uploaded_document = st.file_uploader(
+        "Upload your academic transcript",
+        type=["pdf", "txt"],
+        key="student_document"
+    )
+
+if uploaded_document is not None:
+    try:
+        if uploaded_document.name.lower().endswith(".pdf"):
+            pdf_reader = PdfReader(uploaded_document)
+            document_text = "\n".join(
+                page.extract_text() or ""
+                for page in pdf_reader.pages
+            )
+        else:
+            document_text = uploaded_document.getvalue().decode(
+                "utf-8", errors="ignore"
+            )
+
+        st.session_state["uploaded_document_text"] = document_text
+        st.session_state["uploaded_document_name"] = uploaded_document.name
+
+        if document_text.strip():
+            st.success(
+                f"Document loaded: {uploaded_document.name}"
+            )
+        else:
+            st.warning(
+                "No readable text found. The PDF may be scanned."
+            )
+
+    except Exception as e:
+        st.error(f"Could not read the document: {e}")
 
 # ============================================================
 # API KEY & PROFILES
@@ -561,7 +601,6 @@ manual_student_profile = {
 }
 
 student_profile = selected_student if selected_student else manual_student_profile
-
 
 # ============================================================
 # PROFILE HELPERS
