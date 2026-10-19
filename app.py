@@ -887,16 +887,131 @@ def generate_response(user_query, active_profile):
             messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": query_text})
 
+       
+        # Define the academic tools available to Groq
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "student_profile",
+                    "description": "Retrieve the active student's academic profile.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "credit_checker",
+                    "description": "Check the student's completed credits against a specified requirement.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "required_credits": {
+                                "type": "number",
+                                "description": "The required number of credits"
+                            }
+                        },
+                        "required": ["required_credits"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "prerequisite_checker",
+                    "description": "Check whether specified courses appear in the student's completed-course record.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "required_courses": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Courses to check"
+                            }
+                        },
+                        "required": ["required_courses"]
+                    }
+                }
+            }
+        ]
+
         last_error = None
+
         for model_id in candidates:
             try:
+                # Let Groq decide whether to call an academic tool
                 completion = client.chat.completions.create(
+                    model=model_id,
+                    messages=messages,
+                    tools=tools,
+                    tool_choice="auto",
+                    temperature=0.3,
+                    max_tokens=1024
+                )
+
+                assistant_message = completion.choices[0].message
+                tool_calls = assistant_message.tool_calls
+
+                # If no tool is needed, return the normal answer
+                if not tool_calls:
+                    return assistant_message.content or "I couldn't generate a response. Please try again."
+
+                # Record the assistant's tool requests
+                messages.append({
+                    "role": "assistant",
+                    "content": assistant_message.content,
+                    "tool_calls": [
+                        call.model_dump(exclude_none=True)
+                        for call in tool_calls
+                    ]
+                })
+
+                # Execute each requested academic tool
+                for call in tool_calls:
+                    tool_name = call.function.name
+                    arguments = json.loads(call.function.arguments)
+
+                    if tool_name == "student_profile":
+                        result = student_profile_tool(active_profile)
+
+                    elif tool_name == "credit_checker":
+                        result = credit_checker_tool(
+                            active_profile,
+                            arguments["required_credits"]
+                        )
+
+                    elif tool_name == "prerequisite_checker":
+                        result = prerequisite_checker_tool(
+                            active_profile,
+                            arguments["required_courses"]
+                        )
+
+                    else:
+                        result = "Unknown academic tool requested."
+
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": call.id,
+                        "content": str(result)
+                    })
+
+                # Ask Groq to explain the tool results
+                final_completion = client.chat.completions.create(
                     model=model_id,
                     messages=messages,
                     temperature=0.3,
                     max_tokens=1024
                 )
-                return completion.choices[0].message.content
+
+                return (
+                    final_completion.choices[0].message.content
+                    or "I couldn't generate a final answer. Please try again."
+                )
+
             except Exception as model_err:
                 last_error = model_err
                 continue
