@@ -864,6 +864,8 @@ def generate_response(user_query, active_profile):
         "- Answer based on the retrieved context and academic regulations.\n"
         "- Tailor your response to the student's active profile.\n"
         "- If information is unavailable, advise contacting university administration."
+        "- Format mathematical formulas using LaTeX delimiters: use $...$ for inline maths and $$...$$ for equations on separate lines.\n"
+        "- Never display mathematical formulas inside plain square brackets without LaTeX delimiters.\n"
     )
 
     if not api_key:
