@@ -603,6 +603,106 @@ def profile_retrieval_terms(profile):
             terms.append(val)
     return " ".join(terms)
 
+# ============================================================
+# ACADEMIC TOOLS
+# ============================================================
+
+def student_profile_tool(profile):
+    """Return academic details for the active synthetic student."""
+    if not profile:
+        return "No student profile is available."
+
+    allowed_fields = [
+        "student_id", "program", "programme", "semester",
+        "completed_credits", "credits", "cgpa", "minor",
+        "passed_courses", "completed_courses", "failed_courses",
+        "current_courses", "pending_courses"
+    ]
+
+    details = {
+        key: profile[key]
+        for key in allowed_fields
+        if key in profile
+    }
+
+    if not details:
+        return "No academic details are available."
+
+    return json.dumps(details, indent=2, ensure_ascii=False)
+
+
+def credit_checker_tool(profile, required_credits):
+    """Compare recorded credits against a specified requirement."""
+    if not profile:
+        return "No student profile is available."
+
+    credits = profile.get(
+        "completed_credits",
+        profile.get("credits")
+    )
+
+    try:
+        credits = float(credits)
+        required_credits = float(required_credits)
+    except (TypeError, ValueError):
+        return "Credit information is unavailable. Please verify the profile."
+
+    if credits < 0 or required_credits < 0:
+        return "Credit values cannot be negative."
+
+    if credits >= required_credits:
+        return (
+            f"Recorded credits: {credits:g}. "
+            f"Specified requirement: {required_credits:g}. "
+            "The recorded credits meet this specified requirement."
+        )
+
+    return (
+        f"Recorded credits: {credits:g}. "
+        f"Specified requirement: {required_credits:g}. "
+        f"Credits short of the specified requirement: "
+        f"{required_credits - credits:g}."
+    )
+
+
+def prerequisite_checker_tool(profile, required_courses):
+    """Check whether specified prerequisites appear in completed courses."""
+    if not profile:
+        return "No student profile is available."
+
+    completed = (
+        profile.get("passed_courses")
+        or profile.get("completed_courses")
+        or []
+    )
+
+    if isinstance(completed, str):
+        completed = [completed]
+
+    completed_normalized = {
+        str(course).strip().casefold()
+        for course in completed
+    }
+
+    if not required_courses:
+        return "No prerequisite courses were provided."
+
+    missing = [
+        course for course in required_courses
+        if str(course).strip().casefold() not in completed_normalized
+    ]
+
+    if not missing:
+        return (
+            "All specified prerequisites appear in the completed-course "
+            "record. Verify the official record before confirming eligibility."
+        )
+
+    return (
+        "These prerequisites were not found in the completed-course record: "
+        + ", ".join(missing)
+        + ". Verify the official record before making an eligibility decision."
+    )
 
 # ============================================================
 # TEXT EXTRACTION & CHUNKING
@@ -832,11 +932,16 @@ def retrieve_relevant_chunks(query, profile_context="", top_k=6):
     return [item for _, item in scored_chunks[:top_k]] or all_kb[:top_k]
 
 
+
 def generate_response(user_query, active_profile):
     query_text = user_query.strip()
 
     if SOCIAL_RE.match(query_text):
-        return THANKS_REPLY if re.search(r"\b(thank|thanks|thx|ty)\b", query_text, re.I) else GREETING_REPLY
+        return (
+            THANKS_REPLY
+            if re.search(r"\b(thank|thanks|thx|ty)\b", query_text, re.I)
+            else GREETING_REPLY
+        )
 
     if PERSONAL_RE.search(query_text):
         return PERSONAL_REPLY
@@ -844,58 +949,180 @@ def generate_response(user_query, active_profile):
     if OUT_OF_SCOPE_RE.search(query_text):
         return OUT_OF_SCOPE_REPLY
 
+    if not api_key:
+        return (
+            "⚠️ Groq API Key is missing. Configure GROQ_API_KEY "
+            "in Streamlit secrets or environment variables."
+        )
+
+    # Retrieve relevant academic information.
     profile_text = profile_to_text(active_profile)
     retrieval_terms = profile_retrieval_terms(active_profile)
-    relevant_chunks = retrieve_relevant_chunks(query_text, profile_context=retrieval_terms, top_k=6)
+    relevant_chunks = retrieve_relevant_chunks(
+        query_text,
+        profile_context=retrieval_terms,
+        top_k=6
+    )
 
-    context_str = ""
+    context_parts = []
+
     for idx, chunk in enumerate(relevant_chunks, start=1):
-        source_info = chunk.get("source", "Document")
-        sec = chunk.get("section") or chunk.get("sheet") or ""
-        page = f" (Page {chunk.get('page')})" if chunk.get("page") else ""
-        context_str += f"[{idx}] Source: {source_info} {sec}{page}\n{chunk.get('text')}\n\n"
+        source = chunk.get("source", "Document")
+        section = chunk.get("section") or chunk.get("sheet") or ""
+        page = f" (Page {chunk['page']})" if chunk.get("page") else ""
+
+        context_parts.append(
+            f"[{idx}] Source: {source} {section}{page}\n"
+            f"{chunk.get('text', '')}"
+        )
+
+    context_str = "\n\n".join(context_parts)
+    lower_query = query_text.lower()
+
+    # Run the appropriate local academic tools when relevant.
+    tool_results = []
+
+    if any(term in lower_query for term in [
+        "my profile", "student profile", "my details",
+        "my cgpa", "my credits", "my courses"
+    ]):
+        tool_results.append(
+            "STUDENT PROFILE TOOL:\n"
+            + student_profile_tool(active_profile)
+        )
+
+    # Only compare credits when the question contains a clear
+    # numeric credit requirement.
+    if "credit" in lower_query:
+        match = re.search(
+            r"(\d+(?:\.\d+)?)\s*credits?",
+            lower_query
+        )
+
+        if match and any(term in lower_query for term in [
+            "need", "required", "requirement", "eligible",
+            "minimum", "at least", "complete", "graduation"
+        ]):
+            required_credits = float(match.group(1))
+            tool_results.append(
+                "CREDIT CHECKER TOOL:\n"
+                + credit_checker_tool(active_profile, required_credits)
+            )
+
+    # Check prerequisites when the question explicitly names courses.
+    if "prerequisite" in lower_query or "prerequisites" in lower_query:
+        completed = (
+            (active_profile or {}).get("passed_courses")
+            or (active_profile or {}).get("completed_courses")
+            or []
+        )
+
+        if isinstance(completed, str):
+            completed = [completed]
+
+        # Use course names mentioned in the question, when identifiable.
+        required_courses = []
+        for course in completed:
+            course_name = str(course).strip()
+            if course_name and course_name.lower() in lower_query:
+                required_courses.append(course_name)
+
+        if required_courses:
+            tool_results.append(
+                "PREREQUISITE CHECKER TOOL:\n"
+                + prerequisite_checker_tool(active_profile, required_courses)
+            )
+        else:
+            tool_results.append(
+                "PREREQUISITE CHECKER TOOL:\n"
+                "The question does not identify a prerequisite course that "
+                "can be checked against the recorded completed courses. "
+                "Ask the student to specify the course name."
+            )
+
+    tools_context = (
+        "\n\n".join(tool_results)
+        if tool_results
+        else "No local academic tool was needed for this question."
+    )
 
     system_prompt = (
         "You are Vidyashilp University's AI Academic Advisor.\n"
-        "Provide accurate, empathetic, and structured guidance to students.\n\n"
+        "Provide accurate, empathetic and structured academic guidance.\n\n"
         f"STUDENT PROFILE:\n{profile_text}\n\n"
-        f"RETRIEVED ACADEMIC CONTEXT:\n{context_str if context_str else 'No specific context retrieved.'}\n\n"
+        f"RETRIEVED ACADEMIC CONTEXT:\n"
+        f"{context_str if context_str else 'No specific context retrieved.'}\n\n"
+        f"ACADEMIC TOOL RESULTS:\n{tools_context}\n\n"
         "INSTRUCTIONS:\n"
-        "- Answer based on the retrieved context and academic regulations.\n"
-        "- Tailor your response to the student's active profile.\n"
-        "- If information is unavailable, advise contacting university administration."
+        "- Base university rules and requirements on the retrieved context.\n"
+        "- Use tool results when relevant to the student's question.\n"
+        "- Do not treat a specified credit number as an official university "
+        "requirement unless the retrieved context confirms it.\n"
+        "- Do not claim that a student is officially eligible based only on "
+        "a synthetic profile or an incomplete course record.\n"
+        "- If information is unavailable, say so and recommend confirming "
+        "it with the university administration.\n"
+        "- Format inline mathematical expressions using $...$ and "
+        "standalone equations using $$...$$.\n"
+        "- Do not put mathematical formulas inside plain square brackets.\n"
     )
-
-    if not api_key:
-        return "⚠️ Groq API Key is missing. Please configure GROQ_API_KEY in environment variables or Streamlit secrets."
 
     try:
         client = Groq(api_key=api_key)
 
-        # Query live active models directly from Groq to avoid decommissioned models
-        try:
-            live_models = [
-                m.id for m in client.models.list().data
-                if not any(x in m.id for x in ["whisper", "guard", "compound", "orpheus", "tts", "safeguard", "prompt"])
-            ]
-    
-    candidates = live_models if live_models else FALLBACK_MODELS
+        # Use the configured model list and try alternatives if one fails.
+        candidates = FALLBACK_MODELS
 
-            candidates = [
-                model for model in supported_tool_models
-                if model in live_models
-            ]
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ]
 
-            if not candidates:
-                candidates = ["llama-3.3-70b-versatile"]
-        except Exception:
-            candidates = FALLBACK_MODELS
+        # Include recent conversation context without duplicating
+        # the current user message.
+        for msg in st.session_state.messages[-7:]:
+            if msg.get("role") in ("user", "assistant"):
+                messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
 
-        messages = [{"role": "system", "content": system_prompt}]
-        for msg in st.session_state.messages[-6:]:
-            messages.append({"role": msg["role"], "content": msg["content"]})
-        messages.append({"role": "user", "content": query_text})
+        messages.append({
+            "role": "user",
+            "content": query_text
+        })
 
+        last_error = None
+
+        for model_id in candidates:
+            try:
+                completion = client.chat.completions.create(
+                    model=model_id,
+                    messages=messages,
+                    temperature=0.3,
+                    max_tokens=1024
+                )
+
+                answer = completion.choices[0].message.content
+
+                if answer:
+                    return answer
+
+                last_error = "The model returned an empty response."
+
+            except Exception as model_err:
+                last_error = model_err
+
+        return (
+            "The advisory model could not generate a response. "
+            "Please try again. Technical detail: "
+            + str(last_error)
+        )
+
+    except Exception as e:
+        return (
+            "An error occurred while connecting to the advisory model: "
+            + str(e)
+        )
        
         # Define the academic tools available to Groq
         tools = [
