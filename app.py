@@ -878,12 +878,8 @@ def generate_response(user_query, active_profile):
                 m.id for m in client.models.list().data
                 if not any(x in m.id for x in ["whisper", "guard", "compound", "orpheus", "tts", "safeguard", "prompt"])
             ]
-                        supported_tool_models = [
-                "llama-3.3-70b-versatile",
-                "openai/gpt-oss-20b",
-                "openai/gpt-oss-120b",
-                "llama-3.1-8b-instant"
-            ]
+    
+    candidates = live_models if live_models else FALLBACK_MODELS
 
             candidates = [
                 model for model in supported_tool_models
