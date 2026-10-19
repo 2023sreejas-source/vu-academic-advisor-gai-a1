@@ -1306,22 +1306,22 @@ for msg in st.session_state.messages:
     else:
         content = msg["content"]
 
-# Convert common LaTeX delimiters to plain text
-content = re.sub(r"\\\[([\s\S]*?)\\\]", r"\1", content)
-content = re.sub(r"\\\(([\s\S]*?)\\\)", r"\1", content)
-content = re.sub(r"\$\$([\s\S]*?)\$\$", r"\1", content)
-content = re.sub(r"\$([^$]+)\$", r"\1", content)
+        # Convert common LaTeX delimiters to plain text
+        content = re.sub(r"\\\[([\s\S]*?)\\\]", r"\1", content)
+        content = re.sub(r"\\\(([\s\S]*?)\\\)", r"\1", content)
+        content = re.sub(r"\$\$([\s\S]*?)\$\$", r"\1", content)
+        content = re.sub(r"\$([^$]+)\$", r"\1", content)
+        
+        # Remove common LaTeX formatting commands
+        content = re.sub(r"\\text\{([^{}]*)\}", r"\1", content)
+        content = re.sub(r"\\mathrm\{([^{}]*)\}", r"\1", content)
+        content = re.sub(r"\\;|\\,|\\quad|\\qquad", " ", content)
+        content = content.replace("\\\\", "\n")
 
-# Remove common LaTeX formatting commands
-content = re.sub(r"\\text\{([^{}]*)\}", r"\1", content)
-content = re.sub(r"\\mathrm\{([^{}]*)\}", r"\1", content)
-content = re.sub(r"\\;|\\,|\\quad|\\qquad", " ", content)
-content = content.replace("\\\\", "\n")
-
-formatted_content = markdown.markdown(
-    content,
-    extensions=["nl2br", "tables"]
-)
+        formatted_content = markdown.markdown(
+            content,
+            extensions=["nl2br", "tables"]
+        )
 
         render_html(f"""
         <div class="bubble-bot">
