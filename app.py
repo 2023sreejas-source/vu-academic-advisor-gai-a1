@@ -7,7 +7,7 @@ import streamlit as st
 from groq import Groq
 from pypdf import PdfReader
 
-import osj
+import os
 import re
 import math
 import json
