@@ -1405,32 +1405,43 @@ for msg in st.session_state.messages:
 st.markdown("#### 📄 Upload your academic transcript")
 
 uploaded_document = st.file_uploader(
-    "Upload a PDF or text transcript",
-    type=["pdf", "txt"],
+    "Upload a transcript, marks card, or academic document",
+    type=["pdf", "txt", "png", "jpg", "jpeg", "webp"],
     key="main_chat_document"
 )
 
-if uploaded_document is not None:
-    try:
-        if uploaded_document.name.lower().endswith(".pdf"):
-            pdf_reader = PdfReader(uploaded_document)
-            document_text = "\n".join(
-                page.extract_text() or ""
-                for page in pdf_reader.pages
-            )
-        else:
-            document_text = uploaded_document.getvalue().decode(
-                "utf-8", errors="ignore"
-            )
+file_name = uploaded_document.name.lower()
 
-        if document_text.strip():
-            st.session_state["uploaded_document_text"] = document_text[:12000]
-            st.session_state["uploaded_document_name"] = uploaded_document.name
-            st.success("Transcript uploaded successfully!")
-        else:
-            st.warning(
-                "No readable text found. The PDF may be scanned."
-            )
+if file_name.endswith(".pdf"):
+    pdf_reader = PdfReader(uploaded_document)
+    document_text = "\n".join(
+        page.extract_text() or ""
+        for page in pdf_reader.pages
+    )
+
+elif file_name.endswith(".txt"):
+    document_text = uploaded_document.getvalue().decode(
+        "utf-8", errors="ignore"
+    )
+
+else:
+    # Images require OCR or an image-capable AI model.
+    document_text = ""
+
+    st.info(
+        "Image uploaded. Image-reading support must be connected "
+        "before its contents can be used to answer questions."
+    )
+
+if document_text.strip():
+    st.session_state["uploaded_document_text"] = document_text[:12000]
+    st.session_state["uploaded_document_name"] = uploaded_document.name
+    st.success("Document text extracted successfully!")
+
+elif file_name.endswith((".pdf", ".txt")):
+    st.warning(
+        "No readable text found. The PDF may be scanned."
+    )
 
     except Exception as e:
         st.error(f"Could not read the document: {e}")
