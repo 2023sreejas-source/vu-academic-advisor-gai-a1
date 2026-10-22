@@ -1451,11 +1451,15 @@ uploaded_document = st.file_uploader(
     key="main_chat_document"
 )
 
+
 if uploaded_document is not None:
     try:
         file_name = uploaded_document.name.lower()
 
         if file_name.endswith(".pdf"):
+            st.session_state.pop("uploaded_image_bytes", None)
+            st.session_state.pop("uploaded_image_mime", None)
+
             pdf_reader = PdfReader(uploaded_document)
             document_text = "\n".join(
                 page.extract_text() or ""
@@ -1463,26 +1467,29 @@ if uploaded_document is not None:
             )
 
         elif file_name.endswith(".txt"):
+            st.session_state.pop("uploaded_image_bytes", None)
+            st.session_state.pop("uploaded_image_mime", None)
+
             document_text = uploaded_document.getvalue().decode(
                 "utf-8", errors="ignore"
             )
-            
+
         else:
-            # Save the image so the vision model can inspect it.
+            # Store the image for the vision model.
             image_bytes = uploaded_document.getvalue()
-            mime_type = (
-                "image/jpeg"
-                if file_name.endswith((".jpg", ".jpeg"))
-                else "image/png"
-                if file_name.endswith(".png")
-                else "image/webp"
-            )
+
+            if file_name.endswith((".jpg", ".jpeg")):
+                mime_type = "image/jpeg"
+            elif file_name.endswith(".webp"):
+                mime_type = "image/webp"
+            else:
+                mime_type = "image/png"
 
             st.session_state["uploaded_image_bytes"] = image_bytes
             st.session_state["uploaded_image_mime"] = mime_type
             st.session_state["uploaded_image_name"] = uploaded_document.name
 
-            # Clear old document text when a new image is uploaded.
+            # Clear previously uploaded document text.
             st.session_state["uploaded_document_text"] = ""
 
             st.success(
@@ -1490,17 +1497,24 @@ if uploaded_document is not None:
                 "in the chat below."
             )
 
+            document_text = ""
 
-        if document_text.strip():
-            st.session_state["uploaded_document_text"] = document_text[:12000]
-            st.session_state["uploaded_document_name"] = uploaded_document.name
-            st.success("Document text extracted successfully!")
-
-        elif file_name.endswith((".pdf", ".txt")):
-            st.warning(
-                "No readable text found. The PDF may be scanned."
-            )
-
+        # Save text only when processing a PDF or TXT file.
+        if file_name.endswith((".pdf", ".txt")):
+            if document_text.strip():
+                st.session_state["uploaded_document_text"] = (
+                    document_text[:12000]
+                )
+                st.session_state["uploaded_document_name"] = (
+                    uploaded_document.name
+                )
+                st.success("Document text extracted successfully!")
+            else:
+                st.warning(
+                    "No readable text found. The PDF may be scanned "
+                    "or the file may contain no text."
+                )
+                
     except Exception as e:
         st.error(f"Could not read the uploaded file: {e}")
 
