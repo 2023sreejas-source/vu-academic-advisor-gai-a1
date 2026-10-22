@@ -14,6 +14,7 @@ import json
 import requests
 import html
 import markdown
+import base64
 
 from collections import Counter
 
@@ -1425,13 +1426,30 @@ if uploaded_document is not None:
             document_text = uploaded_document.getvalue().decode(
                 "utf-8", errors="ignore"
             )
-
+            
         else:
-            document_text = ""
-            st.info(
-                "Image uploaded, but image text-reading support "
-                "has not been connected yet."
+            # Save the image so the vision model can inspect it.
+            image_bytes = uploaded_document.getvalue()
+            mime_type = (
+                "image/jpeg"
+                if file_name.endswith((".jpg", ".jpeg"))
+                else "image/png"
+                if file_name.endswith(".png")
+                else "image/webp"
             )
+
+            st.session_state["uploaded_image_bytes"] = image_bytes
+            st.session_state["uploaded_image_mime"] = mime_type
+            st.session_state["uploaded_image_name"] = uploaded_document.name
+
+            # Clear old document text when a new image is uploaded.
+            st.session_state["uploaded_document_text"] = ""
+
+            st.success(
+                "Image uploaded! Ask a question about the image "
+                "in the chat below."
+            )
+
 
         if document_text.strip():
             st.session_state["uploaded_document_text"] = document_text[:12000]
