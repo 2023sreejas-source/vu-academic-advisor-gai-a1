@@ -206,6 +206,30 @@ div[data-testid="stButton"] > button:hover {
     border-radius: 6px !important;
 }
 
+/* Make upload text black */
+[data-testid="stFileUploader"],
+[data-testid="stFileUploader"] label,
+[data-testid="stFileUploader"] p,
+[data-testid="stFileUploader"] span,
+[data-testid="stFileUploader"] small,
+[data-testid="stFileUploader"] section,
+[data-testid="stFileUploader"] section div {
+    color: #000000 !important;
+}
+
+/* Keep the upload area red */
+[data-testid="stFileUploader"] {
+    background-color: #d62828 !important;
+    border-radius: 10px !important;
+}
+
+/* Keep the Browse files button readable */
+[data-testid="stFileUploader"] button {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+}
+
 /* Welcome Box */
 .info-box {
     background: #ffffff;
