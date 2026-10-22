@@ -563,47 +563,6 @@ with st.sidebar:
         st.rerun()
 
 # ============================================================
-# STUDENT DOCUMENT UPLOAD
-# ============================================================
-
-with st.sidebar:
-    st.markdown("### 📄 Student Documents")
-
-    uploaded_document = st.file_uploader(
-        "Upload your academic transcript",
-        type=["pdf", "txt"],
-        key="student_document"
-    )
-
-if uploaded_document is not None:
-    try:
-        if uploaded_document.name.lower().endswith(".pdf"):
-            pdf_reader = PdfReader(uploaded_document)
-            document_text = "\n".join(
-                page.extract_text() or ""
-                for page in pdf_reader.pages
-            )
-        else:
-            document_text = uploaded_document.getvalue().decode(
-                "utf-8", errors="ignore"
-            )
-
-        st.session_state["uploaded_document_text"] = document_text
-        st.session_state["uploaded_document_name"] = uploaded_document.name
-
-        if document_text.strip():
-            st.success(
-                f"Document loaded: {uploaded_document.name}"
-            )
-        else:
-            st.warning(
-                "No readable text found. The PDF may be scanned."
-            )
-
-    except Exception as e:
-        st.error(f"Could not read the document: {e}")
-
-# ============================================================
 # API KEY & PROFILES
 # ============================================================
 
@@ -1414,6 +1373,43 @@ for msg in st.session_state.messages:
             <div class="bubble-bot-inner">{formatted_content}</div>
         </div>
         """)
+        
+# ============================================================
+# STUDENT DOCUMENT UPLOAD - MAIN CHAT AREA
+# ============================================================
+
+st.markdown("#### 📄 Upload your academic transcript")
+
+uploaded_document = st.file_uploader(
+    "Upload a PDF or text transcript",
+    type=["pdf", "txt"],
+    key="main_chat_document"
+)
+
+if uploaded_document is not None:
+    try:
+        if uploaded_document.name.lower().endswith(".pdf"):
+            pdf_reader = PdfReader(uploaded_document)
+            document_text = "\n".join(
+                page.extract_text() or ""
+                for page in pdf_reader.pages
+            )
+        else:
+            document_text = uploaded_document.getvalue().decode(
+                "utf-8", errors="ignore"
+            )
+
+        if document_text.strip():
+            st.session_state["uploaded_document_text"] = document_text[:12000]
+            st.session_state["uploaded_document_name"] = uploaded_document.name
+            st.success("Transcript uploaded successfully!")
+        else:
+            st.warning(
+                "No readable text found. The PDF may be scanned."
+            )
+
+    except Exception as e:
+        st.error(f"Could not read the document: {e}")
 
 chat_input = st.chat_input("Ask your academic question...")
 active_query = chat_input or quick_prompt
