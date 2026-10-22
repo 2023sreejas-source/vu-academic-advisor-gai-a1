@@ -1148,8 +1148,17 @@ def generate_response(user_query, active_profile):
     try:
         client = Groq(api_key=api_key)
 
-        # Use the configured model list and try alternatives if one fails.
-        candidates = FALLBACK_MODELS
+        
+        # Use a vision model for images and existing models for text.
+        image_bytes = st.session_state.get("uploaded_image_bytes")
+        image_mime = st.session_state.get(
+            "uploaded_image_mime", "image/png"
+        )
+
+        if image_bytes:
+            candidates = ["qwen/qwen3.8-27b"]
+        else:
+            candidates = FALLBACK_MODELS
 
         messages = [
             {"role": "system", "content": system_prompt}
@@ -1164,10 +1173,41 @@ def generate_response(user_query, active_profile):
                     "content": msg["content"]
                 })
 
-        messages.append({
-            "role": "user",
-            "content": query_text
-        })
+        # Attach the uploaded image to the current question.
+        if image_bytes:
+            encoded_image = base64.b64encode(
+                image_bytes
+            ).decode("utf-8")
+
+            image_data_url = (
+                f"data:{image_mime};base64,{encoded_image}"
+            )
+
+            messages.append({
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": (
+                            query_text
+                            + "\n\nPlease inspect the uploaded image "
+                            "and answer the question using what is "
+                            "actually visible. If text is unclear, say so."
+                        )
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_data_url
+                        }
+                    }
+                ]
+            })
+        else:
+            messages.append({
+                "role": "user",
+                "content": query_text
+            })
 
         last_error = None
 
