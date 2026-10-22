@@ -1017,6 +1017,27 @@ def generate_response(user_query, active_profile):
 
     context_str = "\n\n".join(context_parts)
     lower_query = query_text.lower()
+    
+    # Add the student's uploaded transcript to the context.
+    uploaded_text = st.session_state.get(
+        "uploaded_document_text", ""
+    )
+
+    uploaded_name = st.session_state.get(
+        "uploaded_document_name", "Uploaded student document"
+    )
+
+    if uploaded_text.strip():
+        # Limit the text to avoid sending an excessively large prompt.
+        uploaded_text = uploaded_text[:12000]
+
+        context_parts.append(
+            f"[STUDENT UPLOADED DOCUMENT: {uploaded_name}]\n"
+            f"{uploaded_text}"
+        )
+
+    # Rebuild the context after adding the uploaded document.
+    context_str = "\n\n".join(context_parts)
 
     # Run the appropriate local academic tools when relevant.
     tool_results = []
@@ -1095,6 +1116,7 @@ def generate_response(user_query, active_profile):
         "INSTRUCTIONS:\n"
         "- Base university rules and requirements on the retrieved context.\n"
         "- Use tool results when relevant to the student's question.\n"
+        "- Use the student's uploaded document when relevant. Treat it as evidence of the student's recorded details, but do not treat it as an official university rule.\n"
         "- Do not treat a specified credit number as an official university "
         "requirement unless the retrieved context confirms it.\n"
         "- Do not claim that a student is officially eligible based only on "
