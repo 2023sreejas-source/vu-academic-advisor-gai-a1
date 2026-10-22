@@ -1402,49 +1402,49 @@ for msg in st.session_state.messages:
 # STUDENT DOCUMENT UPLOAD - MAIN CHAT AREA
 # ============================================================
 
-st.markdown("#### 📄 Upload your academic transcript")
+st.markdown("#### 📄 Upload your transcript or academic document")
 
 uploaded_document = st.file_uploader(
-    "Upload a transcript, marks card, or academic document",
+    "Upload a PDF, text file, or image",
     type=["pdf", "txt", "png", "jpg", "jpeg", "webp"],
     key="main_chat_document"
 )
 
-file_name = uploaded_document.name.lower()
+if uploaded_document is not None:
+    try:
+        file_name = uploaded_document.name.lower()
 
-if file_name.endswith(".pdf"):
-    pdf_reader = PdfReader(uploaded_document)
-    document_text = "\n".join(
-        page.extract_text() or ""
-        for page in pdf_reader.pages
-    )
+        if file_name.endswith(".pdf"):
+            pdf_reader = PdfReader(uploaded_document)
+            document_text = "\n".join(
+                page.extract_text() or ""
+                for page in pdf_reader.pages
+            )
 
-elif file_name.endswith(".txt"):
-    document_text = uploaded_document.getvalue().decode(
-        "utf-8", errors="ignore"
-    )
+        elif file_name.endswith(".txt"):
+            document_text = uploaded_document.getvalue().decode(
+                "utf-8", errors="ignore"
+            )
 
-else:
-    # Images require OCR or an image-capable AI model.
-    document_text = ""
+        else:
+            document_text = ""
+            st.info(
+                "Image uploaded, but image text-reading support "
+                "has not been connected yet."
+            )
 
-    st.info(
-        "Image uploaded. Image-reading support must be connected "
-        "before its contents can be used to answer questions."
-    )
+        if document_text.strip():
+            st.session_state["uploaded_document_text"] = document_text[:12000]
+            st.session_state["uploaded_document_name"] = uploaded_document.name
+            st.success("Document text extracted successfully!")
 
-if document_text.strip():
-    st.session_state["uploaded_document_text"] = document_text[:12000]
-    st.session_state["uploaded_document_name"] = uploaded_document.name
-    st.success("Document text extracted successfully!")
-
-elif file_name.endswith((".pdf", ".txt")):
-    st.warning(
-        "No readable text found. The PDF may be scanned."
-    )
+        elif file_name.endswith((".pdf", ".txt")):
+            st.warning(
+                "No readable text found. The PDF may be scanned."
+            )
 
     except Exception as e:
-        st.error(f"Could not read the document: {e}")
+        st.error(f"Could not read the uploaded file: {e}")
 
 chat_input = st.chat_input("Ask your academic question...")
 active_query = chat_input or quick_prompt
