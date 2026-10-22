@@ -181,6 +181,31 @@ div[data-testid="stButton"] > button:hover {
     background: #f3f7fb !important;
 }
 
+/* Student document upload styling */
+[data-testid="stFileUploader"] {
+    background-color: #d62828 !important;
+    border: 2px solid #d62828 !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
+    color: #ffffff !important;
+}
+
+/* Upload instructions and labels */
+[data-testid="stFileUploader"] label,
+[data-testid="stFileUploader"] p,
+[data-testid="stFileUploader"] span,
+[data-testid="stFileUploader"] small {
+    color: #ffffff !important;
+}
+
+/* Browse files button */
+[data-testid="stFileUploader"] button {
+    background-color: #ffffff !important;
+    color: #d62828 !important;
+    border: 1px solid #ffffff !important;
+    border-radius: 6px !important;
+}
+
 /* Welcome Box */
 .info-box {
     background: #ffffff;
